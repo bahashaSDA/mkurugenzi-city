@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { useGame } from '../../app/store';
 import { getKTX2Loader } from '../../world/ktx2';
+import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 import { playerPosition } from '../player/playerState';
 import { getHubLayout, KERB_E, KERB_W } from '../../districts/hub/layout';
 
@@ -19,7 +20,6 @@ const VARIANTS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_
 const URLS = VARIANTS.map((v) => `/models/npc_${v}.glb`);
 const POOL = { low: 10, mid: 18, high: 28 } as const;
 const ANIMATE_DIST = 70;
-const WALK_NATIVE = 1.35;
 const STAND_CLIPS = ['Idle_Talking_Loop', 'Idle_TalkingPhone_Loop', 'Idle_FoldArms_Loop', 'Idle_Loop'];
 
 type Role = 'walk' | 'stand' | 'sit';
@@ -62,6 +62,8 @@ function planAgents(count: number): Agent[] {
       const west = r() < 0.5;
       const lane = west ? KERB_W - 2.6 + (r() - 0.5) * 0.8 : KERB_E + 2.6 + (r() - 0.5) * 0.8;
       const a = base('walk', lane, -60 + r() * 110, 0, 'Walk_Loop');
+      a.speed = 0.9 + r() * 0.6; // real pedestrian pace: 0.9-1.5 m/s
+      a.clip = a.speed < 1.2 ? 'Walk_Slow_Loop' : 'Walk_Loop';
       out.push(a);
     } else if (k < 0.85) {
       const atKiosk = r() < 0.5 && kiosks.length;
@@ -80,24 +82,6 @@ function planAgents(count: number): Agent[] {
   return out;
 }
 
-function prepare(root: THREE.Object3D, shadows: boolean) {
-  root.traverse((o) => {
-    const m = o as THREE.SkinnedMesh;
-    if (!m.isMesh) return;
-    m.castShadow = shadows;
-    m.receiveShadow = true;
-    m.frustumCulled = false;
-    const mats = Array.isArray(m.material) ? m.material : [m.material];
-    for (const mat of mats) {
-      if (/short0|afro|braid|bob|long0|ponytail|eyebrow|eyelash/i.test(mat.name)) {
-        mat.transparent = false;
-        mat.alphaTest = 0.5;
-        mat.side = THREE.DoubleSide;
-      }
-    }
-  });
-}
-
 const _toPlayer = new THREE.Vector3();
 
 function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] } }) {
@@ -106,11 +90,11 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
   const holder = useRef<THREE.Group>(null);
   const { obj, mixer, actions } = useMemo(() => {
     const obj = cloneSkinned(source.scene);
-    prepare(obj, tier !== 'low');
+    prepareCharacter(obj, tier !== 'low');
     const mixer = new THREE.AnimationMixer(obj);
     const actions = new Map<string, THREE.AnimationAction>();
-    for (const clip of source.animations) {
-      const name = clip.name.replace(/\.\d+$/, '');
+    for (const clip of prepareClips(source.animations.map((c) => c.clone()))) {
+      const name = clip.name;
       const a = mixer.clipAction(clip);
       if (name === 'Yes') {
         a.setLoop(THREE.LoopOnce, 1);
@@ -169,7 +153,7 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
         s.pause -= dt;
         play('Idle_Loop', 0.2);
       } else {
-        play('Walk_Loop', 0.25);
+        play(agent.clip, 0.25);
         s.z += agent.dir * agent.speed * dt;
         s.x += (agent.laneX - s.x) * Math.min(1, dt * 0.6); // drift back to the pavement line
         if (s.z > 95 || s.z < -145) agent.dir = (agent.dir * -1) as 1 | -1; // turn at the street ends
@@ -178,8 +162,8 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
         d = Math.atan2(Math.sin(d), Math.cos(d));
         s.rotY += d * Math.min(1, dt * 3);
       }
-      const a = actions.get('Walk_Loop');
-      if (a) a.timeScale = agent.speed / WALK_NATIVE;
+      const a = actions.get(agent.clip);
+      if (a) a.timeScale = agent.speed / (NATIVE_SPEED[agent.clip] ?? 1.3);
     } else if (agent.role === 'stand') {
       // People recognise the Mkurugenzi (SPEC 8.1): turn to him and nod as he passes.
       if (pd < 4 && !agent.nodded) {

@@ -23,19 +23,46 @@ from common import script_args  # noqa: E402
 
 from bl_ext.blender_org.mpfb.services.humanservice import HumanService  # noqa: E402
 from retarget import retarget  # noqa: E402
+from mocap import retarget_mocap  # noqa: E402
+from abel_look import apply_abel_look, cull_hidden_body  # noqa: E402
+from npc_look import headwrap, hi_vis_vest, recolour_outfit  # noqa: E402
+
+# Per-character dress (Nairobi street wear). Linear colour factors.
+NPC_DRESS = {
+    "mama_mboga": lambda: (recolour_outfit("female_elegantsuit01", (0.45, 0.06, 0.03), (0.03, 0.16, 0.06),
+                                           "mboga_blouse", "mboga_skirt"),
+                           headwrap(((0.55, 0.05, 0.03), (0.85, 0.55, 0.05), (0.05, 0.25, 0.45)), seed=4)),
+    "auntie": lambda: (recolour_outfit("female_elegantsuit01", (0.20, 0.02, 0.06), (0.04, 0.04, 0.05),
+                                       "auntie_blouse", "auntie_skirt"),
+                       headwrap(((0.05, 0.30, 0.12), (0.85, 0.75, 0.10), (0.45, 0.05, 0.25)), seed=9)),
+    # secondary-school uniform: bottle-green top, grey skirt
+    "student": lambda: recolour_outfit("female_elegantsuit01", (0.02, 0.12, 0.05), (0.15, 0.15, 0.16),
+                                       "uniform_sweater", "uniform_grey"),
+    # boda boda rider: hi-vis reflective vest over his clothes
+    "hustler": lambda: hi_vis_vest("male_casualsuit05"),
+}
+
+# CMU trials (see mocap.py): (file, clip name, loop search (start fraction, min, max frames @120 Hz))
+MOCAP = [
+    ("111_28.bvh", "Idle_Loop", (0.15, 500, 1400)),   # standing still: weight shifts, breathing
+    ("35_01.bvh", "Walk_Loop", (0.20, 110, 190)),     # natural walk
+    ("07_04.bvh", "Walk_Slow_Loop", (0.30, 120, 200)),  # slow stroll (pedestrians)
+    ("16_35.bvh", "Jog_Fwd_Loop", (0.30, 55, 110)),   # jog
+    ("09_01.bvh", "Sprint_Loop", (0.35, 45, 95)),     # run
+]
+MOCAP_NPC = {"Idle_Loop", "Walk_Loop", "Walk_Slow_Loop"}
 
 UAL1 = "ual1.glb"  # Quaternius UAL 1 Standard (Godot GLB), renamed: the importer rejects "[...]" paths
 UAL2 = "ual2.glb"  # Quaternius UAL 2 Standard (Unreal-Godot GLB)
 # Animation sets (no combat: the world is non-violent, SPEC 8.6)
 PLAYER_ANIMS = {
-    UAL1: ["Idle_Loop", "Idle_Talking_Loop", "Walk_Loop", "Walk_Formal_Loop", "Jog_Fwd_Loop", "Sprint_Loop",
-           "Jump_Start", "Jump_Loop", "Jump_Land", "Sitting_Enter", "Sitting_Idle_Loop", "Sitting_Talking_Loop",
+    UAL1: ["Idle_Talking_Loop", "Jump_Start", "Jump_Loop", "Jump_Land", "Sitting_Enter", "Sitting_Idle_Loop", "Sitting_Talking_Loop",
            "Sitting_Exit", "Interact", "Push_Loop", "Driving_Loop", "Dance_Loop", "PickUp_Table", "Crouch_Idle_Loop"],
     UAL2: ["Idle_FoldArms_Loop", "Idle_TalkingPhone_Loop", "Idle_No_Loop", "Yes", "Walk_Carry_Loop", "Consume",
            "ClimbUp_1m_RM", "Idle_Rail_Loop"],
 }
 NPC_ANIMS = {
-    UAL1: ["Idle_Loop", "Idle_Talking_Loop", "Walk_Loop", "Walk_Formal_Loop", "Sitting_Idle_Loop"],
+    UAL1: ["Idle_Talking_Loop", "Sitting_Idle_Loop"],
     UAL2: ["Idle_FoldArms_Loop", "Idle_TalkingPhone_Loop", "Walk_Carry_Loop", "Yes"],
 }
 
@@ -44,6 +71,7 @@ OUT = ARGS[ARGS.index("--out") + 1] if "--out" in ARGS else "public/models/raw"
 ONLY = ARGS[ARGS.index("--only") + 1] if "--only" in ARGS else None
 PREVIEW = ARGS[ARGS.index("--preview") + 1] if "--preview" in ARGS else None
 UAL_DIR = ARGS[ARGS.index("--ual") + 1] if "--ual" in ARGS else None
+MOCAP_DIR = ARGS[ARGS.index("--mocap") + 1] if "--mocap" in ARGS else None
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 
@@ -55,7 +83,7 @@ def age_slider(years):
 
 
 def human(name, *, gender, years, weight=0.5, muscle=0.5, height=0.5, skin, hair, eyebrows="eyebrow001",
-          clothes=(), proxy=None):
+          clothes=(), proxy=None, targets=()):
     return {
         "name": name,
         "phenotype": {
@@ -71,7 +99,7 @@ def human(name, *, gender, years, weight=0.5, muscle=0.5, height=0.5, skin, hair
         "teeth": "",
         "hair": f"{hair}/{hair}.mhclo" if hair else "",
         "proxy": proxy or ("male_generic/male_generic.proxy" if gender > 0.5 else "female_generic/female_generic.proxy"),
-        "targets": [],
+        "targets": [{"target": t, "value": v} for t, v in targets],
         "clothes": [f"{c}/{c}.mhclo" for c in clothes],
         "skin_mhmat": f"{skin}/{skin}.mhmat",
         "skin_material_type": "MAKESKIN",  # glTF-exportable (the SSS skin uses Blender-only nodes)
@@ -85,19 +113,26 @@ def human(name, *, gender, years, weight=0.5, muscle=0.5, height=0.5, skin, hair
 
 CHARACTERS = {
     # Temporary Abel stand-in: Kenyan man in his late 30s, sturdy build, short hair, casual wear.
-    "abel": human("abel", gender=1.0, years=38, weight=0.62, muscle=0.55, height=0.52,
-                  skin="middleage_african_male", hair="short01", clothes=("male_casualsuit03", "shoes02")),
+    # Abel stand-in matched to the owner's reference photo: full rounded face, broad warm smile
+    # lines, trimmed beard (added in abel_look), suit + tie; cap/glasses/beard/pocket square/bracelet
+    # are modelled in abel_look.py. Final likeness still needs the SPEC 5.5 capture session.
+    "abel": human("abel", gender=1.0, years=38, weight=0.6, muscle=0.55, height=0.55,
+                  skin="middleage_african_male", hair="short01", eyebrows="eyebrow002",
+                  clothes=("male_elegantsuit01", "shoes03"),
+                  targets=(("head-round", 0.45), ("head-fat-incr", 0.25), ("l-cheek-volume-incr", 0.35),
+                           ("r-cheek-volume-incr", 0.35), ("mouth-angles-up", 0.35), ("mouth-scale-horiz-incr", 0.25),
+                           ("mouth-lowerlip-volume-incr", 0.3))),
     # Street pedestrians: varied ages, builds, hair and clothing (VISUAL_OVERHAUL 19: no clones).
     "mama_mboga": human("mama_mboga", gender=0.0, years=45, weight=0.7, muscle=0.45, height=0.42,
-                        skin="middleage_african_female", hair="braid01", clothes=("female_casualsuit02", "shoes05")),
+                        skin="middleage_african_female", hair="braid01", clothes=("female_elegantsuit01", "shoes05")),
     "hustler": human("hustler", gender=1.0, years=24, weight=0.42, muscle=0.55, height=0.55,
                      skin="young_african_male", hair="short03", clothes=("male_casualsuit05", "shoes01")),
     "office": human("office", gender=1.0, years=35, weight=0.55, muscle=0.5, height=0.6,
                     skin="middleage_african_male", hair="short01", clothes=("male_elegantsuit01", "shoes03")),
     "student": human("student", gender=0.0, years=17, weight=0.45, muscle=0.45, height=0.45,
-                     skin="young_african_female", hair="ponytail01", clothes=("female_casualsuit01", "shoes06")),
+                     skin="young_african_female", hair="short02", clothes=("female_elegantsuit01", "shoes06")),  # Kenyan schools: short cropped hair
     "elder": human("elder", gender=1.0, years=68, weight=0.48, muscle=0.4, height=0.48,
-                   skin="old_african_male", hair="short04", clothes=("male_worksuit01", "shoes02")),
+                   skin="old_african_male", hair="short04", clothes=("male_casualsuit01", "shoes02")),
     "young_woman": human("young_woman", gender=0.0, years=26, weight=0.5, muscle=0.5, height=0.52,
                          skin="young_african_female", hair="afro01", clothes=("female_sportsuit01", "shoes04")),
     "worker": human("worker", gender=1.0, years=30, weight=0.55, muscle=0.62, height=0.5,
@@ -167,6 +202,18 @@ def add_animations(anim_sets):
         retarget(src, tgt, names)
         for o in new:
             bpy.data.objects.remove(o, do_unlink=True)
+    if MOCAP_DIR:
+        speeds = {}
+        for fname, clip, loop in MOCAP:
+            if anim_sets is NPC_ANIMS and clip not in MOCAP_NPC:
+                continue
+            before = set(bpy.data.objects)
+            bpy.ops.import_anim.bvh(filepath=os.path.join(MOCAP_DIR, fname), global_scale=0.056444,
+                                    rotate_mode="NATIVE", axis_forward="-Z", axis_up="Y")
+            src = next(o for o in bpy.data.objects if o not in before and o.type == "ARMATURE")
+            _, speeds[clip] = retarget_mocap(src, tgt, clip, loop=loop)
+            bpy.data.objects.remove(src, do_unlink=True)
+        print("[human]   mocap speeds", {k: round(v, 2) for k, v in speeds.items()})
     # drop imported source actions; keep only the retargeted ones (fake-user)
     for a in list(bpy.data.actions):
         if not a.use_fake_user:
@@ -186,7 +233,7 @@ def export(name):
         filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
         export_skins=True, export_animations=True, export_animation_mode="ACTIONS",
         export_force_sampling=True, export_optimize_animation_size=True, export_def_bones=False,
-        export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=85,
+        export_materials="EXPORT", export_image_format="AUTO",  # AUTO keeps PNG alpha: hair/brow/lash cards need it (JPEG made them solid slabs)
     )
     print(f"[human]   exported {path}")
 
@@ -197,6 +244,10 @@ def build(spec):
     settings["subdiv_levels"] = 0
     settings["override_skin_model"] = "MAKESKIN"
     basemesh = HumanService.deserialize_from_dict(spec, settings)
+    if spec.get("targets"):
+        # face-shape targets change the head after hair/clothes were fitted: refit them, or the
+        # hair hangs over the face
+        HumanService.refit(basemesh)
     return basemesh
 
 
@@ -225,9 +276,15 @@ for name, spec in CHARACTERS.items():
     print(f"[human] building {name}")
     build(spec)
     finish_materials(name)
+    cull_hidden_body()
+    if name == "abel":
+        apply_abel_look()
+    elif name in NPC_DRESS:
+        NPC_DRESS[name]()
     report()
     if UAL_DIR:
-        add_animations(PLAYER_ANIMS if name == "abel" else NPC_ANIMS)
+        if "--noanim" not in ARGS:
+            add_animations(PLAYER_ANIMS if name == "abel" else NPC_ANIMS)
         if name != "abel":
             decimate_for_crowd()
         export(name)

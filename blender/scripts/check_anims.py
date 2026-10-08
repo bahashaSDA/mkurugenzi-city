@@ -15,6 +15,8 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=glb)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
 scene = bpy.context.scene
+for _o in bpy.data.objects:
+    if _o.name.startswith('Icosphere'): _o.hide_render = True  # importer's bone-shape helper
 scene.render.engine = "BLENDER_EEVEE_NEXT"
 scene.render.resolution_x, scene.render.resolution_y = 600, 800
 sun = bpy.data.objects.new("sun", bpy.data.lights.new("sun", "SUN"))

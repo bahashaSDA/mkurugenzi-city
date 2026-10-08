@@ -3,10 +3,13 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { getKTX2Loader } from '../../world/ktx2';
+import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 
 // Abel (temporary MPFB2 stand-in until the approved capture-session likeness, SPEC 5.5).
-// Clips are Quaternius UAL (CC0) retargeted onto the MPFB game_engine rig in Blender
-// (blender/scripts/build_humans.py + retarget.py). Swapping in the final GLB needs no code changes.
+// Locomotion + standing idle: CMU motion capture (real people), retargeted in Blender (mocap.py).
+// Gestures (phone, talking, folded arms...): Quaternius UAL upper body over mocap legs.
+// Look (tweed jacket, cap, glasses, beard...) from the owner's reference photo (abel_look.py).
+// Swapping in the final capture-session GLB needs no code changes.
 
 export const ABEL_URL = '/models/abel.glb';
 
@@ -14,31 +17,7 @@ export const ABEL_URL = '/models/abel.glb';
 export const playerAnim = { speed: 0, grounded: true, vy: 0, idleTime: 0 };
 
 const FADE = 0.25;
-// Native forward speed of each locomotion clip (m/s), used to scale playback so feet don't slide.
-const NATIVE: Record<string, number> = { Walk_Loop: 1.35, Jog_Fwd_Loop: 3.3, Sprint_Loop: 6.2 };
 const IDLE_VARIANTS = ['Idle_FoldArms_Loop', 'Idle_TalkingPhone_Loop', 'Idle_Talking_Loop', 'Idle_Loop'];
-
-const clean = (n: string) => n.replace(/\.\d+$/, '');
-
-/** Cut-out materials (hair cards, brows, lashes) must alpha-test, not alpha-blend. */
-function prepare(root: THREE.Object3D) {
-  root.traverse((o) => {
-    const m = o as THREE.SkinnedMesh;
-    if (!m.isMesh) return;
-    m.castShadow = true;
-    m.receiveShadow = true;
-    m.frustumCulled = false; // skinned bounds don't follow the pose; it's one character
-    const mats = Array.isArray(m.material) ? m.material : [m.material];
-    for (const mat of mats) {
-      if (/short0|afro|braid|bob|long0|ponytail|eyebrow|eyelash/i.test(mat.name)) {
-        mat.transparent = false;
-        mat.alphaTest = 0.5;
-        mat.side = THREE.DoubleSide;
-        mat.depthWrite = true;
-      }
-    }
-  });
-}
 
 export function AbelModel() {
   const gl = useThree((s) => s.gl);
@@ -48,12 +27,11 @@ export function AbelModel() {
   const group = useRef<THREE.Group>(null);
 
   const { mixer, actions } = useMemo(() => {
-    prepare(gltf.scene);
+    prepareCharacter(gltf.scene, true);
     const mixer = new THREE.AnimationMixer(gltf.scene);
     const actions = new Map<string, THREE.AnimationAction>();
-    for (const clip of gltf.animations) {
-      const name = clean(clip.name);
-      clip.name = name;
+    for (const clip of prepareClips(gltf.animations)) {
+      const name = clip.name;
       const a = mixer.clipAction(clip);
       if (!name.endsWith('_Loop')) {
         a.setLoop(THREE.LoopOnce, 1);
@@ -81,8 +59,8 @@ export function AbelModel() {
     let want: string;
     if (!grounded && vy > 1.5) want = 'Jump_Start';
     else if (!grounded) want = 'Jump_Loop';
-    else if (speed > 5.4) want = 'Sprint_Loop';
-    else if (speed > 2.9) want = 'Jog_Fwd_Loop';
+    else if (speed > 5.0) want = 'Sprint_Loop';
+    else if (speed > 2.6) want = 'Jog_Fwd_Loop';
     else if (speed > 0.25) want = 'Walk_Loop';
     else {
       // Personality when idle (SPEC 8.1): after 10 s, fold arms / check phone / talk to himself.
@@ -104,7 +82,7 @@ export function AbelModel() {
       prev?.fadeOut(want.startsWith('Jump') ? 0.12 : FADE);
       s.current = want;
     }
-    const native = NATIVE[s.current];
+    const native = NATIVE_SPEED[s.current];
     const a = actions.get(s.current);
     if (a) a.timeScale = native ? THREE.MathUtils.clamp(speed / native, 0.6, 1.8) : 1;
     mixer.update(dt);

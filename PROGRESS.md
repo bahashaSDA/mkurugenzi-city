@@ -1,6 +1,6 @@
 # PROGRESS
 
-_Last updated: 2026-10-08 (session 4)_
+_Last updated: 2026-10-08 (session 5)_
 
 ## Session 4: owner feedback "this looks so lame", so we switched to a vertical slice
 Owner screenshot: the avenue in an empty beige plain with a capsule player.
@@ -31,6 +31,35 @@ Owner screenshot: the avenue in an empty beige plain with a capsule player.
   - Test course moved to (-600, 600).
 - `src/world/Cables.tsx`: power conductors, slack telecom lines and service drops to the shops, all in ONE merged mesh.
 - Spawn moved to the west pavement, looking up the street.
+
+## Session 5: owner feedback on the characters
+Owner feedback: characters looked "like skeletons / dead bodies", moved "like ancient homosapiens", and Abel's face and outfit didn't match. The owner supplied a reference photo.
+
+Root causes found by measurement, not guesswork:
+1. **"Caveman" movement.** The animation transfer was exact: a per-bone check gave 0 deg error. The *source* Quaternius clips are stylised (wide stance, bent knees). Replaced locomotion and standing idle with **CMU motion capture of real people** (`blender/scripts/mocap.py`):
+   - seamless loop extraction (loop error < 1 for every clip)
+   - heading correction, in-place root
+   - native speeds: walk 1.33, slow 1.04, jog 3.04, run 3.75 m/s
+   - BVH quirk fixed: in the CMU T-pose the hand bones point straight up, which bent every wrist 90 deg. Hands and toes now inherit their parent's alignment.
+2. **Gesture clips** (phone, talking, folded arms, nod) keep the UAL upper body over **mocap legs**, combined at runtime (`src/systems/characters.ts`).
+3. **"Dead body" look.** Hair, brow and lash cards were exported as **JPEG, which drops alpha**, so they rendered as solid dark slabs over faces. Now exported with alpha (AUTO). At runtime, cut-out cards alpha-test and everything else is forced opaque.
+4. **Skin poking through clothes**: body skin hidden under garments is culled (ray test, below the neck only).
+5. **Abel's look from the reference photo** (`blender/scripts/abel_look.py`):
+   - brown tweed jacket (suit re-dyed per UV island), charcoal trousers, white shirt, dark brown tie
+   - white pocket square, camel flat cap, round metal glasses, beaded bracelet
+   - circle beard (moustache + mouth corners + chin) as a soft alpha stubble shell, shaped to the measured chin point
+   - rounder, fuller face targets, skin lightened to medium brown, hair refit after face shaping
+   - **Still a stand-in, not the exact likeness: that needs the SPEC 5.5 capture session.**
+6. **Pedestrian variety** (`blender/scripts/npc_look.py`):
+   - mama mboga and auntie: blouse and skirt with kitenge headwraps
+   - student: bottle-green and grey school uniform with short cropped hair
+   - boda rider: hi-vis reflective vest (skinned with the garment's weights)
+   - elder: shirt and trousers instead of duplicate overalls
+7. Preview renders now hide the glTF importer's 1 m bone-shape sphere, which had faked a "black face" in early checks.
+
+**Budgets:** Abel 1.80 MB; pedestrians 0.51-0.59 MB.
+
+**Tests:** smoke 6/7. The 30 deg ramp check climbed to 3.51 m but ran out of time at about 10 FPS under software GL; it passes at normal speed. Physics, audit and build pass. In-game screenshots are in `research/visual-tests/v4-mocap-abel/`.
 
 ## Session 4b: people (VISUAL_OVERHAUL V7, first pass)
 **Characters**
