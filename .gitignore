@@ -5,3 +5,8 @@ dist
 *.blend1
 blender/source/*.blend
 *.log
+public/models/raw
+blender/cache
+blender/textures
+blender/previews
+__pycache__/

@@ -58,24 +58,24 @@ This is a starting dossier compiled from public news sources. Section 2B tells y
 - 2012: works alongside Philip Karanja; later co-founds **Phil-It Productions** with Philip Karanja and Bob Muriithi. Abel writes and is Creative Director; Phil directs.
 - 2018: honoured at the Young Entrepreneurs Awards.
 - 2020: pandemic lockdown. He tells stories to his family at home; his wife Judy suggests posting them. The YouTube storytelling era begins.
-- May 2021: first live audience recording at the **Kenya National Theatre** (300 seats), then a bigger live show at **Nairobi Cinema**. Merch (t-shirts, jackets) sold alongside tickets.
+- 29 May 2021: first live audience recording at the **Kenya National Theatre** (about **250** in attendance; corrected in Phase R, confirmed by Abel's team), then a bigger live show at **Nairobi Cinema**. Merch (t-shirts, jackets) sold alongside tickets.
 - 2021: Grand Little Lie released on the Phil-It website and in Nairobi cinemas; later on Netflix.
 - July 2022: **Click Click Bang** premieres at Nairobi Cinema, KSh 2.5M from 2,500 attendees, a Kenyan premiere record. Wins six Kalasha Awards with the Phil-It team. Acquired by Netflix in 2023.
 - 2023: Top Content Creator (KUZA Awards), YouTube Influencer of the Year (Pulse).
-- 2024: Untying Kantai premieres on Showmax (May). Makosa Ni Yangu premieres on philittv.com. The Mkurugenzi Podcast ranks third most listened podcast in Kenya on Spotify. Men's Conference on Valentine's Day addressing gender-based violence.
+- 2024: Untying Kantai premieres on Showmax (May). Makosa Ni Yangu premieres on philittv.com; its October 2024 "Trinity Experience" premiere (live storytelling + concert + screening) drew about **6,000** attendees, a new record (added in Phase R). The Mkurugenzi Podcast ranks third most listened podcast in Kenya on Spotify. Men's Conference on Valentine's Day addressing gender-based violence.
 - 2025: AMVCA nominations.
 - **24 June 2026: crosses 1,000,000 YouTube subscribers** (YouTube Gold Creator Award). Channel shows about 8.2M views and 2.2M watch hours per 28 days around that time.
 - Has publicly called for a **20,000-seat indoor arena** in East Africa, citing Kigali as the example.
 
 **2.3 Brand and voice (most important for the world's personality)**
 - Catchphrases: **"Utafraaaia"** (you will not like what happens next) and **"I got you"** (a gripping story is coming).
-- YouTube shows: Young and Stupid (real-life stories), Headline Hitters (global news retold as stories), Stories of My Life, Celebrity First Encounters.
+- YouTube shows: **Mkurugenzi Minisodes** (largest series, 17 seasons), **Mkurugenzi Diastories**, Young and Stupid (real-life stories), Headline Hitters (global news retold as stories), Stories of My Life, Celebrity First Encounters, The Play House. Channel scan (Oct 2026): 642 public videos and streams, about 1.08M subscribers.
 - Channel tagline (paraphrased): a storytelling platform to entertain, educate and inform.
 - Tone: Sheng and Swahili mixed with English, self-deprecating humour, dramatic pauses before the twist, cinematic narration of ordinary Nairobi life.
 - Business: his wife **Judy Nyawira** is his creative partner and manager (relevant for the pitch, not for in-world content).
 
 **2.4 Official channels**
-- YouTube: https://www.youtube.com/@Mkurugenzii
+- YouTube: https://www.youtube.com/@mkurugenziii (three i's; corrected in Phase R, confirmed by Abel's team)
 - Instagram: @abelmutua
 - TikTok and Facebook: "Abel Mutua"
 - The Mkurugenzi Podcast (Spotify and YouTube)

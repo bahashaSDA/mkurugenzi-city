@@ -37,6 +37,8 @@ def make_lod(src, suffix, ratio):
     dup.name = name
     for col in src.users_collection:
         col.objects.link(dup)
+    if len(dup.data.polygons) < 16:
+        return dup  # already minimal (e.g. a roof plane): LODs are plain copies
     mod = dup.modifiers.new("lod_decimate", "DECIMATE")
     mod.decimate_type = "COLLAPSE"
     mod.ratio = ratio

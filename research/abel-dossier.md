@@ -13,7 +13,7 @@ Compiled 2026-10-08 (Phase R). Public, professional facts only. SPEC section 2.5
 | 2007 to 2016 | Plays **Freddie** on a Citizen TV high-school drama | "Freddie's School" district (never use the show name) |
 | 2010s | Scriptwriter, *The Real Househelps of Kawangware* (KTN) and others | Principal's office certificates |
 | 2018 | Honoured at the Young Entrepreneurs Awards | Award shelf, boardroom |
-| 29 May 2021 | First **Mkurugenzi Live** recording at the Kenya National Theatre, ~**250** in attendance (spec said 300; Abel's own post says 250) | Wakurugenzi Live Theatre plaque |
+| 29 May 2021 | First **Mkurugenzi Live** recording at the Kenya National Theatre, ~**250** in attendance (confirmed by Abel's team; SPEC corrected) | Wakurugenzi Live Theatre plaque |
 | 2021 | Bigger live show at Nairobi Cinema | Theatre district |
 | 2021 | *Grand Little Lie* on the Phil-It site and in Nairobi cinemas; Netflix in 2024 | Backlot set |
 | Jul 2022 | *Click Click Bang* premieres at Nairobi Cinema (record 2,500 fans / KSh 2.5M); Netflix Oct 2023 | CBD billboard, backlot crime-scene set |
@@ -30,8 +30,20 @@ Compiled 2026-10-08 (Phase R). Public, professional facts only. SPEC section 2.5
 No 2026 film premiere or live show had been announced as of this research. Re-check philittv.com and his socials before each content update.
 
 ## YouTube
-- Channel handle: **@mkurugenziii** (the spec says `@Mkurugenzii`; trackers use three i's. **Confirm with Abel's team.**)
-- Series: **Young and Stupid** (real-life stories), **Headline Hitters** (global news retold as stories), Stories of My Life, Celebrity First Encounters.
+- Channel handle: **@mkurugenziii** (three i's). **Confirmed by Abel's team**; SPEC.md corrected. Channel ID `UC4tjY2tTltEKePusozUxtSA`.
+- Channel scan 2026-10-08 (`tools/fetch-episodes.py`, metadata only): **642 public videos and streams**, about **1.08M subscribers**.
+| Series | Videos |
+|---|---|
+| Mkurugenzi Minisodes (17 seasons) | 216 |
+| Headline Hitters (12+ seasons) | 147 |
+| Young and Stupid (11+ seasons) | 133 |
+| Mkurugenzi Diastories (4+ seasons) | 52 |
+| Other stories (Jonte chapters, Osama Bin Laden trilogy, trailers...) | 38 |
+| Celebrity First Encounters | 23 |
+| Stories of My Life | 13 |
+| Live streams (incl. "A Milli, A Milli..." 1M celebration) | 10 |
+| The Play House | 9 |
+- 4 personal home-purchase vlogs are excluded from the world (SPEC 2.5).
 - Example viral episode cited for growth: "The Tragic Story Of Tom & Jacky Hawks" (Headline Hitters).
 
 ## Brand voice

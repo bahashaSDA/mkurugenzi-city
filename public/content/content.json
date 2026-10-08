@@ -1,24 +1,5190 @@
 {
-  "_note": "Everything Abel's team may change lives here (SPEC 8.14). Episode IDs below are PLACEHOLDERS: replace with real YouTube video IDs from the official channel.",
-  "links": {
-    "YouTube": "https://www.youtube.com/@mkurugenziii",
-    "Phil-It TV": "https://www.philittv.com",
-    "Instagram": "https://www.instagram.com/abelmutua/",
-    "TikTok": "https://www.tiktok.com/@abel_mutua"
+ "links": {
+  "YouTube": "https://www.youtube.com/@mkurugenziii",
+  "Phil-It TV": "https://www.philittv.com",
+  "Instagram": "https://www.instagram.com/abelmutua/",
+  "TikTok": "https://www.tiktok.com/@abel_mutua"
+ },
+ "episodes": [
+  {
+   "youtubeId": "w5jRmoVl1s0",
+   "title": "The Innocent Handler l| Mkurugenzi Minisodes 17 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 5,
+   "durationSec": 919
   },
-  "episodes": [
-    { "youtubeId": "PLACEHOLDER_1", "title": "Replace with a Young and Stupid episode", "show": "Young and Stupid" },
-    { "youtubeId": "PLACEHOLDER_2", "title": "Replace with a Headline Hitters episode", "show": "Headline Hitters" }
-  ],
-  "podcast": { "spotify": "", "youtube": "" },
-  "films": [
-    { "title": "Click Click Bang", "url": "https://www.philittv.com" },
-    { "title": "Grand Little Lie", "url": "https://www.philittv.com" },
-    { "title": "Makosa Ni Yangu", "url": "https://www.philittv.com" }
-  ],
-  "merch": { "url": "" },
-  "contact": { "email": "", "formUrl": "" },
-  "featuredVideo": "",
-  "announcements": [],
-  "stats": { "youtubeSubscribers": "1M+", "milestoneDate": "2026-06-24" }
+  {
+   "youtubeId": "Uz4BjLwoFpY",
+   "title": "A Petty Business Partner || Young and Stupid 11 Ep 9",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 9,
+   "durationSec": 1955
+  },
+  {
+   "youtubeId": "6mx8J5F-Y64",
+   "title": "Family Thuggery || Mkurugenzi Minisodes 17 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 5,
+   "durationSec": 986
+  },
+  {
+   "youtubeId": "4aenHKtIcak",
+   "title": "The Techbro From Busia || Mkurugenzi Minisodes 17 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 3,
+   "durationSec": 2056
+  },
+  {
+   "youtubeId": "mLKBzdmIL6Y",
+   "title": "Journey To The Death Trap || Mkurugenzi Diastories 4 Ep 11",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 11,
+   "durationSec": 4514
+  },
+  {
+   "youtubeId": "ZXB0czpF64w",
+   "title": "The Innocent Sharp Girl || Mkurugenzi Minisodes 17 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 2,
+   "durationSec": 1385
+  },
+  {
+   "youtubeId": "RNzmVCHijV4",
+   "title": "Ken Me Gooner || Mkurugenzi Minisodes 17 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 4,
+   "durationSec": 1260
+  },
+  {
+   "youtubeId": "RvTa69Otcv8",
+   "title": "Birgenair Flight 301 || Headline Hitters 12 Ep 9",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 9,
+   "durationSec": 2956
+  },
+  {
+   "youtubeId": "UK1b3TvHfXE",
+   "title": "Wrath Of A Woman || Mkurugenzi Minisodes 17 Ep 1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 17,
+   "episode": 1,
+   "durationSec": 909
+  },
+  {
+   "youtubeId": "VecQ-TasJ-o",
+   "title": "The Dan Markel Case || Headline Hitters 12 Ep 8",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 8,
+   "durationSec": 3222
+  },
+  {
+   "youtubeId": "6vNZzV0PYsQ",
+   "title": "Enter The Dragon || Mkurugenzi Minisodes 16 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 13,
+   "durationSec": 1563
+  },
+  {
+   "youtubeId": "gn3q-QJO2cw",
+   "title": "Kenya’s Super Athletes || Mkurugenzi Minisodes 16 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 10,
+   "durationSec": 1837
+  },
+  {
+   "youtubeId": "LmEnVqWKgY0",
+   "title": "Falling For A Sharp Boy || Young & Stupid 11 Ep 8",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 8,
+   "durationSec": 2018
+  },
+  {
+   "youtubeId": "5vaBsAXqvMU",
+   "title": "Sugar Mama’s Blackmail || Mkurugenzi Minisode 16 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 12,
+   "durationSec": 1303
+  },
+  {
+   "youtubeId": "IwaSQ1G08rM",
+   "title": "Another Funeral Scammer || Mkurugenzi Minisodes 16 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 11,
+   "durationSec": 1284
+  },
+  {
+   "youtubeId": "s8OqvcgiF34",
+   "title": "Duped At Dawn || Mkurugenzi Minisodes 16 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 9,
+   "durationSec": 1632
+  },
+  {
+   "youtubeId": "SkR6rW4I3WA",
+   "title": "Operation Bride Price || Young & Stupid 11 Ep 7",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 7,
+   "durationSec": 2006
+  },
+  {
+   "youtubeId": "EEdOE6TVTj4",
+   "title": "In Sickness And In Death || Young & Stupid 11 Ep 6",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 6,
+   "durationSec": 1934
+  },
+  {
+   "youtubeId": "bomnrlsWHOc",
+   "title": "Kulthum Akbari - The Iranian Black Widow|| Headline Hitters 12 Ep 7",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 7,
+   "durationSec": 2762
+  },
+  {
+   "youtubeId": "78RgP714fxY",
+   "title": "Passenger From Hell || Mkurugenzi Minisodes 16 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 8,
+   "durationSec": 922
+  },
+  {
+   "youtubeId": "Qt67W6geIPU",
+   "title": "The Funeral Scammer || Mkurugenzi Minisodes 16 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 7,
+   "durationSec": 889
+  },
+  {
+   "youtubeId": "8Bir9ECGuDc",
+   "title": "The Involuntary Undertakers || Mkurugenzi Minisodes 16 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 6,
+   "durationSec": 1228
+  },
+  {
+   "youtubeId": "e9st2HPOTts",
+   "title": "Black Magic Records || Young & Stupid 11 Ep 1",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 1,
+   "durationSec": 2032
+  },
+  {
+   "youtubeId": "QeBND4hUxp4",
+   "title": "Adam & Steve || Mkurugenzi Minisodes 16 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 5,
+   "durationSec": 1189
+  },
+  {
+   "youtubeId": "9ZKhbi9Pn8s",
+   "title": "Sharp Boy On The Loose || Mkurugenzi Minisodes 16 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 2,
+   "durationSec": 1031
+  },
+  {
+   "youtubeId": "0-DhUWVHjv0",
+   "title": "No Good Deed Goes Unpunished 2 || Mkurugenzi Minisodes 16 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 3,
+   "durationSec": 1382
+  },
+  {
+   "youtubeId": "JJnA5QskMf0",
+   "title": "My mysterious Uncle || Young & Stupid 10 Ep 13",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 13,
+   "durationSec": 2202
+  },
+  {
+   "youtubeId": "HI8maK2FX18",
+   "title": "Murderous Rage || Mkurugenzi Minisodes 16 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 4,
+   "durationSec": 1065
+  },
+  {
+   "youtubeId": "ZSJru_Ea_yg",
+   "title": "Rock Bottom And Its Basement || Mkurugenzi Diastories 4 Ep 11",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 11,
+   "durationSec": 2680
+  },
+  {
+   "youtubeId": "AYNWKZiGs00",
+   "title": "Grand Theft Auto - Naivasha || Mkurugenzi Minisodes 16 Ep 1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 16,
+   "episode": 1,
+   "durationSec": 1739
+  },
+  {
+   "youtubeId": "FnOSX6NWRZ8",
+   "title": "Ex-Cans To Ex-Cons || Young & Stupid 11 Ep 5",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 5,
+   "durationSec": 1732
+  },
+  {
+   "youtubeId": "LbKMX2yD3Is",
+   "title": "Love and Poison || Mkurugenzi Minisodes 15 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 13,
+   "durationSec": 1730
+  },
+  {
+   "youtubeId": "h7F_iSNgQIU",
+   "title": "Abubakr Al Baghdadi - The End || Headline Hitters 12 Ep 6",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 6,
+   "durationSec": 2395
+  },
+  {
+   "youtubeId": "Hrf3XJonncg",
+   "title": "Abubakr Al Baghdadi - The Beginning || Headline Hitters",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 1648
+  },
+  {
+   "youtubeId": "uKDvQlzPC7I",
+   "title": "A Toronto Boys’ OG || Mkurugenzi Minisodes 15 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 11,
+   "durationSec": 1379
+  },
+  {
+   "youtubeId": "f6mFkfgGXVc",
+   "title": "Saved By The Bell || Mkurugenzi Minisode 15 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 10,
+   "durationSec": 1568
+  },
+  {
+   "youtubeId": "Zqb5lmPC8b4",
+   "title": "Pests and Illegal Substances || Mkurugenzi Minisodes 15 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 12,
+   "durationSec": 1506
+  },
+  {
+   "youtubeId": "ixkRqUMh0l0",
+   "title": "The Death March || Mkurugenzi Diastories 4 Ep 10",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 10,
+   "durationSec": 2823
+  },
+  {
+   "youtubeId": "5Jkih4nVFx0",
+   "title": "Habakkuk Strikes Again || Mkurugenzi Minisodes 15 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 8,
+   "durationSec": 990
+  },
+  {
+   "youtubeId": "6KWWkAeL6oM",
+   "title": "The Tragic Story Of Tom & Jacky Hawks || Headline Hitters 12 Ep 4",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 4,
+   "durationSec": 3146
+  },
+  {
+   "youtubeId": "KiUoVb8DaR8",
+   "title": "The Killer Lie || Mkurugenzi Minisodes 15 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 8,
+   "durationSec": 1263
+  },
+  {
+   "youtubeId": "Wu345506eeM",
+   "title": "Cheque Mate! || Mkurugenzi Diastories 4 Ep 8",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 8,
+   "durationSec": 2157
+  },
+  {
+   "youtubeId": "llIS0KbU6lE",
+   "title": "Road to Vasha || Mkurugenzi Minisodes 15 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 4,
+   "durationSec": 1145
+  },
+  {
+   "youtubeId": "0KWwK1y5N1M",
+   "title": "End of an Error || Mkurugenzi Minisode 15 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 3,
+   "durationSec": 1660
+  },
+  {
+   "youtubeId": "v8E8DD4BR0k",
+   "title": "Gone in Two Days || Mkurugenzi Minisodes 15 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 2,
+   "durationSec": 1259
+  },
+  {
+   "youtubeId": "vxD5IhtUW34",
+   "title": "The Jinxed Bus Ride || Young And Stupid 11 Ep",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2671
+  },
+  {
+   "youtubeId": "r0R0x4v_n28",
+   "title": "Carwash Shenanigans || Mkurugenzi Minsodes 15 Ep 1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 1,
+   "durationSec": 997
+  },
+  {
+   "youtubeId": "ZZqVhqAmNtw",
+   "title": "Knocked Out Cold || Mkurugenzi Minisodes 14 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 13,
+   "durationSec": 1241
+  },
+  {
+   "youtubeId": "ldKCDs4d_xY",
+   "title": "Mike Day - The Bullet Stopper || Headline Hitters 12 Ep 1",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 1,
+   "durationSec": 2973
+  },
+  {
+   "youtubeId": "KFLGRkhF6RU",
+   "title": "Monster In The Shadows || Mkurugenzi Minisodes 14 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 12,
+   "durationSec": 1984
+  },
+  {
+   "youtubeId": "-JSmJd0ogR4",
+   "title": "Another Gangsta Loving || Mkurugenzi Minisodes 14 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 10,
+   "durationSec": 1694
+  },
+  {
+   "youtubeId": "yLKchXQxC4M",
+   "title": "Editor In Chief || Young & Stupid 10 Ep 11",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 11,
+   "durationSec": 1531
+  },
+  {
+   "youtubeId": "9xh1shTLPxA",
+   "title": "The Dream Smasher || Mkurugenzi Minisodes 14 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 8,
+   "durationSec": 1293
+  },
+  {
+   "youtubeId": "-xQjXB02Nx4",
+   "title": "Conning The Cons || Young & Stupid 11 Ep 4",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 4,
+   "durationSec": 1463
+  },
+  {
+   "youtubeId": "jZ90qjD1aZw",
+   "title": "The Ultimate Pimp || Mkurugenzi Diastories 4 Ep 9",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 9,
+   "durationSec": 2108
+  },
+  {
+   "youtubeId": "OF2A1KfOED8",
+   "title": "Phoney Tactics || Mkurugenzi Minisodes 14 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 6,
+   "durationSec": 865
+  },
+  {
+   "youtubeId": "fcbZCq7u9CY",
+   "title": "Umepaniki Blaza || Mkurugenzi Minisodes 15 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 7,
+   "durationSec": 1088
+  },
+  {
+   "youtubeId": "7Y-OmWqtTAg",
+   "title": "Brewed To Perfection || Mkurugenzi Minisodes 15 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 6,
+   "durationSec": 1283
+  },
+  {
+   "youtubeId": "VluutfI8rJU",
+   "title": "Toronto Boys Of Juba || Mkurugenzi Minisodes 14 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 11,
+   "durationSec": 1525
+  },
+  {
+   "youtubeId": "RZPcgZdHxD0",
+   "title": "Operation Repo || Mkurugenzi Minisodes 15 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 15,
+   "episode": 5,
+   "durationSec": 1568
+  },
+  {
+   "youtubeId": "9LXsxzk3I9w",
+   "title": "The Denise Huskins & Aaron Quinn Ordeal -Guilty Until Proven Innocent || Headline Hitters PART 2",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2691
+  },
+  {
+   "youtubeId": "fk9FfXmXnWQ",
+   "title": "The Denise Huskins & Aaron Quinn Ordeal -Guilty Until Proven Innocent || Headline Hitters PART 1",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2571
+  },
+  {
+   "youtubeId": "LRkaN_ndl3E",
+   "title": "The Innocent Peddlers || Mkurugenzi Minisodes 14 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 9,
+   "durationSec": 1592
+  },
+  {
+   "youtubeId": "eUUzsI9WyVk",
+   "title": "Home Alone UK Version || Mkurugenzi Diastories 4 Ep 7",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 7,
+   "durationSec": 2407
+  },
+  {
+   "youtubeId": "XJYGylUQkbc",
+   "title": "Wash Wash Chronicles || Mkurugenzi Minisodes 14 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 5,
+   "durationSec": 1423
+  },
+  {
+   "youtubeId": "Xtx8URF5jxs",
+   "title": "Nabbed At The Altar || Mkurugenzi Minisodes 14 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 7,
+   "durationSec": 1552
+  },
+  {
+   "youtubeId": "eC9ug3CxFDY",
+   "title": "Till Death Do Us Part || Young & Stupid 11 Ep 2",
+   "show": "Young and Stupid",
+   "season": 11,
+   "episode": 2,
+   "durationSec": 2364
+  },
+  {
+   "youtubeId": "Ny45NzNB_fE",
+   "title": "Payback Time || Mkurugenzi Minisodes 14 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 4,
+   "durationSec": 1216
+  },
+  {
+   "youtubeId": "0o2VHTMmr-Y",
+   "title": "Kenya’s Most Wanted Footballer || Mkurugenzi Minisodes 14 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 2,
+   "durationSec": 1479
+  },
+  {
+   "youtubeId": "2lXuD_U8p8I",
+   "title": "To Uganda On Foot || Young And Stupid 10 Ep 10",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 10,
+   "durationSec": 2028
+  },
+  {
+   "youtubeId": "dDKzPWIeXWE",
+   "title": "It’s A Gangsta Lovin’ || Mkurugenzi Minisodes 14 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 3,
+   "durationSec": 1678
+  },
+  {
+   "youtubeId": "8P-Rowk-5z8",
+   "title": "The Undisputed Shoplifter || Mkurugenzi Minisodes 13 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 13,
+   "durationSec": 1316
+  },
+  {
+   "youtubeId": "hCwihOguh8g",
+   "title": "Joe Pistone is Donnie Brasco || Headline Hitters 11 Ep 12",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 12,
+   "durationSec": 4109
+  },
+  {
+   "youtubeId": "T9l5_aMADzk",
+   "title": "Con In Law || Young & Stupid 10 Ep 12",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 12,
+   "durationSec": 1856
+  },
+  {
+   "youtubeId": "Ii4Fz4yk7Zk",
+   "title": "Darkest Day || Mkurugenzi Minisodes 13 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 11,
+   "durationSec": 1342
+  },
+  {
+   "youtubeId": "-Qh5IRdK8BM",
+   "title": "Wizi wa Mambavu || Mkurugenzi Minisodes 14 Ep 1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 14,
+   "episode": 1,
+   "durationSec": 1021
+  },
+  {
+   "youtubeId": "9-zRZclNEQ4",
+   "title": "TACA Airlines Flight 110 || Headline Hitters 11 Ep 13",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 13,
+   "durationSec": 2709
+  },
+  {
+   "youtubeId": "HQCDBE3KXmE",
+   "title": "Love and Mental Illness ||Mkurugenzi Minisodes 13 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 9,
+   "durationSec": 1110
+  },
+  {
+   "youtubeId": "AXCYspXXLL0",
+   "title": "Dollars In, Dollars Out || Mkurugenzi Minisodes 13 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 12,
+   "durationSec": 1431
+  },
+  {
+   "youtubeId": "lpHJJMR8vZs",
+   "title": "The Kenyan German Swindler || Mkurugenzi Diastories 4 Ep5",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 5,
+   "durationSec": 2621
+  },
+  {
+   "youtubeId": "V_IaRUVdn6w",
+   "title": "Surprise, Surprise || Mkurugenzi Minisodes 13 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 10,
+   "durationSec": 1067
+  },
+  {
+   "youtubeId": "VLGARsGhGNw",
+   "title": "The Innocent Accomplice || Mkurugenzi Minisodes 13 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 8,
+   "durationSec": 1548
+  },
+  {
+   "youtubeId": "aQmL30TrTFs",
+   "title": "One Victim 3 Suspects || Young & Stupid 10 Ep 9",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 9,
+   "durationSec": 2013
+  },
+  {
+   "youtubeId": "U2hVjZV8XJI",
+   "title": "The Grim Reaper Of Kerala - Part 2 || Headline Hitters 11 Ep 10",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 10,
+   "durationSec": 2865
+  },
+  {
+   "youtubeId": "RwdBGG6Yp1s",
+   "title": "The Grim Reaper Of Kerala Part 1 || Headline Hitters 11 Ep10",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 10,
+   "durationSec": 2360
+  },
+  {
+   "youtubeId": "ULRAiIZEL70",
+   "title": "MnaOverShare!!! Data Privacy… Or Lack Thereof. || Mkurugenzi Minisodes 13 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 7,
+   "durationSec": 1299
+  },
+  {
+   "youtubeId": "p56NbWkVKq8",
+   "title": "Light at The End Of The Tunnel || Mkurugenzi Diastories 4 Ep 6",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 6,
+   "durationSec": 2982
+  },
+  {
+   "youtubeId": "Tq1jIqoJ-sM",
+   "title": "University of Character Development || Mkurugenzi Minisodes 13 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 5,
+   "durationSec": 1542
+  },
+  {
+   "youtubeId": "sCZ8chlG6Eg",
+   "title": "Uhalifu Kwa Wote || Mkurugenzi Minisodes 13 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 6,
+   "durationSec": 1100
+  },
+  {
+   "youtubeId": "2-N3zn8DJhc",
+   "title": "The Secret Agent Amongst Us || Headline Hitters 11 Ep 9",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 9,
+   "durationSec": 2440
+  },
+  {
+   "youtubeId": "x7PIRmzM3-o",
+   "title": "Whose Wife Did I Steal ? || Mkurugenzi Minisodes 13 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 3,
+   "durationSec": 1942
+  },
+  {
+   "youtubeId": "cRof8zLXcA8",
+   "title": "Asset Rich, Cash Poor ||Mkurugenzi Minisodes 13 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 4,
+   "durationSec": 1880
+  },
+  {
+   "youtubeId": "bqqhykDsNYI",
+   "title": "My Scammer Relative || Young & Stupid Sn10 Ep8",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 8,
+   "durationSec": 2040
+  },
+  {
+   "youtubeId": "WDmcxYgqHKA",
+   "title": "The Principal Without Principles || Mkurugenzi Minisodes 12 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 13,
+   "durationSec": 1282
+  },
+  {
+   "youtubeId": "zEJCSsr8QKU",
+   "title": "You May Now Meet The Bride || Mkurugenzi Minisodes 13 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 13,
+   "episode": 2,
+   "durationSec": 1372
+  },
+  {
+   "youtubeId": "YxASniIJN8k",
+   "title": "The Naked Truth || Mkurugenzi Diastories 4 Ep 4",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 4,
+   "durationSec": 2151
+  },
+  {
+   "youtubeId": "wtBY_gKAV1w",
+   "title": "Habibi!!! Slaps in Dubai || Mkurugenzi Minisodes 12 Ep13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 13,
+   "durationSec": 1142
+  },
+  {
+   "youtubeId": "BwNqPtpaS_U",
+   "title": "Whose Money Did We Steal? || Mkurugenzi Minisodes 12 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 12,
+   "durationSec": 1456
+  },
+  {
+   "youtubeId": "s6TYJer9HgU",
+   "title": "British Airways Flight 009 || Headline Hitters 11 Ep 8",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 8,
+   "durationSec": 2905
+  },
+  {
+   "youtubeId": "F_7iJaHu2J4",
+   "title": "Grand Theft Auto Kiambu Edition || Mkurugenzi Minisodes 12 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 11,
+   "durationSec": 1615
+  },
+  {
+   "youtubeId": "5qq7NvlEFHQ",
+   "title": "The Greatest Train Robbery || Headline Hitters 11 Ep 7",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 7,
+   "durationSec": 3741
+  },
+  {
+   "youtubeId": "Oea_WbUwUxo",
+   "title": "Whose Body Did We Bury ? || Mkurugenzi Minisode 12 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 9,
+   "durationSec": 1086
+  },
+  {
+   "youtubeId": "R9QKRkrqvSM",
+   "title": "The Modern Day Bonnie & Clyde || Headline Hitters 11 Ep 6",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 6,
+   "durationSec": 3197
+  },
+  {
+   "youtubeId": "QVZCFkDMS_8",
+   "title": "Afande Please || Mkurugenzi Minisodes 12 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 7,
+   "durationSec": 1381
+  },
+  {
+   "youtubeId": "BW2erV6UrMU",
+   "title": "The Long Road To Comoros || Mkurugenzi Diastories 4 EP 3",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 3,
+   "durationSec": 2260
+  },
+  {
+   "youtubeId": "01_NAH1RBlI",
+   "title": "Please Deport Me || Mkurugenzi Minisode 12 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 6,
+   "durationSec": 1855
+  },
+  {
+   "youtubeId": "yNTyu3mie6o",
+   "title": "South African Airways Flight 295 || Headline Hitters 11 Ep 5",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 5,
+   "durationSec": 2891
+  },
+  {
+   "youtubeId": "_FmH_ar0OCg",
+   "title": "Maji Chini Ya Maji || Mkurugenzi Minisodes 12 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 2,
+   "durationSec": 858
+  },
+  {
+   "youtubeId": "vqj6aWI0kg4",
+   "title": "The Tiger Kidnapping Of Kenyans || Mkurugenzi Diastories",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": null,
+   "durationSec": 4271
+  },
+  {
+   "youtubeId": "EbUG1CKr_RI",
+   "title": "Cheza Safe || Mkurugenzi Minisode 12 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 10,
+   "durationSec": 787
+  },
+  {
+   "youtubeId": "LZmKIsMEgms",
+   "title": "Talking Stage To Marriage Direct! || Mkurugenzi Minisodes 12 Ep 41",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 41,
+   "durationSec": 1536
+  },
+  {
+   "youtubeId": "c_TYJPoF-ls",
+   "title": "Osama Bin Laden - The Reckoning",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3499
+  },
+  {
+   "youtubeId": "tilN9h5SwI0",
+   "title": "Osama Bin Laden - The Reign",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2648
+  },
+  {
+   "youtubeId": "HWXVKhwR48M",
+   "title": "Osama Bin Laden - The Rise",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2380
+  },
+  {
+   "youtubeId": "u92p_-TtnOU",
+   "title": "A Graduate Of Embarrassment || Mkurugenzi Minisode Sn 3 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 8,
+   "durationSec": 1380
+  },
+  {
+   "youtubeId": "4NSR7ePxFtI",
+   "title": "The Kisumu Serial Killer || Headline Hitters 11 Ep 4",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 4,
+   "durationSec": 2914
+  },
+  {
+   "youtubeId": "uzaJ3MZuWRA",
+   "title": "Cash Heavy But Flat Broke! || Mkurugenzi Minisode 12 EP 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 3,
+   "durationSec": 1162
+  },
+  {
+   "youtubeId": "q-aaHgFrOB8",
+   "title": "Close Shave In Qatar 🇶🇦 || Mkurugenzi Minisodes",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1207
+  },
+  {
+   "youtubeId": "HZQ2-PmJeKA",
+   "title": "India's Worst Hijacking || The KANDAHAR Story || Headline Hitters",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 3656
+  },
+  {
+   "youtubeId": "huoPbbaBp-Q",
+   "title": "The Extremist Son || Mkurugenzi Minisode 8 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 10,
+   "durationSec": 1586
+  },
+  {
+   "youtubeId": "wJjtWVcVSb4",
+   "title": "Black Weedower || Mkurugenzi Minisode 11 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 9,
+   "durationSec": 1241
+  },
+  {
+   "youtubeId": "NrFRlsKtMTs",
+   "title": "Most Innocent Repeat Offender || Young & Stupid 10 Ep 7",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 7,
+   "durationSec": 2470
+  },
+  {
+   "youtubeId": "OZVvA0PqqoE",
+   "title": "How Private Is Your Data? || Mkurugenzi Minisode 12 Ep 1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 12,
+   "episode": 1,
+   "durationSec": 1862
+  },
+  {
+   "youtubeId": "UBf0t3BgdMo",
+   "title": "When Water Is Thicker Than Blood || Diastories 4 Ep 1",
+   "show": "Mkurugenzi Diastories",
+   "season": 4,
+   "episode": 1,
+   "durationSec": 1887
+  },
+  {
+   "youtubeId": "T79fcrDU1vQ",
+   "title": "Home Invasion || Mkurugenzi Minisode 11 Ep 13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 13,
+   "durationSec": 1409
+  },
+  {
+   "youtubeId": "BwOAhND16Sk",
+   "title": "30 Year Old Double Homicide|| Headline Hitters 11 Ep 2",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 2,
+   "durationSec": 2000
+  },
+  {
+   "youtubeId": "JTUpnCqmQvc",
+   "title": "Uwongo Wa Luwongo || Mkurugenzi Minisodes 11 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 12,
+   "durationSec": 1277
+  },
+  {
+   "youtubeId": "02iGL-u946s",
+   "title": "No Good Deed Goes Unpunished ||Young & Stupid 10 Ep 5",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 5,
+   "durationSec": 2467
+  },
+  {
+   "youtubeId": "O7tbL4j5sag",
+   "title": "A Rose In The Dark Clouds || Mkurugenzi Minisodes 11 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 12,
+   "durationSec": 1613
+  },
+  {
+   "youtubeId": "J_bucUwcy2w",
+   "title": "The Jonestown Mass Poisoning || Headline Hitters 11 Ep 3",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 3,
+   "durationSec": 3148
+  },
+  {
+   "youtubeId": "2CxEqvrbHNU",
+   "title": "The Dream Chaser | Mkurugenzi Minisodes 11 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 8,
+   "durationSec": 1458
+  },
+  {
+   "youtubeId": "6-i7eKQJeSo",
+   "title": "JONTE OFFICIAL MUSIC",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 207
+  },
+  {
+   "youtubeId": "JOSJOOZ1FVc",
+   "title": "JONTE CHAPTER 3 || Forever Jonte",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 4172
+  },
+  {
+   "youtubeId": "cndPjaHnWX4",
+   "title": "JONTE CHAPTER 2 || The Legend Begins",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2365
+  },
+  {
+   "youtubeId": "1XEV27ubbNg",
+   "title": "JONTE CHAPTER 1||The Origin Story",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3222
+  },
+  {
+   "youtubeId": "USLRM5EQJuU",
+   "title": "Double Dealing Devil || Mkurugenzi Minisode 11 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 10,
+   "durationSec": 1202
+  },
+  {
+   "youtubeId": "YxMdb0E_MAE",
+   "title": "How To Be An Under Age Parent || Young & Stupid 10 Ep 4",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 4,
+   "durationSec": 2679
+  },
+  {
+   "youtubeId": "gf-dpamMc9k",
+   "title": "Samsung Z Fold Folded in 15 Min || Mkurugenzi Minisode 11 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 7,
+   "durationSec": 1177
+  },
+  {
+   "youtubeId": "yYQHVu8K5bc",
+   "title": "The Heroes Of The Mandera Bus Attack || Headline Hitters 11 Ep 1",
+   "show": "Headline Hitters",
+   "season": 11,
+   "episode": 1,
+   "durationSec": 2126
+  },
+  {
+   "youtubeId": "2jIeFKqng1o",
+   "title": "Kenyans Drink To Die || Mkurugenzi Minisode 11 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 6,
+   "durationSec": 1390
+  },
+  {
+   "youtubeId": "ufilIV2YRbA",
+   "title": "When The Party Stops || Young & Stupid 10 Ep 3",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 3,
+   "durationSec": 2397
+  },
+  {
+   "youtubeId": "gRUcmJ5kvkc",
+   "title": "Wrongful Crucifixion || Mkurugenzi Minisode 11 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 5,
+   "durationSec": 1239
+  },
+  {
+   "youtubeId": "dNFFSxFZZrY",
+   "title": "The 33 Year Old Cold Case || Headline Hitters 10 Ep 13",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 13,
+   "durationSec": 2339
+  },
+  {
+   "youtubeId": "VzyuXgw0iAs",
+   "title": "30-Minute Heist Nightmare|| Mkurugenzi Minisode 11 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 4,
+   "durationSec": 899
+  },
+  {
+   "youtubeId": "GljlYwhxgks",
+   "title": "The Gamble in Gambia || Mkurugenzi Diastories 3 Ep 13",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 13,
+   "durationSec": 3272
+  },
+  {
+   "youtubeId": "HZ-81-wanTM",
+   "title": "Stealing From The Dead || Mkurugenzi Minisode11 Ep3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 3,
+   "durationSec": 1216
+  },
+  {
+   "youtubeId": "CxZKfHRfFjk",
+   "title": "SwissAir Flight 111 Crash 1998 || Headline Hitters10 Ep12",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 12,
+   "durationSec": 2464
+  },
+  {
+   "youtubeId": "WsMP7QlU4TU",
+   "title": "Love , Chains & Cuffs: The Kevin Matundura Robbery Romance || Mkurugenzi Minisode 11 Ep1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 11,
+   "episode": 1,
+   "durationSec": 1183
+  },
+  {
+   "youtubeId": "e0qjB2PEh5U",
+   "title": "The Tragic Story of Tito Musili || Mkurugenzi Diastories 3 Ep 12",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 12,
+   "durationSec": 1271
+  },
+  {
+   "youtubeId": "7wzuyzTxWSE",
+   "title": "High School Joyride Disaster || Sipangwingwi Edition || Mkurugenzi Minisode 10 Ep13",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 13,
+   "durationSec": 1272
+  },
+  {
+   "youtubeId": "kK_645BPOcY",
+   "title": "New Zealand’s Darkest Day – The Christchurch Terror Attack || Headline Hitters 10 Ep 11",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 11,
+   "durationSec": 2548
+  },
+  {
+   "youtubeId": "_NuRIiCzTPs",
+   "title": "Stranded in Qatar 🇶🇦 || How Kenyans Are Abandoned in Qatar 2025 | Mkurugenzi Minisode 10 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 12,
+   "durationSec": 1022
+  },
+  {
+   "youtubeId": "e9VwJEdRebU",
+   "title": "The Rogue Road Trip Fiasco: No License, No Mercy! || Young & Stupid 10 Ep 2",
+   "show": "Young and Stupid",
+   "season": 10,
+   "episode": 2,
+   "durationSec": 2103
+  },
+  {
+   "youtubeId": "OakJh5lKk18",
+   "title": "NGARA CONMAN STRIKES! | Online Scam Exposed | Mkurugenzi Minisodes 10 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 11,
+   "durationSec": 1106
+  },
+  {
+   "youtubeId": "fS0q6l035kg",
+   "title": "Campus Love Gone Wrong | Young & Stupid Season 10 Premiere!",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2061
+  },
+  {
+   "youtubeId": "Xy1QTvOfmzk",
+   "title": "Burundi’s Bloodless Coup - Mkurugenzi Minisodes 10 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 10,
+   "durationSec": 1064
+  },
+  {
+   "youtubeId": "_Zd7MZUsKGk",
+   "title": "Almost Addis A Blunder - Mkurugenzi Diastories 3 Ep 11",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 11,
+   "durationSec": 1822
+  },
+  {
+   "youtubeId": "HTvTYWwbHOE",
+   "title": "The Extremist That Was Swallowed By Lake Victoria | Mkurugenzi Minisode 10 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 8,
+   "durationSec": 1556
+  },
+  {
+   "youtubeId": "6zFVxKepaUI",
+   "title": "African Emperor Jean Bedel Bokassa - Headline Hitters 10 Ep 10",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 10,
+   "durationSec": 3244
+  },
+  {
+   "youtubeId": "UOTchjadm20",
+   "title": "Trapped at The Summertide ! - Mkurugenzi Minisodes 10 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 7,
+   "durationSec": 1370
+  },
+  {
+   "youtubeId": "XRUvjRoSPg8",
+   "title": "DELAY IS NOT DENIAL: Deported, Detained, but Never Defeated | Abel Mutua | Diastories 3 Ep 10",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 10,
+   "durationSec": 1839
+  },
+  {
+   "youtubeId": "IoOT5KXMQEA",
+   "title": "The $282,000 Hitman Chain That Backfired | Mkurugenzi Minisodes 10 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 6,
+   "durationSec": 1445
+  },
+  {
+   "youtubeId": "zHcGcL4uxZU",
+   "title": "Qantas Flight 32 Emergency Landing ! | Headline Hitter 10 Ep 9 | Abel Mutua",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 9,
+   "durationSec": 3175
+  },
+  {
+   "youtubeId": "UJkjQjIg-x8",
+   "title": "Auntie From Hell: Her Story of Survival, Abuse & Healing | Minisode 10 Ep 4 | Abel Mutua",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 4,
+   "durationSec": 1142
+  },
+  {
+   "youtubeId": "bpiPO71XvbI",
+   "title": "The SHOCKING Truth About The Northern Bank Heist in Headline Hitters 10 Ep 8",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 8,
+   "durationSec": 2285
+  },
+  {
+   "youtubeId": "C6uxfVviy24",
+   "title": "MPESA AGENTS BEWARE: The 3-Day Con That Cost KSH 63,000 | Mkurugenzi Minisode 10 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 5,
+   "durationSec": 854
+  },
+  {
+   "youtubeId": "pyOXWuUAjws",
+   "title": "Stranded In The City - Mkurugenzi Diastories 3 Ep 9",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 9,
+   "durationSec": 2090
+  },
+  {
+   "youtubeId": "XUR_EzIxRmc",
+   "title": "The Kanungu Massacre: Uganda’s Deadliest Cult Story | Abel Mutua Minisode 10 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 2,
+   "durationSec": 1359
+  },
+  {
+   "youtubeId": "ItZnD0EjvNE",
+   "title": "Inside Operation Dawn of Gulf of Aden | They Hijacked the Wrong Ship | Headline Hitters 10 Ep 7",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 7,
+   "durationSec": 1672
+  },
+  {
+   "youtubeId": "osr_RngwNZo",
+   "title": "How One Man Fooled Dozens of Women in Nairobi | Mkurugenzi Minisodes Season 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1186
+  },
+  {
+   "youtubeId": "rPv52YvNTAE",
+   "title": "So Close to America || Mkurugenzi Diastories 3 Ep 8",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 8,
+   "durationSec": 1603
+  },
+  {
+   "youtubeId": "BTkyuyib78A",
+   "title": "FATHER’S DAY SPECIAL| Big Six on Masculinity, Self-Love &Brotherhood |Mkurugenzi Minisodes Sn10Ep1",
+   "show": "Mkurugenzi Minisodes",
+   "season": 10,
+   "episode": 1,
+   "durationSec": 1288
+  },
+  {
+   "youtubeId": "Ht7y2a5iW5g",
+   "title": "Chief Obtainer - Mkurugenzi Minisodes Season 9 Finale!",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1306
+  },
+  {
+   "youtubeId": "nyjNi0CDP9I",
+   "title": "The Unmatched Audacity Of Dalia Dipolitto | Abel Mutua Headline Hitters 10 Ep 6",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 6,
+   "durationSec": 2491
+  },
+  {
+   "youtubeId": "jIlXwEiOitc",
+   "title": "Kenya's Deadliest Train Crash: 1993 Disaster | Mkurugenzi Minisode 9 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 12,
+   "durationSec": 949
+  },
+  {
+   "youtubeId": "uEwtv5X6RM0",
+   "title": "Tinder Date Turns Into Nightmare: Justice Served || Mkurugenzi Diastories 3 Ep 7",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 7,
+   "durationSec": 1840
+  },
+  {
+   "youtubeId": "wic3MFiK4uw",
+   "title": "The First Fatal Boeing 747 Crash – Lufthansa 540 | Mkurugenzi Minisodes 9 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 11,
+   "durationSec": 1474
+  },
+  {
+   "youtubeId": "68L1-KSuqtU",
+   "title": "The Yankee Bandit ,Eddie Dodson- Headline Hitters 10 Ep 5",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 5,
+   "durationSec": 1950
+  },
+  {
+   "youtubeId": "CvFtIKVRGO8",
+   "title": "The Case Of Salim Rashid aka Chotara - Mkurugenzi Minisodes 9 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 10,
+   "durationSec": 950
+  },
+  {
+   "youtubeId": "sQ9dysZXUW4",
+   "title": "The Money Multiplier - Young & Stupid Season 9 Finale!",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2147
+  },
+  {
+   "youtubeId": "oxFdeRaz9j8",
+   "title": "Tracking The Trucker - Mkurugenzi Minisodes 9 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 9,
+   "durationSec": 1236
+  },
+  {
+   "youtubeId": "KisUMPaunt4",
+   "title": "Nanny Doss aka The Giggling Granny - Headline Hitters 10 Ep 4",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 4,
+   "durationSec": 2623
+  },
+  {
+   "youtubeId": "G-K_tndrY2Y",
+   "title": "Happy Land Club Inferno - Mkurugenzi Minisodes 9 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 8,
+   "durationSec": 1319
+  },
+  {
+   "youtubeId": "QPxHiOSN6D4",
+   "title": "Aiding And A Betting - Young & Stupid 9 Ep 12",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 12,
+   "durationSec": 3601
+  },
+  {
+   "youtubeId": "YDQL1lN-ReM",
+   "title": "The Genesis Of Tuma Kitu - Mkurugenzi Minisode 9 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 7,
+   "durationSec": 1313
+  },
+  {
+   "youtubeId": "Xed78o2-mmA",
+   "title": "Munich Air Disaster - Headline Hitters 10 Ep 3",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 3,
+   "durationSec": 2820
+  },
+  {
+   "youtubeId": "KTcFo3ueo_E",
+   "title": "Diplomatic Mistake- Mkurugenzi Minisodes 9 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 6,
+   "durationSec": 1578
+  },
+  {
+   "youtubeId": "iNoxxwxHa0c",
+   "title": "Sins From The Past - Young & Stupid 9 Ep 11",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 11,
+   "durationSec": 2279
+  },
+  {
+   "youtubeId": "3EqRTxBrFIg",
+   "title": "The Cost Of Silence - Mkurugenzi Minisodes 9 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 5,
+   "durationSec": 1809
+  },
+  {
+   "youtubeId": "v3gSLZNOpU8",
+   "title": "Jessica Buchanan Rescue - Headline Hitters 10 Ep 2",
+   "show": "Headline Hitters",
+   "season": 10,
+   "episode": 2,
+   "durationSec": 2445
+  },
+  {
+   "youtubeId": "i9AS192e3Qs",
+   "title": "Mapenzi Kiboko Yao - Young & Stupid 9 Ep 10",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 10,
+   "durationSec": 1889
+  },
+  {
+   "youtubeId": "XWidmbvFJfs",
+   "title": "China Airlines Flight 006 - Headline Hitters Season 10 Premiere!",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2312
+  },
+  {
+   "youtubeId": "DoV4Rjy8nsE",
+   "title": "The Pregnant Virgin - Mkurugenzi Minisodes 9 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 4,
+   "durationSec": 1044
+  },
+  {
+   "youtubeId": "9FUbpmxWIqg",
+   "title": "Raised In Hell - Young & Stupid 9 Ep 9",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 9,
+   "durationSec": 1572
+  },
+  {
+   "youtubeId": "1K6IdOZeAkc",
+   "title": "Waziri, A Quick One! - Mkurugenzi Minisodes 9 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 3,
+   "durationSec": 1151
+  },
+  {
+   "youtubeId": "h_ot2ufOdoo",
+   "title": "GermanWings Flight 9525 - Headline Hitters Season 9 Finale!",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2027
+  },
+  {
+   "youtubeId": "C1Q9JmsQ8Ug",
+   "title": "An Unprecedented Encounter - Mkurugenzi Minisodes 9 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 9,
+   "episode": 2,
+   "durationSec": 1747
+  },
+  {
+   "youtubeId": "kMTiCsiXaQI",
+   "title": "The Silent Pandemic - Young & stupid 9 Ep 8",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 8,
+   "durationSec": 3662
+  },
+  {
+   "youtubeId": "ADHQokpntAM",
+   "title": "Auto Recovery Mission - Mkurugenzi Minisodes Season 9 Premiere!",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1458
+  },
+  {
+   "youtubeId": "9LJxP0NPj2o",
+   "title": "Kidnapping The Heineken Boss - Headline Hitters 9 Ep 12",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 12,
+   "durationSec": 3125
+  },
+  {
+   "youtubeId": "FWfTH7RwXOI",
+   "title": "Marched Out - Mkurugenzi Minisodes Season 8 Finale!",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1409
+  },
+  {
+   "youtubeId": "9dmysSTAEMM",
+   "title": "Two Sides Of A Maniac - Young & Stupid 9 Ep 7",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 7,
+   "durationSec": 1944
+  },
+  {
+   "youtubeId": "lBMXvpd5HKg",
+   "title": "Sleeping On The Job - Mkurugenzi Minisodes 8 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 12,
+   "durationSec": 1622
+  },
+  {
+   "youtubeId": "8eDvP9_Es2E",
+   "title": "Lufthansa Airlines Flight 181 Hijacking - Headline Hitters 9 Ep 11",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 11,
+   "durationSec": 3243
+  },
+  {
+   "youtubeId": "wn_ivEzcunw",
+   "title": "Digital Heist - Mkurugenzi Minisodes 8 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 11,
+   "durationSec": 1072
+  },
+  {
+   "youtubeId": "kLMneasPMAE",
+   "title": "Double Tapped - Young & Stupid 9 Ep 6",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 6,
+   "durationSec": 1392
+  },
+  {
+   "youtubeId": "BQN0Ke_yIYU",
+   "title": "Mkurugenzi Minisodes 8 Bonus Episode - Safisha Rada",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1261
+  },
+  {
+   "youtubeId": "TYW-Vm8yAtY",
+   "title": "Nigeria’s Most Wanted - Mkurugenzi Minisodes 8 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 10,
+   "durationSec": 1568
+  },
+  {
+   "youtubeId": "HTeILZVxrzE",
+   "title": "Collateral Damage - Headline hitters 9 Ep 10",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 10,
+   "durationSec": 3244
+  },
+  {
+   "youtubeId": "2iN-TMSiNLY",
+   "title": "Mubabaz From Hell - Young and Stupid 9 Ep 5",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 5,
+   "durationSec": 2017
+  },
+  {
+   "youtubeId": "5SSt_8g-QBQ",
+   "title": "The Football War - Headline Hitters 9 Ep 9",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 9,
+   "durationSec": 2128
+  },
+  {
+   "youtubeId": "BEFm2n2FjIQ",
+   "title": "Dust Is Constant - Mkurugenzi Minisodes 8 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 9,
+   "durationSec": 1145
+  },
+  {
+   "youtubeId": "5tZ7SDBo9VU",
+   "title": "The Hopeless Romantic - Young & Stupid 9 Ep 4",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 4,
+   "durationSec": 2226
+  },
+  {
+   "youtubeId": "r9T89oGj8Dk",
+   "title": "The Wicked OffSpring - Mkurugenzi Minisodes 8 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 8,
+   "durationSec": 2008
+  },
+  {
+   "youtubeId": "AnRaDQkIY4E",
+   "title": "The Z Boskovic Air Charters Story - Mkurugenzi Minisode 8 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 7,
+   "durationSec": 1046
+  },
+  {
+   "youtubeId": "zpyhRouewCM",
+   "title": "Mental Breakdown - Mkurugenzi Minisodes 8 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 6,
+   "durationSec": 1344
+  },
+  {
+   "youtubeId": "NZlul9sKd18",
+   "title": "Better Luck Next Time - Young & Stupid 9 Ep 3",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 3,
+   "durationSec": 1748
+  },
+  {
+   "youtubeId": "OX4SAlZsm_0",
+   "title": "It’s A Sign - Mkurugenzi Minisodes 8 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 5,
+   "durationSec": 1387
+  },
+  {
+   "youtubeId": "q-pfA-l636s",
+   "title": "Trapped In The Mountains -Headline Hitters 9 Ep 8",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 8,
+   "durationSec": 2899
+  },
+  {
+   "youtubeId": "__kwATf3MfA",
+   "title": "Hell Of A Ride - Young & Stupid 9 Ep 2",
+   "show": "Young and Stupid",
+   "season": 9,
+   "episode": 2,
+   "durationSec": 2938
+  },
+  {
+   "youtubeId": "7yS4VGtfhmY",
+   "title": "K-Rupt Tribute- Headline Hitters 9 Ep 7",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 7,
+   "durationSec": 6057
+  },
+  {
+   "youtubeId": "aS84DYAxRaA",
+   "title": "Jabaration - Mkurugenzi Minisode 8 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 4,
+   "durationSec": 1274
+  },
+  {
+   "youtubeId": "yhi-c1fwK_M",
+   "title": "Makosa Ni Yangu - Official Trailer",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 102
+  },
+  {
+   "youtubeId": "NhHnLq-_tGw",
+   "title": "False Promises - Mkurugenzi Minisode 8 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 3,
+   "durationSec": 1632
+  },
+  {
+   "youtubeId": "8ZchDeyCla0",
+   "title": "Schanda Handley Kidnapping - Headline Hitters 9 Ep 6",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 6,
+   "durationSec": 2925
+  },
+  {
+   "youtubeId": "7dwreK-F950",
+   "title": "Farm-bling The Bag - Mkurugenzi Minisode 8 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 8,
+   "episode": 2,
+   "durationSec": 1132
+  },
+  {
+   "youtubeId": "eEf5CX3mPv8",
+   "title": "The Serial Escapee - Young & Stupid Season 9 Premiere",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2634
+  },
+  {
+   "youtubeId": "M-3ofhzU2_k",
+   "title": "Mkasi - Mkurugenzi Minisodes Season 8 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 872
+  },
+  {
+   "youtubeId": "r2Xa_BKEj_E",
+   "title": "End Of The Concorde - Headline Hitters 9 Ep 5",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 5,
+   "durationSec": 2301
+  },
+  {
+   "youtubeId": "1caPuuxKVp0",
+   "title": "Defenth Fortheth - Mkurugenzi Minisodes Season 7 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 993
+  },
+  {
+   "youtubeId": "1_ocLfYEWyQ",
+   "title": "Crying Wolf - Young & Stupid Season 8 Finale",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2601
+  },
+  {
+   "youtubeId": "WDrpj4cdmiY",
+   "title": "Walking Dead - Mkurugenzi Minisodes 7 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 12,
+   "durationSec": 895
+  },
+  {
+   "youtubeId": "MM0-0g4ZtFg",
+   "title": "Stupid In Love - Young & Stupid 8 Ep 12",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 12,
+   "durationSec": 2251
+  },
+  {
+   "youtubeId": "pG-xCcgHUYA",
+   "title": "Addis A Blunder Part 2 - Mkurugenzi Minisodes 7 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 11,
+   "durationSec": 973
+  },
+  {
+   "youtubeId": "XIHehXs6uO8",
+   "title": "Addis A Blunder - Mkurugenzi Diastories 3 Ep 6",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 6,
+   "durationSec": 2228
+  },
+  {
+   "youtubeId": "Fds4t3KJNsc",
+   "title": "Curse Kazini - Mkurugenzi Minisodes 7 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 10,
+   "durationSec": 1042
+  },
+  {
+   "youtubeId": "FstHdKwsE-o",
+   "title": "Mont Blanc Tunnel Inferno - Headline Hitters 9 Ep 4",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 4,
+   "durationSec": 2384
+  },
+  {
+   "youtubeId": "6N7dFu5QX3s",
+   "title": "Tale Of The Wife Eater - Mkurugenzi Minisodes 7 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 9,
+   "durationSec": 1286
+  },
+  {
+   "youtubeId": "9AREsZx6MhM",
+   "title": "Transworld Airline Flight 800 - Headline Hitters 9 Ep 3",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 3,
+   "durationSec": 2279
+  },
+  {
+   "youtubeId": "zRcP3iID088",
+   "title": "The Unfortunate Pilot - Mkurugenzi Minisodes 7 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 8,
+   "durationSec": 1111
+  },
+  {
+   "youtubeId": "39oM7TiXsdw",
+   "title": "Hotel New World Collapse - Headline Hitters 9 Ep 2",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 2,
+   "durationSec": 2946
+  },
+  {
+   "youtubeId": "M38OMmW7EdQ",
+   "title": "From Dubai With Love - Mkurugenzi Minisodes 7 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 7,
+   "durationSec": 1382
+  },
+  {
+   "youtubeId": "RTpD__ZiHIE",
+   "title": "The Devil In The Medals - Headline Hitters 9 Ep 1",
+   "show": "Headline Hitters",
+   "season": 9,
+   "episode": 1,
+   "durationSec": 2257
+  },
+  {
+   "youtubeId": "vOVLvuZkyko",
+   "title": "Wrath Of The Kilimanjaro; Gugu's Story - Mkurugenzi Minisodes 7 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 6,
+   "durationSec": 1355
+  },
+  {
+   "youtubeId": "68iqJB3QMBY",
+   "title": "The Piper Alpha Disaster - Headline Hitters Season 8 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 3924
+  },
+  {
+   "youtubeId": "_9_PeB3WMzg",
+   "title": "Air Canada Near Miss - Mkurugenzi Minisodes 7 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 5,
+   "durationSec": 1712
+  },
+  {
+   "youtubeId": "BH6uZSZforM",
+   "title": "The TrickToker - Young & Stupid 8 Ep 11",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 11,
+   "durationSec": 1406
+  },
+  {
+   "youtubeId": "OmmQ9ZIbF-c",
+   "title": "The Drone Pilot - Mkurugenzi Minisodes 7 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 4,
+   "durationSec": 1088
+  },
+  {
+   "youtubeId": "U8YmPuEz-4Q",
+   "title": "Serial Swindler - Young & Stupid 8 Ep 10",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 10,
+   "durationSec": 1957
+  },
+  {
+   "youtubeId": "VEkBEJCncik",
+   "title": "Bachelor Of Romance - Mkurugenzi Minisodes 7 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 3,
+   "durationSec": 1667
+  },
+  {
+   "youtubeId": "Q7Gpo1yaFmY",
+   "title": "Jenny From The Block - Young & Stupid 8 Ep 9",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 9,
+   "durationSec": 2323
+  },
+  {
+   "youtubeId": "wpMX1vtZXLo",
+   "title": "Blue Uniform - Mkurugenzi Minisodes 7 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 7,
+   "episode": 2,
+   "durationSec": 940
+  },
+  {
+   "youtubeId": "xJfNI2ayZXk",
+   "title": "The Fall of An Honest Man Part 3 - Mkurugenzi Diastories 3 Ep 5",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 5,
+   "durationSec": 1210
+  },
+  {
+   "youtubeId": "emKP4dzRRlo",
+   "title": "Brother Bernard, EEEEHH!!! - Mkurugenzi Minisodes Season 7 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1421
+  },
+  {
+   "youtubeId": "Za8vozYEWro",
+   "title": "Boston Marathon Bombing - Headline Hitters 8 Ep 12",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 12,
+   "durationSec": 3712
+  },
+  {
+   "youtubeId": "e1eh0hI3LYE",
+   "title": "Jenny Walker - Mkurugenzi Minisodes Season 6 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1777
+  },
+  {
+   "youtubeId": "SChHEUfUhus",
+   "title": "Cheating Practice; CP - Young & Stupid 8 Ep 8",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 8,
+   "durationSec": 1793
+  },
+  {
+   "youtubeId": "cxeSRJC2kxU",
+   "title": "The Fall of An Honest Man Part 2 - Mkurugenzi Minisodes 6 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 12,
+   "durationSec": 2113
+  },
+  {
+   "youtubeId": "EdS6bcZR7-4",
+   "title": "The Fall Of An Honest Man - Mkurugenzi Diastories 3 Ep 4",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 4,
+   "durationSec": 2528
+  },
+  {
+   "youtubeId": "C8618F6PEC8",
+   "title": "Mob Deep - Mkurugenzi Minisodes 6 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 11,
+   "durationSec": 1608
+  },
+  {
+   "youtubeId": "agwh_ASvgUE",
+   "title": "The Fall of Ceaușescu - Headline Hitters 8 Ep 11",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 11,
+   "durationSec": 3440
+  },
+  {
+   "youtubeId": "3-ijrRC9LUA",
+   "title": "Still Dark At The End Of The Tunnel - Mkurugenzi Minisodes 6 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 10,
+   "durationSec": 1369
+  },
+  {
+   "youtubeId": "e0Q3lHIsTv8",
+   "title": "For Papers or For Worse, Australia - Young & Stupid 8 Ep 7",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 7,
+   "durationSec": 1905
+  },
+  {
+   "youtubeId": "UTyev-rxHjA",
+   "title": "Double Tragedy - Mkurugenzi Minisodes 6 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 9,
+   "durationSec": 1264
+  },
+  {
+   "youtubeId": "DlqV-0REcBo",
+   "title": "The Story of Henry Rono - Mkurugenzi Diastories 3 Ep 3",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 3,
+   "durationSec": 3619
+  },
+  {
+   "youtubeId": "OtLRi9ihOz4",
+   "title": "The Tale Of The Police Masseuse - Young & Stupid 8 Ep 6",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 6,
+   "durationSec": 2089
+  },
+  {
+   "youtubeId": "xuc_T25FkvA",
+   "title": "A Friend Of The Bottle - Mkurugenzi Minisodes 6 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 8,
+   "durationSec": 1241
+  },
+  {
+   "youtubeId": "HGTxFdZndYc",
+   "title": "Neurosurgeon on DeathRow - Mkurugenzi Minisodes 6 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 7,
+   "durationSec": 1036
+  },
+  {
+   "youtubeId": "_bcPTxjSk1k",
+   "title": "Escape From Italy - Young & Stupid 8 Ep 5",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 5,
+   "durationSec": 2281
+  },
+  {
+   "youtubeId": "9Cff4fk4z7c",
+   "title": "Stone Massage - Mkurugenzi Minisodes 6 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 6,
+   "durationSec": 1103
+  },
+  {
+   "youtubeId": "dG7AlzwWUR4",
+   "title": "Married To An Assassin - Headline Hitters 8 Ep 9",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 9,
+   "durationSec": 2713
+  },
+  {
+   "youtubeId": "UKWP6o0plVQ",
+   "title": "Somebody HELB!!! - Mkurugenzi Minisodes 6 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 5,
+   "durationSec": 1126
+  },
+  {
+   "youtubeId": "6pbASkuNw_s",
+   "title": "The Jinxed Road Trip - Young & Stupid 8 Ep 4",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 4,
+   "durationSec": 1551
+  },
+  {
+   "youtubeId": "QTiVaYsJGLQ",
+   "title": "The Phoney Cousin - Mkurugenzi Minisodes 6 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 4,
+   "durationSec": 1069
+  },
+  {
+   "youtubeId": "qz5uJh9Rb6E",
+   "title": "Emiliano Sala - Headline Hitters 8 Ep 8",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 8,
+   "durationSec": 2410
+  },
+  {
+   "youtubeId": "MbHaZy1_kAQ",
+   "title": "A Private Phone Ring - Mkurugenzi Minisodes 6 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 3,
+   "durationSec": 1134
+  },
+  {
+   "youtubeId": "0OgGqLw9XWI",
+   "title": "Major Miner’s Troubles - Young & Stupid 8 Ep 3",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 3,
+   "durationSec": 2221
+  },
+  {
+   "youtubeId": "3x8p4_fcwL4",
+   "title": "Shanga - Mkurugenzi Minisodes 6 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 6,
+   "episode": 2,
+   "durationSec": 1213
+  },
+  {
+   "youtubeId": "K1fHnNGP8ks",
+   "title": "Transat Flight 236 - Headline Hitters 8 Ep 7",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 7,
+   "durationSec": 2970
+  },
+  {
+   "youtubeId": "9MhWOUjO34s",
+   "title": "The Empire State Miracle - Mkurugenzi Minisodes Season 6 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1288
+  },
+  {
+   "youtubeId": "HiLWx_4FOS8",
+   "title": "Stranded In Saudi - Mkurugenzi Minisodes Season 5 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1956
+  },
+  {
+   "youtubeId": "NAoYr_zVk2E",
+   "title": "Prison Break: William Leslie - Headline Hitters 8 Ep 6",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 6,
+   "durationSec": 3518
+  },
+  {
+   "youtubeId": "gQ3ydZemfC8",
+   "title": "Unusual Suspect- Mkurugenzi Minisodes 5 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 12,
+   "durationSec": 1776
+  },
+  {
+   "youtubeId": "Vy7DvDym5tk",
+   "title": "Lost In The Hood - Young & Stupid 8 Ep 2",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 2,
+   "durationSec": 2103
+  },
+  {
+   "youtubeId": "MSnuEYPxtCA",
+   "title": "No Joy For Maribel - Headline Hitters 8 Ep 5",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 5,
+   "durationSec": 2476
+  },
+  {
+   "youtubeId": "7gWfbvVXQkc",
+   "title": "Women Troubles - Mkurugenzi Minisodes 5 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 11,
+   "durationSec": 1025
+  },
+  {
+   "youtubeId": "cxW80Ky3CE0",
+   "title": "The Dalehurst Train Disaster - Headline Hitters 8 Ep 4",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 4,
+   "durationSec": 2188
+  },
+  {
+   "youtubeId": "l9jLIuI45uA",
+   "title": "The Local Fugitive - Mkurugenzi Minisodes 5 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 10,
+   "durationSec": 1124
+  },
+  {
+   "youtubeId": "9_G2ZCx62UQ",
+   "title": "The Miracle Of The Stowaway - Headline Hitters 8 EP 3",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 3,
+   "durationSec": 2088
+  },
+  {
+   "youtubeId": "7g0Y-otD-1w",
+   "title": "Under The Influence - Mkurugenzi Minisodes 5 EP 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 9,
+   "durationSec": 1432
+  },
+  {
+   "youtubeId": "NZQZZvfLB8g",
+   "title": "Kenya’s Most Wanted Cousins Part 2 - Headline Hitters 8 Ep 2",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 2,
+   "durationSec": 1718
+  },
+  {
+   "youtubeId": "3nb00D40p2Q",
+   "title": "Internal Insecurity - Mkurugenzi Minisodes 5 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 8,
+   "durationSec": 1710
+  },
+  {
+   "youtubeId": "HL_vaHhqDp8",
+   "title": "OH! My Lord -Young & Stupid 8 Ep 1",
+   "show": "Young and Stupid",
+   "season": 8,
+   "episode": 1,
+   "durationSec": 1716
+  },
+  {
+   "youtubeId": "vj6frEIRGW8",
+   "title": "Dede And Gypsy - Mkurugenzi Minisodes 5 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 7,
+   "durationSec": 1341
+  },
+  {
+   "youtubeId": "9GvQhwAGY-M",
+   "title": "The War Dogs - Headline Hitters 8 Ep 1",
+   "show": "Headline Hitters",
+   "season": 8,
+   "episode": 1,
+   "durationSec": 4288
+  },
+  {
+   "youtubeId": "oKG89PVRwnY",
+   "title": "Tech It And Go - Mkurugenzi Minisodes 5 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 6,
+   "durationSec": 1521
+  },
+  {
+   "youtubeId": "xaRl3Zs5K78",
+   "title": "Fight Or Flight - Young & Stupid Season 7 Finale.",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 1955
+  },
+  {
+   "youtubeId": "m9tIhVni14k",
+   "title": "Mob Injustice - Mkurugenzi Minisodes 5 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 5,
+   "durationSec": 1674
+  },
+  {
+   "youtubeId": "dtvsscbxFgg",
+   "title": "Costa Concordia - Headline Hitters Season 7 Finale.",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2990
+  },
+  {
+   "youtubeId": "iAT1cKXChys",
+   "title": "Lucky Escape - Mkurugenzi Minisodes 5 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 4,
+   "durationSec": 1972
+  },
+  {
+   "youtubeId": "dD6TscSuH4I",
+   "title": "How To Ignore Red Flags - Young & Stupid 7 Ep 12",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 12,
+   "durationSec": 2536
+  },
+  {
+   "youtubeId": "4k8paBcQpg4",
+   "title": "Vehicular Shenanigans - Mkurugenzi Minisodes 5 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 3,
+   "durationSec": 1357
+  },
+  {
+   "youtubeId": "8Dj5Zo9v9LE",
+   "title": "Robbing The Dead - Headline Hitters 7 Ep 12",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 12,
+   "durationSec": 2475
+  },
+  {
+   "youtubeId": "ibur-S2ukKU",
+   "title": "Raundi Mbuzi - Mkurugenzi Minisodes 5 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 5,
+   "episode": 2,
+   "durationSec": 1117
+  },
+  {
+   "youtubeId": "KLvrD6GxHMc",
+   "title": "The Mystery Envelope - Young & Stupid 7 Ep 11",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 11,
+   "durationSec": 1461
+  },
+  {
+   "youtubeId": "VFLFFaHp2BA",
+   "title": "The Killer Mum - Mkurugenzi Minisodes Season 5 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1089
+  },
+  {
+   "youtubeId": "uA4sH3egAuA",
+   "title": "Hostage In Nigeria - Headline Hitters 7 Ep 11",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 11,
+   "durationSec": 2910
+  },
+  {
+   "youtubeId": "62qXNGj-d_Q",
+   "title": "Deleted In Plain Sight - Headline Hitters 7 Ep 10",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 10,
+   "durationSec": 2688
+  },
+  {
+   "youtubeId": "1gHsSkG54NM",
+   "title": "The Master Better! - Young & Stupid 7 Ep 10",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 10,
+   "durationSec": 2091
+  },
+  {
+   "youtubeId": "n_unOAKFxwo",
+   "title": "Wallahi Sina Story! - Mkurugenzi Minisodes Season 4 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1069
+  },
+  {
+   "youtubeId": "rnk9xEol6QU",
+   "title": "The Power Of A Receipt - Mkurugenzi Minisodes 4 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 12,
+   "durationSec": 1310
+  },
+  {
+   "youtubeId": "DS4R0-T8BWc",
+   "title": "Parent For Hire - Young & Stupid 7 Ep 9",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 9,
+   "durationSec": 2802
+  },
+  {
+   "youtubeId": "d_pYjhD_MJw",
+   "title": "The Chai Cartel - Mkurugenzi Minisodes 4 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 11,
+   "durationSec": 1722
+  },
+  {
+   "youtubeId": "aoWwt33PCSw",
+   "title": "Air India 101 - Headline Hitters 7 Ep 9",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 9,
+   "durationSec": 2497
+  },
+  {
+   "youtubeId": "3GFdu4eJ_Kk",
+   "title": "0 - 100 Real Quick - Mkurugenzi Minisodes 4 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 10,
+   "durationSec": 1003
+  },
+  {
+   "youtubeId": "ND74qfTk8Mc",
+   "title": "Nightmare In Benghazi - Headline Hitters 7 Ep 8",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 8,
+   "durationSec": 4228
+  },
+  {
+   "youtubeId": "GaKn6Sxxyjg",
+   "title": "The Bet Slip - Young & Stupid 7 Ep 8",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 8,
+   "durationSec": 1807
+  },
+  {
+   "youtubeId": "dYJgEVqlQFE",
+   "title": "Aussie’s Unluckiest Kenyan - Mkurugenzi Diastories 3 Ep 2",
+   "show": "Mkurugenzi Diastories",
+   "season": 3,
+   "episode": 2,
+   "durationSec": 1519
+  },
+  {
+   "youtubeId": "Xcz02rmVwJ4",
+   "title": "Necessary Evil - Mkurugenzi Minisodes 4 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 9,
+   "durationSec": 1009
+  },
+  {
+   "youtubeId": "-91E5NRlpvM",
+   "title": "Trapped In The Amhara - Mkurugenzi Diastories Season 3 Premiere.",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2416
+  },
+  {
+   "youtubeId": "KSipcAsyVjo",
+   "title": "Comrade To Convict In 4 Days - Young & Stupid 7 Ep7",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 7,
+   "durationSec": 2389
+  },
+  {
+   "youtubeId": "W3mPKXuBPK0",
+   "title": "Dope Boy -Young & Stupid 7 Ep 6",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 6,
+   "durationSec": 1550
+  },
+  {
+   "youtubeId": "x2jxpMpdiWQ",
+   "title": "The Crypto Queen- Mkurugenzi Minisodes 4 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 8,
+   "durationSec": 1581
+  },
+  {
+   "youtubeId": "ySXeKFIgIbg",
+   "title": "Free The Mason - Mkurugenzi Minisodes 4 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 7,
+   "durationSec": 1291
+  },
+  {
+   "youtubeId": "Vk5QZc0_mow",
+   "title": "Washed By A Stranger - Young & Stupid 7 Ep 5",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 5,
+   "durationSec": 1746
+  },
+  {
+   "youtubeId": "0yOg5LaIoGQ",
+   "title": "Saved By A Gadget - Mkurugenzi Minisodes 4 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 6,
+   "durationSec": 1209
+  },
+  {
+   "youtubeId": "UyZlx23ipbM",
+   "title": "The Incredible Story Of A Special Operations Warrior - Headline Hitters 7 Ep 7",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 7,
+   "durationSec": 3182
+  },
+  {
+   "youtubeId": "j4wVPDJvsbs",
+   "title": "Diaspora Pains - Mkurugenzi Minisodes 4 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 5,
+   "durationSec": 847
+  },
+  {
+   "youtubeId": "pSvV_k8I0rc",
+   "title": "Ol Kekun - A Little Paradise In The Rift",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 807
+  },
+  {
+   "youtubeId": "ttqXNxFVPSc",
+   "title": "Baterrorist Ba Congo - Diastories 2 Ep 14",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 14,
+   "durationSec": 3227
+  },
+  {
+   "youtubeId": "KDlqaXD_AIs",
+   "title": "Philippines Airline Flight 434 - Headline Hitters 7 Ep 6",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 6,
+   "durationSec": 1998
+  },
+  {
+   "youtubeId": "a2JnlKDS8JU",
+   "title": "Stupidly In Love - Young & Stupid 7 Ep 4",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 4,
+   "durationSec": 1675
+  },
+  {
+   "youtubeId": "NKAMoL0USd8",
+   "title": "A Borderline Mishap - Mkurugenzi Diastories 2 Ep 13",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 13,
+   "durationSec": 2268
+  },
+  {
+   "youtubeId": "nPv-SifIWxA",
+   "title": "Letter Of Disservice- Mkurugenzi Minisodes 4 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 4,
+   "durationSec": 1565
+  },
+  {
+   "youtubeId": "MzCJNx0Jvq4",
+   "title": "88 Days Captive - Headline Hitters 7 Ep 5",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 5,
+   "durationSec": 1928
+  },
+  {
+   "youtubeId": "JuhDHn5xVwg",
+   "title": "Wrong Move - Young & Stupid 7 Ep 3",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 3,
+   "durationSec": 1795
+  },
+  {
+   "youtubeId": "RkW1eUisyas",
+   "title": "For Papers Or For Worse Part 2 - Mkurugenzi Diastories 2 Ep 12",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 12,
+   "durationSec": 2561
+  },
+  {
+   "youtubeId": "8hg3TWGRRhc",
+   "title": "Shattered Dreams - Mkurugenzi Minisodes 4 Ep 3.",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 3,
+   "durationSec": 1171
+  },
+  {
+   "youtubeId": "v2kTfE4F414",
+   "title": "Through Thick And Thin - Mkurugenzi Diastories 2 Ep 11",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 11,
+   "durationSec": 3043
+  },
+  {
+   "youtubeId": "RwKdDFSHcH8",
+   "title": "The Village Burner Boy - Mkurugenzi Minisodes 4 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 4,
+   "episode": 2,
+   "durationSec": 932
+  },
+  {
+   "youtubeId": "hOYsDAHJ0p0",
+   "title": "A Bird In Hand - Young & Stupid 7 Ep 2",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 2,
+   "durationSec": 1662
+  },
+  {
+   "youtubeId": "LiE0L1KHbLo",
+   "title": "The Wrong Skin - Mkurugenzi Diastories 2 Ep 10.",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 10,
+   "durationSec": 2772
+  },
+  {
+   "youtubeId": "eAMdIpWdRUY",
+   "title": "America By Bus - Mkurugenzi Diastories 2 Ep 9.",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 9,
+   "durationSec": 1646
+  },
+  {
+   "youtubeId": "iL3iO9UALHk",
+   "title": "The Kung-Fu Mums - Young & Stupid 7 Ep 1",
+   "show": "Young and Stupid",
+   "season": 7,
+   "episode": 1,
+   "durationSec": 1787
+  },
+  {
+   "youtubeId": "N6BEdlzp0v8",
+   "title": "Kenya’s Most Wanted Cousins - Headline Hitters 7 Ep 3",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 3,
+   "durationSec": 2585
+  },
+  {
+   "youtubeId": "Ip-VQKyzBKo",
+   "title": "The Lunch Time Robber - Headline Hitters 7 Ep 2",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 2,
+   "durationSec": 2565
+  },
+  {
+   "youtubeId": "jJ7GMCt3F7c",
+   "title": "The Mystery Hospitals - Mkurugenzi Minisodes Season 3 Finale.",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1154
+  },
+  {
+   "youtubeId": "sXhVGF-iAEo",
+   "title": "The Tech Detective - Headline Hitters 7 Ep 1",
+   "show": "Headline Hitters",
+   "season": 7,
+   "episode": 1,
+   "durationSec": 2179
+  },
+  {
+   "youtubeId": "pqL6FN9ra0A",
+   "title": "A One In A Million Chance - Mkurugenzi Minisode 3 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 12,
+   "durationSec": 1068
+  },
+  {
+   "youtubeId": "BbbwWxop2S4",
+   "title": "One Good Turn Deserves Another - Mkurugenzi Diastories 2 Ep 8",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 8,
+   "durationSec": 2386
+  },
+  {
+   "youtubeId": "hKThed5P5X8",
+   "title": "Lost In The Skies, Aloha Airlines Flight 243 - Headline Hitters Season 6 Finale.",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2393
+  },
+  {
+   "youtubeId": "_aT4PhZi7zc",
+   "title": "The Bet Masters - Mkurugenzi Minisodes 3 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 11,
+   "durationSec": 1286
+  },
+  {
+   "youtubeId": "JJmMkny8ADM",
+   "title": "The Man I’d Like To Fund (M.I.L.F) - Young & Stupid Season 6 Finale.",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2289
+  },
+  {
+   "youtubeId": "vjtbBmOJ-gk",
+   "title": "Dare To Dream - Speed Date Session",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 762
+  },
+  {
+   "youtubeId": "OzCtdAmORuM",
+   "title": "A Victim Of To Serve And Protect’ - Young & Stupid 6 Ep 12",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 12,
+   "durationSec": 2895
+  },
+  {
+   "youtubeId": "UZljR48HVto",
+   "title": "The Obstacle Conqueror - Mkurugenzi Diastories 2 Ep 7",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 7,
+   "durationSec": 2525
+  },
+  {
+   "youtubeId": "VNYL5_L9tY8",
+   "title": "The Phone-y Tactics That Solved A Murder - Young And Stupid 6 Ep 11",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 11,
+   "durationSec": 2617
+  },
+  {
+   "youtubeId": "3G_Nz2vKggo",
+   "title": "Control Alt Delete - Mkurugenzi Minisode 3 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 10,
+   "durationSec": 1074
+  },
+  {
+   "youtubeId": "BPhO2u0df84",
+   "title": "One Way Ticket, The Swedish Chapter - Mkurugenzi Diastories 2 Ep 6",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 6,
+   "durationSec": 1619
+  },
+  {
+   "youtubeId": "s9WkglGdp5A",
+   "title": "In The Name Of Shots And Shots - Young & Stupid 6 Ep 10",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 10,
+   "durationSec": 2049
+  },
+  {
+   "youtubeId": "HjrBu8gdRy8",
+   "title": "The Rwandan Job - Mkurugenzi Diastories 2 Ep 5.",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 5,
+   "durationSec": 1123
+  },
+  {
+   "youtubeId": "qFHu9vEezoQ",
+   "title": "The Story Behind The Headline - Headline Hitters 6 Ep 12",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 12,
+   "durationSec": 2562
+  },
+  {
+   "youtubeId": "LLCChueNS3Y",
+   "title": "Trapped In Sub Zero Temperatures - Mkurugenzi Diastories 2 Ep 4",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 4,
+   "durationSec": 2085
+  },
+  {
+   "youtubeId": "FiybNNajb7c",
+   "title": "The Baby Under The Rubble - Mkurugenzi Minisode 3 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 10,
+   "durationSec": 1197
+  },
+  {
+   "youtubeId": "8MS9E788HkU",
+   "title": "The Tanzanite Script - Mkurugenzi Diastories 2 Ep 3",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 3,
+   "durationSec": 1598
+  },
+  {
+   "youtubeId": "4Bnxf77rfyw",
+   "title": "A Boy And A Girl Toto, Literally - Young & Stupid 6 Ep 9",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 9,
+   "durationSec": 1785
+  },
+  {
+   "youtubeId": "MB8cl2P7APo",
+   "title": "World’s Biggest Kite - Headline Hitters 6 Ep 11",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 11,
+   "durationSec": 2635
+  },
+  {
+   "youtubeId": "971_kubjpuQ",
+   "title": "FedEx Flight 705 - Headline Hitters 6 Ep 10",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 10,
+   "durationSec": 2250
+  },
+  {
+   "youtubeId": "CSFTr8XikpA",
+   "title": "Stuck in an Island - Headline Hitters 6 Ep 9",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 9,
+   "durationSec": 1936
+  },
+  {
+   "youtubeId": "lAMU8xxL1T0",
+   "title": "Albert Spaggiari And The Sewer Rat Gang - Headline Hitters 6 Ep 8",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 8,
+   "durationSec": 1618
+  },
+  {
+   "youtubeId": "Lpupdz92Wfs",
+   "title": "Justice Delayed But Not Denied - Headline Hitters 6 Ep 7",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 7,
+   "durationSec": 1871
+  },
+  {
+   "youtubeId": "IUEwR_ChVco",
+   "title": "Richard Russel’s Final 73 Minutes - Headline Hitters 6 Ep 6",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 6,
+   "durationSec": 1921
+  },
+  {
+   "youtubeId": "GWHNfewXPPI",
+   "title": "An Armory of Faith - Headline Hitters 6 Ep 5",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 5,
+   "durationSec": 1964
+  },
+  {
+   "youtubeId": "4pHKHm9yHsQ",
+   "title": "Undercover In Qatar Part 1- Mkurugenzi Diastories 2 Ep 2",
+   "show": "Mkurugenzi Diastories",
+   "season": 2,
+   "episode": 2,
+   "durationSec": 3325
+  },
+  {
+   "youtubeId": "bU1v-Vygziw",
+   "title": "Formless In Dubai - Young & Stupid 6 Ep 8",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 8,
+   "durationSec": 2499
+  },
+  {
+   "youtubeId": "EJYXrMSLiuQ",
+   "title": "From Chilling To Chillies - Young & Stupid 6 Ep 7",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 7,
+   "durationSec": 1829
+  },
+  {
+   "youtubeId": "E6q1g6uTJ_Y",
+   "title": "Mkurugenzi Diastories - Season 2 Premiere",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1072
+  },
+  {
+   "youtubeId": "hisw8GbtSb8",
+   "title": "The Killer Photograph - Headline Hitters 6 Ep 4",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 4,
+   "durationSec": 2327
+  },
+  {
+   "youtubeId": "ZrH_1OxZjHw",
+   "title": "The Crash of The Dream Team - Headline Hitters 6 Ep 3",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 3,
+   "durationSec": 1771
+  },
+  {
+   "youtubeId": "QY6cXIWKsLg",
+   "title": "Angel In The Mountains - Young & Stupid 6 Ep 6",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 6,
+   "durationSec": 1396
+  },
+  {
+   "youtubeId": "oBHm-JlbBzs",
+   "title": "Lufthansa Heist - Headline Hitters 6 Ep 2",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 2,
+   "durationSec": 2469
+  },
+  {
+   "youtubeId": "hBUY8hzBLhs",
+   "title": "Filing Error - Mkurugenzi Minisodes 3 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 9,
+   "durationSec": 1203
+  },
+  {
+   "youtubeId": "Uo7ewV2RhbA",
+   "title": "The Sim Swap Scam - Mkurugenzi Minisodes 3 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 8,
+   "durationSec": 730
+  },
+  {
+   "youtubeId": "t124xUYFzhU",
+   "title": "From Grass To Grace - Young & Stupid 6 Ep 5",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 5,
+   "durationSec": 1375
+  },
+  {
+   "youtubeId": "z-tgWPNqUqg",
+   "title": "Nothing Best About Bester - Headline Hitters 6 Ep 1",
+   "show": "Headline Hitters",
+   "season": 6,
+   "episode": 1,
+   "durationSec": 2117
+  },
+  {
+   "youtubeId": "o3X7mbFTpEU",
+   "title": "My Best Story This Week",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 443
+  },
+  {
+   "youtubeId": "_HHOdCnSMLw",
+   "title": "The Mother Of All Chest Pains - Mkurugenzi Minisodes 3 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 7,
+   "durationSec": 1377
+  },
+  {
+   "youtubeId": "2M3J543gO9k",
+   "title": "The Academic Mafia of Abu Dhabi Part 2 - Mkurugenzi Minisodes 3 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 6,
+   "durationSec": 1050
+  },
+  {
+   "youtubeId": "CBlCel5qgyI",
+   "title": "Over And Out! - Young & Stupid 6 Ep 4",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 4,
+   "durationSec": 1528
+  },
+  {
+   "youtubeId": "-rZmqJkIM9M",
+   "title": "The Unlucky Candidate. - Mkurugenzi Minisodes 3 Ep 5.",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 5,
+   "durationSec": 969
+  },
+  {
+   "youtubeId": "grk3x8CYswc",
+   "title": "Sio kila siku ni mambo ya kamisi na story za jaba",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 61
+  },
+  {
+   "youtubeId": "gKZBky96yS4",
+   "title": "Saved by a Tribesman - Young & Stupid 6 Ep 3",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 3,
+   "durationSec": 1703
+  },
+  {
+   "youtubeId": "ugq8s0m_GP8",
+   "title": "Super Strange Coincidences - Mkurugenzi Minisodes 3 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 4,
+   "durationSec": 1255
+  },
+  {
+   "youtubeId": "IOlBJFbzDss",
+   "title": "Sewer Sider - Mkurugenzi Minisodes 3 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 3,
+   "durationSec": 1116
+  },
+  {
+   "youtubeId": "_LKqz21n9Zc",
+   "title": "The Long Con - Young & Stupid 6 Ep 2",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 2,
+   "durationSec": 1938
+  },
+  {
+   "youtubeId": "I1JZvCmo3H0",
+   "title": "Deportivo La Filipino - Young & Stupid 6 Ep 1",
+   "show": "Young and Stupid",
+   "season": 6,
+   "episode": 1,
+   "durationSec": 1373
+  },
+  {
+   "youtubeId": "FtjAd1sX9Ps",
+   "title": "Beaten Like A Burukenge - Mkurugenzi Minisodes 3 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 3,
+   "episode": 2,
+   "durationSec": 1292
+  },
+  {
+   "youtubeId": "iEeZBNnCtr8",
+   "title": "The Miracle Of Captain Tim - Headline Hitters Season 5 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2271
+  },
+  {
+   "youtubeId": "N63r9WGrfq0",
+   "title": "The Blackberry Detectives - Young & Stupid Season 5 Finale",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 1619
+  },
+  {
+   "youtubeId": "pkutd-vmC7I",
+   "title": "Framed For Pleasure - Mkurugenzi Minisodes Season 3 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1069
+  },
+  {
+   "youtubeId": "yi51Kcp6QX0",
+   "title": "Caught Pants Down - Young & Stupid 5 Ep 12",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 12,
+   "durationSec": 1727
+  },
+  {
+   "youtubeId": "Wm8cMeRjRhI",
+   "title": "The Case Of Billy Chemirmir - Mkurugenzi Minisodes Season 2 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 877
+  },
+  {
+   "youtubeId": "pnvtFGrnYPE",
+   "title": "A Nurse-ty Con game - Young & Stupid 5 Ep 11",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 11,
+   "durationSec": 1724
+  },
+  {
+   "youtubeId": "npmMIRc8PYI",
+   "title": "The Damned Waitress - Mkurugenzi Minisodes 2 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 12,
+   "durationSec": 952
+  },
+  {
+   "youtubeId": "RPE3a6CEnPk",
+   "title": "Rose The Ripper - Headline Hitters 5 Ep 11",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 11,
+   "durationSec": 2404
+  },
+  {
+   "youtubeId": "fw_9ko8u8Nw",
+   "title": "Campus Love - Young & Stupid 5 Ep 10",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 10,
+   "durationSec": 1933
+  },
+  {
+   "youtubeId": "ah9zvRoNXmI",
+   "title": "Best Coincidence Ever - Mkurugenzi Minisodes 2 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 11,
+   "durationSec": 1331
+  },
+  {
+   "youtubeId": "aouuIKFiitA",
+   "title": "Lost In The City - Mkurugenzi Minisodes 2 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 10,
+   "durationSec": 889
+  },
+  {
+   "youtubeId": "UunF_kkHQqY",
+   "title": "Disaster Ellis Park - Headline Hitters 5 Ep 10",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 10,
+   "durationSec": 1086
+  },
+  {
+   "youtubeId": "drAv6f2bUuc",
+   "title": "Saved From The Hangman - Young & Stupid 5 Ep 9",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 9,
+   "durationSec": 1556
+  },
+  {
+   "youtubeId": "gwcKG4ws918",
+   "title": "The Epitome Of Hope - Omyra Sanchez Headline Hitters 5 Ep 9",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 9,
+   "durationSec": 1911
+  },
+  {
+   "youtubeId": "4sxpi2HvipA",
+   "title": "Big Fish, Cracked Ribs, Behind Bars - Young & Stupid 5 Ep 8",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 8,
+   "durationSec": 2223
+  },
+  {
+   "youtubeId": "y0ab3hO-JSg",
+   "title": "Mkurugenzi Behind The Scenes",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 846
+  },
+  {
+   "youtubeId": "si-HzS64qmU",
+   "title": "The Stopwatch Gang - Headline Hitters 5 Ep 8",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 8,
+   "durationSec": 2610
+  },
+  {
+   "youtubeId": "WWnopkqmOoI",
+   "title": "My New Name Is… Kimani - Mkurugenzi Minisodes 2 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 9,
+   "durationSec": 790
+  },
+  {
+   "youtubeId": "xyms401HyXc",
+   "title": "From Grass To Grand Acres - Mkurugenzi Diastories Season Finale",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3619
+  },
+  {
+   "youtubeId": "C9USUywI4qM",
+   "title": "Philip Karanja and I team up to tell the story of how we almost died at RTI",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 56
+  },
+  {
+   "youtubeId": "Ail4nJB9MV4",
+   "title": "How Abel Mutua Ended Up At Tahidi High #shorts",
+   "show": "Shorts",
+   "season": null,
+   "episode": null,
+   "durationSec": 59
+  },
+  {
+   "youtubeId": "uPFRMFI2I28",
+   "title": "Suffering From The Myths Of A Disease - Mkurugenzi Minisodes 2 Ep 8.",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 8,
+   "durationSec": 762
+  },
+  {
+   "youtubeId": "m3LVwP-aseo",
+   "title": "Nothing Like A Mother’s Scam - Mkurugenzi Diastories Ep 12 .",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 12,
+   "durationSec": 1293
+  },
+  {
+   "youtubeId": "PxhDVFAPNxQ",
+   "title": "How To NOT Get A Loan in Kenya - Speed Date Ep 5",
+   "show": "Other Stories",
+   "season": null,
+   "episode": 5,
+   "durationSec": 1074
+  },
+  {
+   "youtubeId": "JZUl3hMtXBA",
+   "title": "Messing With The Real Househelps Of Qatar - Mkurugenzi Diastories Ep 11.",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 11,
+   "durationSec": 1395
+  },
+  {
+   "youtubeId": "Y-hpjKO0I-Q",
+   "title": "The Black Widow - Headline Hitters 5 Ep 7",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 7,
+   "durationSec": 2008
+  },
+  {
+   "youtubeId": "cDhY2t1iH6s",
+   "title": "For Papers Or For Worse Part 1 - Mkurugenzi Diastories Ep 10.",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 10,
+   "durationSec": 2349
+  },
+  {
+   "youtubeId": "g-tqilIQ_Pk",
+   "title": "16 Days Of Activism - Mkurugenzi Minisodes 2 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 7,
+   "durationSec": 1417
+  },
+  {
+   "youtubeId": "ClD_v804Bd4",
+   "title": "Project Invisible - Mkurugenzi Diastories Ep 9.",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 9,
+   "durationSec": 1423
+  },
+  {
+   "youtubeId": "EtY8iIrX0qg",
+   "title": "The Best Site Visit We’ve Ever Been On - Speed Date Session",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2597
+  },
+  {
+   "youtubeId": "WyRP48OvJnI",
+   "title": "The Academic Mafia Of Abu Dhabi Part 1 - Mkurugenzi Diastories Ep 8",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 8,
+   "durationSec": 2255
+  },
+  {
+   "youtubeId": "6JZZoAx0KPU",
+   "title": "Grand Theft Auto - Young And Stupid 5 Ep 7",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 7,
+   "durationSec": 2355
+  },
+  {
+   "youtubeId": "-2cxmBeLfWw",
+   "title": "The Power Of Resilience - Mkurugenzi Diastories Ep 7",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 7,
+   "durationSec": 1596
+  },
+  {
+   "youtubeId": "O1TVBrMf7Cw",
+   "title": "The Grand Visit - Speed Date Session 3",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3578
+  },
+  {
+   "youtubeId": "GNbkNsgxzMs",
+   "title": "Green Card To Red Flag - Mkurugenzi Diastories Ep 6",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 6,
+   "durationSec": 1755
+  },
+  {
+   "youtubeId": "FFRte61-BW0",
+   "title": "The Wedding Inferno - Mkurugenzi Minisodes 2 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 6,
+   "durationSec": 1439
+  },
+  {
+   "youtubeId": "Cn1ImOJhFIw",
+   "title": "Return Tickets - Mkurugenzi Diastories Ep 5",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 5,
+   "durationSec": 1596
+  },
+  {
+   "youtubeId": "p9LT3USRFqw",
+   "title": "A Kenyan In Distress - Fredrick Omondi",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1025
+  },
+  {
+   "youtubeId": "wkhyXy3mb2w",
+   "title": "A Cry For Help - Fredrick Omondi - Mkurugenzi Diastories Ep 4",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 4,
+   "durationSec": 1971
+  },
+  {
+   "youtubeId": "ld0YOp2yBr0",
+   "title": "Cheruiyot The Cop Killer - Headline Hitters 5 Ep 6",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 6,
+   "durationSec": 1591
+  },
+  {
+   "youtubeId": "YXlOp-cCtmk",
+   "title": "Angels In Disguise (Keziah Mungai) - Minisode X-tra",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1879
+  },
+  {
+   "youtubeId": "L5p5QJrfnKg",
+   "title": "Landless From Berlin - Mkurugenzi Diastories Ep 3",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 3,
+   "durationSec": 1345
+  },
+  {
+   "youtubeId": "K_A6BOnHOgc",
+   "title": "Minisode X-tra - (Power Of Will - Omondi Ochuka)",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 2703
+  },
+  {
+   "youtubeId": "c9uFV6JGYU0",
+   "title": "Weeding Out A Peddler - Mkurugenzi Diastories Ep 2",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": 2,
+   "durationSec": 1807
+  },
+  {
+   "youtubeId": "P3-DMPbikOI",
+   "title": "Mkurugenzi Diastories - Season Premiere.",
+   "show": "Mkurugenzi Diastories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1413
+  },
+  {
+   "youtubeId": "tjPPudZPLPM",
+   "title": "Robbery Without Violence - Mkurugenzi Minisodes 2 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 5,
+   "durationSec": 1336
+  },
+  {
+   "youtubeId": "0upeWjTthgw",
+   "title": "Polycarp Samora Amuyunzu - (His Final 72 Hours)",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1506
+  },
+  {
+   "youtubeId": "jqAzl-1PHRY",
+   "title": "A Victim Of The Death-Row - Headline Hitters 5 Ep 5",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 5,
+   "durationSec": 1560
+  },
+  {
+   "youtubeId": "YpfCsScGS_Q",
+   "title": "The Search For Polycarp - Mkurugenzi Minisodes 2 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 4,
+   "durationSec": 995
+  },
+  {
+   "youtubeId": "TeUfQ7SZ8Yk",
+   "title": "The Waco, Texas Massacre - Young & Stupid 5 Ep 6",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 6,
+   "durationSec": 2061
+  },
+  {
+   "youtubeId": "4TLNuW5BKGk",
+   "title": "Gambling With Lives - Mkurugenzi Minisodes 2 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 3,
+   "durationSec": 854
+  },
+  {
+   "youtubeId": "NwI6qE6kOAw",
+   "title": "CCB CAST PILLOW TALK (ISABOKE X VIKE)",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2690
+  },
+  {
+   "youtubeId": "Dj8FIAeLPrM",
+   "title": "Relegated By Greed - Young & Stupid 5 Ep 5",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 5,
+   "durationSec": 2555
+  },
+  {
+   "youtubeId": "SlLTQVc3Uzk",
+   "title": "Surviving A Double Assassination - Mkurugenzi Minisodes 2 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 2,
+   "episode": 2,
+   "durationSec": 1095
+  },
+  {
+   "youtubeId": "sLlxhXWBbkg",
+   "title": "Back From The Dead - Mkurugenzi Minisodes Season 2 Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 902
+  },
+  {
+   "youtubeId": "CWGiTgKlRYs",
+   "title": "American Nightmare In Somalia - Headline Hitters 5 Ep 4",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 4,
+   "durationSec": 2177
+  },
+  {
+   "youtubeId": "prcejWDDudY",
+   "title": "Click Click Bang - (Actors Pillow Talk- BASIL X AMINA X SHIGWAN)",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3149
+  },
+  {
+   "youtubeId": "p2qmQYciIhI",
+   "title": "Saved By The Hitman - Young & Stupid 5 Ep 4",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 4,
+   "durationSec": 1947
+  },
+  {
+   "youtubeId": "8IZlqNu_auE",
+   "title": "Crash Landing - Mkurugenzi Minisodes Season 1 Finale",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 736
+  },
+  {
+   "youtubeId": "rU2hzNzJ0Lc",
+   "title": "Unstoppable - Mkurugenzi Minisodes 1 Ep 12",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 12,
+   "durationSec": 1055
+  },
+  {
+   "youtubeId": "2nVkx3s_Ihs",
+   "title": "Buried Alive - Chile Mine Rescue - Headline Hitters 5 Ep 3",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 3,
+   "durationSec": 2388
+  },
+  {
+   "youtubeId": "Y9_UO0fqsVU",
+   "title": "2nd Chance - Mkurugenzi Minisodes 1 Ep 11",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 11,
+   "durationSec": 1093
+  },
+  {
+   "youtubeId": "DMiVA-36PYA",
+   "title": "The Killer Prank - Young & Stupid 5 Ep 3",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 3,
+   "durationSec": 2426
+  },
+  {
+   "youtubeId": "qI89-OgNuIw",
+   "title": "Gladbeck Hostage Situation - Headline Hitters 5 Ep 2",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 2,
+   "durationSec": 2391
+  },
+  {
+   "youtubeId": "i43WIgPMars",
+   "title": "Stray Bullet - Young & Stupid 5 Ep 2",
+   "show": "Young and Stupid",
+   "season": 5,
+   "episode": 2,
+   "durationSec": 1832
+  },
+  {
+   "youtubeId": "kEMUV6SUnQ0",
+   "title": "Wasted - Mkurugenzi Minisodes 1 Ep 10",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 10,
+   "durationSec": 937
+  },
+  {
+   "youtubeId": "5BKyVzm4PkM",
+   "title": "Young, Rich & Afri-Scams - Headline Hitters 5 Ep 1",
+   "show": "Headline Hitters",
+   "season": 5,
+   "episode": 1,
+   "durationSec": 1681
+  },
+  {
+   "youtubeId": "7JfujNPS7gI",
+   "title": "Click Click Bang - The Process Before The Process.",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1535
+  },
+  {
+   "youtubeId": "zzRT0xbijSQ",
+   "title": "Click Click Bang Official Trailer",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 103
+  },
+  {
+   "youtubeId": "1ULjjn1J3X8",
+   "title": "Murder Next Door - Mkurugenzi Minisodes 1 Ep 9",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 9,
+   "durationSec": 1148
+  },
+  {
+   "youtubeId": "2Nr9r7t_rkI",
+   "title": "God's Son - Mkurugenzi Minisodes 1 Ep 8",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 8,
+   "durationSec": 1519
+  },
+  {
+   "youtubeId": "9gd-uRFC8QQ",
+   "title": "High School Horror - Columbine School Shooting - Headline Hitters Season 4 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 1740
+  },
+  {
+   "youtubeId": "iVhI5GeZoWE",
+   "title": "Child Murder By The State - Mkurugenzi Minisodes 1 Ep 7",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 7,
+   "durationSec": 674
+  },
+  {
+   "youtubeId": "dDlEIICwTPs",
+   "title": "High On Heroines Finale - (Jessica McClure - Miracle Baby)",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 1881
+  },
+  {
+   "youtubeId": "Y5JFzwIA5IM",
+   "title": "A One In A Million Mishap - Mkurugenzi Minisodes 1 Ep 6",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 6,
+   "durationSec": 772
+  },
+  {
+   "youtubeId": "3hwPIB1z6yU",
+   "title": "Fall Of The Gambler - Headline Hitters 4 Ep 12",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 12,
+   "durationSec": 1764
+  },
+  {
+   "youtubeId": "Xjxu2HXr4dw",
+   "title": "Man Down - Mkurugenzi Minisodes 1 Ep 5",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 5,
+   "durationSec": 1130
+  },
+  {
+   "youtubeId": "-TCE2oAQ2TU",
+   "title": "Elevated To The 40th Day - Mkurugenzi Minisodes 1 Ep 4",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 4,
+   "durationSec": 865
+  },
+  {
+   "youtubeId": "Ra0oFsoRHGk",
+   "title": "KQ Flight 507 - Gone in 90 Seconds - Headline Hitters 4 Ep 11",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 11,
+   "durationSec": 2204
+  },
+  {
+   "youtubeId": "UpwFHY7d4Iw",
+   "title": "Driving The Departed - Mkurugenzi Minisodes 1 Ep 3",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 3,
+   "durationSec": 867
+  },
+  {
+   "youtubeId": "g8WaUyqLr5U",
+   "title": "High On Heroines 1 Ep 10 - (Miriam Rodrigues - The Mexican Avenger)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 10,
+   "durationSec": 2753
+  },
+  {
+   "youtubeId": "AtGNTSdAIZI",
+   "title": "Saved By Poison - Mkurugenzi Minisodes 1 Ep 2",
+   "show": "Mkurugenzi Minisodes",
+   "season": 1,
+   "episode": 2,
+   "durationSec": 446
+  },
+  {
+   "youtubeId": "Q7pJZOYnQoY",
+   "title": "Thriller In Manila - Headline Hitters 4 Ep 10",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 10,
+   "durationSec": 2998
+  },
+  {
+   "youtubeId": "QjBvyEFLuOo",
+   "title": "The Innocent Trafficker - Mkurugenzi Minisodes Season Premiere",
+   "show": "Mkurugenzi Minisodes",
+   "season": null,
+   "episode": null,
+   "durationSec": 1058
+  },
+  {
+   "youtubeId": "ljtcQAk7G9I",
+   "title": "High On Heroines 1 Ep 9- (Eve Kibare - Lights Out)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 9,
+   "durationSec": 2652
+  },
+  {
+   "youtubeId": "6Gi4s0DsFDM",
+   "title": "Iran Airlines- Mistaken Identity - Headline Hitters 4 Ep 9",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 9,
+   "durationSec": 2395
+  },
+  {
+   "youtubeId": "PgwdJFIc0Y8",
+   "title": "Vesna Vulovic - Miraculous Fall From The Sky : High on Heroines 1 Ep 8",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 8,
+   "durationSec": 1446
+  },
+  {
+   "youtubeId": "ElSHkKM5xJc",
+   "title": "Carlos Ghosn, The Fugitive CEO - Headline Hitters 4 Ep 8",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 8,
+   "durationSec": 1949
+  },
+  {
+   "youtubeId": "p0Awsbx0eV8",
+   "title": "High On Heroines 1 Ep 7 - (Ellen Johnson & The Women Of Liberia)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 7,
+   "durationSec": 2700
+  },
+  {
+   "youtubeId": "tc25VW52A5Q",
+   "title": "Thai Cave Rescue - Headline Hitters 4 Ep 7",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 7,
+   "durationSec": 2714
+  },
+  {
+   "youtubeId": "mo34NBWNQ0M",
+   "title": "High On Heroines 1 Ep 6 - (Real Life Avengers & Wonder Woman)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 6,
+   "durationSec": 2663
+  },
+  {
+   "youtubeId": "T26LTo2tOVM",
+   "title": "The Senegalese Captain Marvel of The Rwandan Genocide -- Headline Hitters 4 Ep 6",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 6,
+   "durationSec": 2813
+  },
+  {
+   "youtubeId": "DuaTBzqdI1k",
+   "title": "High On Heroines 1 Ep 5 - Bertha B (The Mother Of The Motorwagen)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 5,
+   "durationSec": 2093
+  },
+  {
+   "youtubeId": "IIdw4OpaRmk",
+   "title": "2 Airports, 2 Robberies, No weapons - Headline Hitters 4 Ep 5",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 5,
+   "durationSec": 2685
+  },
+  {
+   "youtubeId": "p8p0QpdkSUk",
+   "title": "High On Heroines 1 Ep4 - Wangari Maathai (The Legacy Of A Forester)",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 4,
+   "durationSec": 2568
+  },
+  {
+   "youtubeId": "q-HAD08JXNs",
+   "title": "Three Men Army || Headline Hitters 4 Ep 4",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 4,
+   "durationSec": 3029
+  },
+  {
+   "youtubeId": "Q4lT2XkQwho",
+   "title": "Youngest African President Ever - Headline Hitters 4 Ep 3",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 3,
+   "durationSec": 1561
+  },
+  {
+   "youtubeId": "Cg66HxeDyYg",
+   "title": "A Child Of The Holocaust (Tova Friedman) - High On Heroines 1 Ep 3",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 3,
+   "durationSec": 3317
+  },
+  {
+   "youtubeId": "WWsSxnyeKys",
+   "title": "The Barefoot Bandit - Headline Hitters 4 Ep 2",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 2,
+   "durationSec": 3084
+  },
+  {
+   "youtubeId": "j_lSDOl1_3w",
+   "title": "The Coconut Girl (Sandra Laing ) - The Race War - High on Heroines 1 Ep2",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 2,
+   "durationSec": 2374
+  },
+  {
+   "youtubeId": "p9JrB-M834s",
+   "title": "The Heroes Of United Airlines Flight 93 - Headline Hitters 4 Ep 1",
+   "show": "Headline Hitters",
+   "season": 4,
+   "episode": 1,
+   "durationSec": 3068
+  },
+  {
+   "youtubeId": "KrWKusLd-mc",
+   "title": "Prince Charming From Hell - High On Heroines 1 Ep1",
+   "show": "Other Stories",
+   "season": 1,
+   "episode": 1,
+   "durationSec": 2540
+  },
+  {
+   "youtubeId": "BLKd5N_YQlE",
+   "title": "The Risky Affair Of making #GLL THE FILM",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 3449
+  },
+  {
+   "youtubeId": "PGxsKLoBDVY",
+   "title": "Operation Odessa - Headline Hitters Season 3 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 3088
+  },
+  {
+   "youtubeId": "r4Fvosstqcg",
+   "title": "Merc’d For Destruction - Young & Stupid Season 4 Finale",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 1740
+  },
+  {
+   "youtubeId": "-gMy4Xf0uvw",
+   "title": "#GLLFilm Status Report",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 2388
+  },
+  {
+   "youtubeId": "Lb0hXXUkCQ8",
+   "title": "Trading On Dangerous Grounds - Headline Hitters 3 Ep 10",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 10,
+   "durationSec": 1495
+  },
+  {
+   "youtubeId": "C53N3SdD4Cs",
+   "title": "The Underage Mule - Young & Stupid 4 Ep 10",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 10,
+   "durationSec": 2079
+  },
+  {
+   "youtubeId": "gS_slpk3wQw",
+   "title": "Two Countries, One Siege - Headline Hitters 3 Ep 9",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 9,
+   "durationSec": 3000
+  },
+  {
+   "youtubeId": "fIwG_xzZrnY",
+   "title": "S-Torching Down An Empire - Young & Stupid 4 Ep 9",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 9,
+   "durationSec": 3052
+  },
+  {
+   "youtubeId": "9VXRrA8v8Zk",
+   "title": "The Aquanaut - Trapped Underwater - Headline Hitters 3 Ep 8",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 8,
+   "durationSec": 1995
+  },
+  {
+   "youtubeId": "rug39pzqfT8",
+   "title": "Between a Fire And A Hot Place - Young & Stupid 4 Ep 8",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 8,
+   "durationSec": 1655
+  },
+  {
+   "youtubeId": "GB2NQt5FkXg",
+   "title": "Pilot Suicide - Headline Hitters 3 Ep 7",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 7,
+   "durationSec": 1373
+  },
+  {
+   "youtubeId": "5353LH05FZg",
+   "title": "A Truck Ride and A Truckload of Beatings - Young & Stupid 4 Ep 7",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 7,
+   "durationSec": 1342
+  },
+  {
+   "youtubeId": "9Vpa8OGE7U4",
+   "title": "Tribute To A Fallen Soldier - Headline Hitters 3 Ep 6",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 6,
+   "durationSec": 2106
+  },
+  {
+   "youtubeId": "K6h7tH4yT0M",
+   "title": "Ku-Tender Na Kutendwa - Young & Stupid 4 Ep 6",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 6,
+   "durationSec": 1918
+  },
+  {
+   "youtubeId": "SD6LBOExe0Y",
+   "title": "1982 - The Six Hour Take Over - Headline Hitters 3 Ep 5",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 5,
+   "durationSec": 2959
+  },
+  {
+   "youtubeId": "b1dSPNnF_pI",
+   "title": "Excavated by Greed - Young & Stupid 4 Ep 5",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 5,
+   "durationSec": 1622
+  },
+  {
+   "youtubeId": "VBgMPmVo0U8",
+   "title": "Hudson River Miracle - Headline Hitters 3 Ep 4",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 4,
+   "durationSec": 1718
+  },
+  {
+   "youtubeId": "unWi-07oY-A",
+   "title": "From Push To Gone - Young & Stupid 4 Ep 4",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 4,
+   "durationSec": 1337
+  },
+  {
+   "youtubeId": "mib7V_e_Z3Y",
+   "title": "Love At First Heist - Headline Hitters 3 Ep 3",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 3,
+   "durationSec": 2269
+  },
+  {
+   "youtubeId": "yDm9N7PkV0A",
+   "title": "Nauru - Paradise Lost - Young & Stupid 4 Ep 3",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 3,
+   "durationSec": 1599
+  },
+  {
+   "youtubeId": "TvTFeHnSl8M",
+   "title": "Samurai Jack-ers - Headline Hitters 3 Ep 2",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 2,
+   "durationSec": 1677
+  },
+  {
+   "youtubeId": "5wElp_1RZLY",
+   "title": "Next Level Nairobbery - Young & Stupid 4 Ep 2",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 2,
+   "durationSec": 1814
+  },
+  {
+   "youtubeId": "_opMxRHaaaQ",
+   "title": "Colombia’s Other Escobar - Headline Hitters 3 Ep 1",
+   "show": "Headline Hitters",
+   "season": 3,
+   "episode": 1,
+   "durationSec": 2672
+  },
+  {
+   "youtubeId": "qw1sz66_rXI",
+   "title": "Ass-ets & Lie-abilities - Young & Stupid 4 Ep 1",
+   "show": "Young and Stupid",
+   "season": 4,
+   "episode": 1,
+   "durationSec": 2091
+  },
+  {
+   "youtubeId": "3oyXu02UhMY",
+   "title": "The Wakurugenzi Effect - (First Anniversary Documentary)",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 4579
+  },
+  {
+   "youtubeId": "J4BSq4OalU0",
+   "title": "The Njoro 8 (Casualteens ) - Headline Hitters Season 2 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 2307
+  },
+  {
+   "youtubeId": "ha7-eve6j20",
+   "title": "The Westside Boyz - Young & Stupid 3 Ep12",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 12,
+   "durationSec": 1998
+  },
+  {
+   "youtubeId": "uY0W5D8gr2M",
+   "title": "Mid-Air Collision - Headline Hitters 2 Ep 11",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 11,
+   "durationSec": 2281
+  },
+  {
+   "youtubeId": "Nki1stbv9cY",
+   "title": "The Italian Job - Young & Stupid Season 3 Finale",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 1533
+  },
+  {
+   "youtubeId": "MJGOonvxJpI",
+   "title": "Sole Survivor - Headline Hitters 2 Ep 10",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 10,
+   "durationSec": 1844
+  },
+  {
+   "youtubeId": "cwAQ7Q22O5w",
+   "title": "Thrice Bitten Still Not Shy - Young & Stupid 3 Ep 10",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 10,
+   "durationSec": 1758
+  },
+  {
+   "youtubeId": "rOfQeXqqz-8",
+   "title": "Cash At The End Of The Tunnel - Headline Hitters 2 Ep 9",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 9,
+   "durationSec": 1846
+  },
+  {
+   "youtubeId": "o5kj64k-lsE",
+   "title": "Cougar Town - Young & Stupid 3 Ep 9",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 9,
+   "durationSec": 1358
+  },
+  {
+   "youtubeId": "SqlmtjILDSE",
+   "title": "The High Incident Bandits - Headline Hitters 2 Ep 8",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 8,
+   "durationSec": 2139
+  },
+  {
+   "youtubeId": "oexXjqZxWFE",
+   "title": "Law and Dis-order - Young & Stupid 3 Ep 8",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 8,
+   "durationSec": 1431
+  },
+  {
+   "youtubeId": "r9-_MF0mJRo",
+   "title": "Silencing A Statesman - J.M. Kariuki - Headline Hitters 2 Ep 7",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 7,
+   "durationSec": 2066
+  },
+  {
+   "youtubeId": "tjdyF_PWOHc",
+   "title": "Raundi mwenda - Young & Stupid 3 Ep 7",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 7,
+   "durationSec": 1596
+  },
+  {
+   "youtubeId": "Jq5eRcu35PA",
+   "title": "Bad Beer-ttitudes - Headline Hitters 2 Ep 6 #DrinkIQ #PaidPartnershipWithDiageo",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 6,
+   "durationSec": 1670
+  },
+  {
+   "youtubeId": "HDniq0nnVuw",
+   "title": "Hog Wash - Young & Stupid 3 Ep 6",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 6,
+   "durationSec": 1479
+  },
+  {
+   "youtubeId": "6zPg9Uf5hqk",
+   "title": "Garissa College Attack - Headline Hitters 2 Ep 5",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 5,
+   "durationSec": 1860
+  },
+  {
+   "youtubeId": "rL5nKGIpEMs",
+   "title": "Sema Car-meumana - Young & Stupid 3 Ep 5",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 5,
+   "durationSec": 1946
+  },
+  {
+   "youtubeId": "OZ87Q5v3keA",
+   "title": "Drink IQ - Headline Hitters 2 Ep 4 - #DrinkIQ #ResponsibleDrinking #PaidPartnershipWithDiageo",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 4,
+   "durationSec": 1684
+  },
+  {
+   "youtubeId": "cPT4bb4sbCo",
+   "title": "The Airport Purchase - Young & Stupid 3 Ep 4",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 4,
+   "durationSec": 1726
+  },
+  {
+   "youtubeId": "8BnQkdXTRpg",
+   "title": "Titanic (The Key Error) - Headline Hitters 2 Ep 3",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 3,
+   "durationSec": 1557
+  },
+  {
+   "youtubeId": "ebwK4hcZBjI",
+   "title": "Kumbe ni Under 18 - Young & Stupid 3 Ep 3",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 3,
+   "durationSec": 1152
+  },
+  {
+   "youtubeId": "-8r13dJV_78",
+   "title": "Kaya Bombo Massacre - Headline Hitters 2 Ep 2",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 2,
+   "durationSec": 1088
+  },
+  {
+   "youtubeId": "iMnfdAybPOo",
+   "title": "Dumb-sel In Distress - Young & Stupid 3 Ep 2",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 2,
+   "durationSec": 2109
+  },
+  {
+   "youtubeId": "OXgaNvquoDw",
+   "title": "A Jumbo Disaster - Headline Hitters 2 Ep 1",
+   "show": "Headline Hitters",
+   "season": 2,
+   "episode": 1,
+   "durationSec": 1812
+  },
+  {
+   "youtubeId": "pdc1kL8If3w",
+   "title": "A Messi Wedding - Young & Stupid 3 Ep 1",
+   "show": "Young and Stupid",
+   "season": 3,
+   "episode": 1,
+   "durationSec": 1791
+  },
+  {
+   "youtubeId": "2SZ569WIDnA",
+   "title": "The Upright Man - Headline Hitters Season 1 Finale",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 1707
+  },
+  {
+   "youtubeId": "xjqf_q7aTv8",
+   "title": "Jahmby’s Fayah Story - Celebrity First Encounters SN 2 Finale",
+   "show": "Celebrity First Encounters",
+   "season": null,
+   "episode": null,
+   "durationSec": 5157
+  },
+  {
+   "youtubeId": "vm41pthDZNs",
+   "title": "Sole Survivor Policy - Headline Hitters 1 Ep 12",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 12,
+   "durationSec": 1908
+  },
+  {
+   "youtubeId": "Ul4lmilOKoI",
+   "title": "Doom In The Dorm - Headline Hitters 1 Ep 11",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 11,
+   "durationSec": 1567
+  },
+  {
+   "youtubeId": "N-lAais8HaU",
+   "title": "Special episode - Celebrity First Encounters 2 Ep 10",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 10,
+   "durationSec": 2174
+  },
+  {
+   "youtubeId": "XhxkdsBHXJk",
+   "title": "The Skyjacker - Headline Hitters 1 Ep 10",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 10,
+   "durationSec": 2032
+  },
+  {
+   "youtubeId": "KIpzrzryepg",
+   "title": "BENSOUL - Celebrity First Encounters 2 Ep 9",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 9,
+   "durationSec": 1257
+  },
+  {
+   "youtubeId": "KhJzzTV4HAM",
+   "title": "Johnte - Stories Of My Life (Bonus Episode )",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": null,
+   "durationSec": 1500
+  },
+  {
+   "youtubeId": "Z4H8dgRiqJA",
+   "title": "9 Lives of 6 Camera Mo - Headline Hitters 1 Ep 9",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 9,
+   "durationSec": 2267
+  },
+  {
+   "youtubeId": "q_a05G57-Ds",
+   "title": "EKO DYDDA - Celebrity First Encounters 2 Ep 8",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 8,
+   "durationSec": 1992
+  },
+  {
+   "youtubeId": "oXaU83foh3o",
+   "title": "Gunning The Gunner - Headline Hitters 1 Ep 8",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 8,
+   "durationSec": 1546
+  },
+  {
+   "youtubeId": "jwzTz-XehX0",
+   "title": "KHALIGRAPH JONES - Celebrity First Encounters 2 Ep 7",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 7,
+   "durationSec": 1295
+  },
+  {
+   "youtubeId": "kmV6P7Jn3-M",
+   "title": "Secret Soldiers Of The State - Headline Hitters 1 Ep 7",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 7,
+   "durationSec": 1634
+  },
+  {
+   "youtubeId": "J-A-J3SDv3I",
+   "title": "FENA GITU - Celebrity First Encounters 2 Ep 6",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 6,
+   "durationSec": 1255
+  },
+  {
+   "youtubeId": "_keaUY45bx4",
+   "title": "West Gate Attack - Headline Hitters 1 Ep 6",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 6,
+   "durationSec": 1502
+  },
+  {
+   "youtubeId": "AzeHviKn5Xc",
+   "title": "KING KAKA - Celebrity First Encounters 2 Ep 5",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 5,
+   "durationSec": 1579
+  },
+  {
+   "youtubeId": "iAY_MYQJ9fA",
+   "title": "Ghost Plane - Headline Hitters 1 Ep 5",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 5,
+   "durationSec": 1215
+  },
+  {
+   "youtubeId": "VhvQWqE3fG4",
+   "title": "Nameless - Celebrity First Encounters 2 Ep 4",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 4,
+   "durationSec": 1314
+  },
+  {
+   "youtubeId": "JR8fURWsQBI",
+   "title": "Sunken Dreams - Headline Hitters 1 Ep 4",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 4,
+   "durationSec": 1491
+  },
+  {
+   "youtubeId": "9odZfTGnv7I",
+   "title": "BIGPIN - Celeb First Encounters 2 Ep 3.",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 3,
+   "durationSec": 1635
+  },
+  {
+   "youtubeId": "BlGjbkkp7-Y",
+   "title": "Rebelling The Rebels - Headline Hitters 1 Ep 3",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 3,
+   "durationSec": 1834
+  },
+  {
+   "youtubeId": "XTUx2JBeD8M",
+   "title": "TRUPHENA - Celeb First Encounters 2 Ep 2",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 2,
+   "durationSec": 2113
+  },
+  {
+   "youtubeId": "tO9xx9LlPfY",
+   "title": "Robbery Without Violence - Headline Hitters 1 Ep 2",
+   "show": "Headline Hitters",
+   "season": 1,
+   "episode": 2,
+   "durationSec": 1563
+  },
+  {
+   "youtubeId": "0J4FFxYYR6c",
+   "title": "OTILE BROWN - Celeb First Encounters 2 Ep 1",
+   "show": "Celebrity First Encounters",
+   "season": 2,
+   "episode": 1,
+   "durationSec": 1522
+  },
+  {
+   "youtubeId": "_dnEGicRkSw",
+   "title": "The Boy Is Back !! - Headline Hitters Intro Episode",
+   "show": "Headline Hitters",
+   "season": null,
+   "episode": null,
+   "durationSec": 1356
+  },
+  {
+   "youtubeId": "Ff6OwoLYeN8",
+   "title": "Storyteller Extraordinaire.",
+   "show": "Other Stories",
+   "season": null,
+   "episode": null,
+   "durationSec": 64
+  },
+  {
+   "youtubeId": "RID6mrjlb_Q",
+   "title": "9. Beginning Of The Next Chapter [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 5089
+  },
+  {
+   "youtubeId": "P2EKFCIwLVc",
+   "title": "8. Winnings & Losses [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 3622
+  },
+  {
+   "youtubeId": "t2RfAcqaRCk",
+   "title": "7. The Story of The Real Househelps of Kawangware. [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 4579
+  },
+  {
+   "youtubeId": "LyObliMQpFA",
+   "title": "6. It’s Definitely A Laughing Matter. [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 4203
+  },
+  {
+   "youtubeId": "UoZuGZa4A30",
+   "title": "5. Exit Television, Enter Government. [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 3386
+  },
+  {
+   "youtubeId": "13N6-EahUcc",
+   "title": "4. You Win Some, You Lose Some [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 4527
+  },
+  {
+   "youtubeId": "vG4ub6-YfxA",
+   "title": "3. Stepping Onto Stage For The First Time [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 3767
+  },
+  {
+   "youtubeId": "huAAqEMHly8",
+   "title": "2. The Story Continues [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 4397
+  },
+  {
+   "youtubeId": "9BXMu7UG2e0",
+   "title": "1. The Story Begins [The Play House]",
+   "show": "The Play House",
+   "season": null,
+   "episode": null,
+   "durationSec": 2708
+  },
+  {
+   "youtubeId": "5IdkZK0sRV8",
+   "title": "Phil-It Again In Your Heart and Soul (Part 2) - Young & Stupid 2 Ep 13",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 13,
+   "durationSec": 2567
+  },
+  {
+   "youtubeId": "TNOhtEH2vjM",
+   "title": "Phil-It Again In Your Heart and Soul (Part 1) - Young & Stupid 2 Ep 12",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 12,
+   "durationSec": 2720
+  },
+  {
+   "youtubeId": "Jv3cGKiTWOU",
+   "title": "My WWE Mother - Stories Of My Life Ep 12",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 12,
+   "durationSec": 1256
+  },
+  {
+   "youtubeId": "xUBTNOWK7NQ",
+   "title": "Mapain-zi Hatari - Young & Stupid Season 2 Finale",
+   "show": "Young and Stupid",
+   "season": null,
+   "episode": null,
+   "durationSec": 2223
+  },
+  {
+   "youtubeId": "SXFSxaSRyVQ",
+   "title": "Another Burner Boy Producshizzle - Stories Of My Life Ep 11",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 11,
+   "durationSec": 1591
+  },
+  {
+   "youtubeId": "_uJUtciRPww",
+   "title": "Ni Bahati Tena - Young & Stupid 2 Ep 10",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 10,
+   "durationSec": 1998
+  },
+  {
+   "youtubeId": "PcT-9TIs15I",
+   "title": "Defence-Mechanism with Njugush - Stories Of My Life Ep 10",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 10,
+   "durationSec": 2643
+  },
+  {
+   "youtubeId": "e7KyN-zgbEA",
+   "title": "Adventures Of Eastlands - Young & Stupid 2 Ep 9",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 9,
+   "durationSec": 1390
+  },
+  {
+   "youtubeId": "JKsrbCke7FM",
+   "title": "Philit In Your Heart - Stories Of My Life Ep 9",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 9,
+   "durationSec": 2763
+  },
+  {
+   "youtubeId": "nAlLO0EDaLk",
+   "title": "BlueTicks To Narco-Ticks - Young and Stupid 2 Ep 8",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 8,
+   "durationSec": 1343
+  },
+  {
+   "youtubeId": "mUtXgmpbFt4",
+   "title": "My Favorite Story - STORIES OF MY LIFE EPISODE 8",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 8,
+   "durationSec": 1727
+  },
+  {
+   "youtubeId": "yWjmtxTh-YY",
+   "title": "A Plate Of Blunders With A Side Of Shame - Young & Stupid 2 Ep 7",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 7,
+   "durationSec": 1106
+  },
+  {
+   "youtubeId": "mb1WfUtDB54",
+   "title": "High on Heroines - Stories Of My Life EP 7",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 7,
+   "durationSec": 1644
+  },
+  {
+   "youtubeId": "tkSfu4InUC8",
+   "title": "Hazards Of A Wingman - Young & Stupid 2 Ep 6",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 6,
+   "durationSec": 1475
+  },
+  {
+   "youtubeId": "yJ26CPfWk1E",
+   "title": "August 7th Heroes - Stories Of My Life Ep 6",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 6,
+   "durationSec": 1519
+  },
+  {
+   "youtubeId": "cyKEu0FfGeQ",
+   "title": "Click Click! Bang!!! Story - Young & Stupid 2 Ep 5",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 5,
+   "durationSec": 1734
+  },
+  {
+   "youtubeId": "9wmKjzf7Y6c",
+   "title": "The Top Comic Story - Stories Of My Life Ep 5",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 5,
+   "durationSec": 1988
+  },
+  {
+   "youtubeId": "Do9Qe3PaeUY",
+   "title": "WHY I QUIT DRINKING - Young & Stupid 2 Ep 4",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 4,
+   "durationSec": 1100
+  },
+  {
+   "youtubeId": "jhYNC8frRX4",
+   "title": "The Undertakers - Stories Of My Life Ep 4",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 4,
+   "durationSec": 914
+  },
+  {
+   "youtubeId": "mmPUwYTl-Wk",
+   "title": "Young & Extremely Stupid Kenyans - Young & Stupid 2 Ep 3",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 3,
+   "durationSec": 1464
+  },
+  {
+   "youtubeId": "mpczA9G_27Y",
+   "title": "The Burner Boys of RTI - OJ's Perspective (Part 2) - Young & Stupid 2 Ep 2",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 2,
+   "durationSec": 1563
+  },
+  {
+   "youtubeId": "uWJRZjn8j5k",
+   "title": "The Burner Boys of RTI - OJ's Perspective (Part 1) - Young & Stupid 2 Ep 1",
+   "show": "Young and Stupid",
+   "season": 2,
+   "episode": 1,
+   "durationSec": 2036
+  },
+  {
+   "youtubeId": "O1XKgGvsd6c",
+   "title": "KIBERA DEFENCE FORCES - Stories Of My Life Ep 3",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 3,
+   "durationSec": 1314
+  },
+  {
+   "youtubeId": "eqn7WNWPhh0",
+   "title": "NJUGUSH - Celeb First Encounters Season 1 Finale",
+   "show": "Celebrity First Encounters",
+   "season": null,
+   "episode": null,
+   "durationSec": 1679
+  },
+  {
+   "youtubeId": "CgO6594fdug",
+   "title": "Passenger 001 - Stories Of My Life Ep 2",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 2,
+   "durationSec": 1525
+  },
+  {
+   "youtubeId": "VXzQwM7kbas",
+   "title": "SIZE8 - Celeb First Encounters 1 Ep 11",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 11,
+   "durationSec": 1130
+  },
+  {
+   "youtubeId": "luyidLEChEs",
+   "title": "A Brush With Death - Stories Of My Life Ep 1",
+   "show": "Stories of My Life",
+   "season": null,
+   "episode": 1,
+   "durationSec": 1060
+  },
+  {
+   "youtubeId": "228bAI-DRTw",
+   "title": "CELESTINE NDINDA - Celeb First Encounters 1 Ep 10",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 10,
+   "durationSec": 1299
+  },
+  {
+   "youtubeId": "x65NYD9rP3k",
+   "title": "WINNIE RUBY - Celeb First Encounters 1 Ep 9",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 9,
+   "durationSec": 1389
+  },
+  {
+   "youtubeId": "SOM48kVioeI",
+   "title": "DJ MO - Celebrity First Encounters 1 Ep 8",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 8,
+   "durationSec": 1233
+  },
+  {
+   "youtubeId": "OzY6Qi4GxEM",
+   "title": "JOYCE MAINA - Celeb First Encounters 1 Ep 7",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 7,
+   "durationSec": 1334
+  },
+  {
+   "youtubeId": "VpAVDQlzCbo",
+   "title": "Cash Money Blunder (C.M.B) - Young & Stupid 1 Ep 12",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 12,
+   "durationSec": 1611
+  },
+  {
+   "youtubeId": "iNAlcNHNsrg",
+   "title": "DNA KENYA - Celeb First Encounters 1 Ep 6",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 6,
+   "durationSec": 1556
+  },
+  {
+   "youtubeId": "3pVWi4uQXuY",
+   "title": "Muthaiga Grand Prix - Young & Stupid 1 Ep 11",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 11,
+   "durationSec": 1571
+  },
+  {
+   "youtubeId": "8KCgzN7-AEo",
+   "title": "KATE ACTRESS - Celeb First Encounters 1 Ep 5",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 5,
+   "durationSec": 1620
+  },
+  {
+   "youtubeId": "7w_LaXdPslU",
+   "title": "Anti Terror Squad - Young & Stupid 1 Ep 10",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 10,
+   "durationSec": 2045
+  },
+  {
+   "youtubeId": "B2XvliRXOmo",
+   "title": "YYCOMEDIAN - Celeb First Encounters 1 Ep 4",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 4,
+   "durationSec": 1921
+  },
+  {
+   "youtubeId": "k2nhbNTsDgQ",
+   "title": "DJ SHITI - Celeb First Encounters 1 Ep 3",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 3,
+   "durationSec": 581
+  },
+  {
+   "youtubeId": "bsvmrkCEsb0",
+   "title": "You May Now Miss The Fry - Young & Stupid 1 Ep 9",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 9,
+   "durationSec": 1370
+  },
+  {
+   "youtubeId": "7e9ladGeKTI",
+   "title": "NYASHINSKI - Celebrity First Encounters 1 Ep 2",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 2,
+   "durationSec": 718
+  },
+  {
+   "youtubeId": "Gyb9yww6Bok",
+   "title": "Tailor Messed To Perfection - Young & Stupid 1 Ep 8",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 8,
+   "durationSec": 1386
+  },
+  {
+   "youtubeId": "HfWsne7VCxU",
+   "title": "Jua cali - Celeb First Encounters 1 Ep 1",
+   "show": "Celebrity First Encounters",
+   "season": 1,
+   "episode": 1,
+   "durationSec": 741
+  },
+  {
+   "youtubeId": "GSfC-bl4YzM",
+   "title": "One Way Ticket - Young & Stupid 1 Ep 7",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 7,
+   "durationSec": 1844
+  },
+  {
+   "youtubeId": "6pzfnTk72HI",
+   "title": "Annual Stone Throwing Festival - Young & Stupid 1 Ep 6",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 6,
+   "durationSec": 733
+  },
+  {
+   "youtubeId": "JGa1bdFz7kc",
+   "title": "Mothers' Day Edition - Young & Stupid 1 Ep 5",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 5,
+   "durationSec": 1323
+  },
+  {
+   "youtubeId": "8F3rXxPhwoY",
+   "title": "Robbed at Bible point - Young & Stupid 1 Ep 4",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 4,
+   "durationSec": 1008
+  },
+  {
+   "youtubeId": "a5XEyTBMXfA",
+   "title": "The Burner-Boys of RTI - Young & Stupid 1 Ep 3",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 3,
+   "durationSec": 863
+  },
+  {
+   "youtubeId": "pWxWEfe_694",
+   "title": "A Psycho-Fan - Young & Stupid 1 Ep 2",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 2,
+   "durationSec": 853
+  },
+  {
+   "youtubeId": "5RMUqZBxP48",
+   "title": "Crushing on a Popstar - Young & Stupid 1 Ep 1",
+   "show": "Young and Stupid",
+   "season": 1,
+   "episode": 1,
+   "durationSec": 861
+  },
+  {
+   "youtubeId": "lAI0QRtxqVE",
+   "title": "A Milli, A Milli...",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 2450
+  },
+  {
+   "youtubeId": "yVZVpxCbGM8",
+   "title": "Our Little Catch Up",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 2483
+  },
+  {
+   "youtubeId": "o86LtgK5MVE",
+   "title": "THE LIFE HACK - Securing Your Future - Part 2",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 2884
+  },
+  {
+   "youtubeId": "2p4iXAXVs38",
+   "title": "THE LIFE HACK - Securing Your Future - Part 1.",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 1907
+  },
+  {
+   "youtubeId": "Qb0tcCsfcZc",
+   "title": "A Grand Little Lie Premier- Red Carpet Live #GLL #Philmambassadors #Wakurugenzi",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 4614
+  },
+  {
+   "youtubeId": "Un09HCaOQGs",
+   "title": "A Grand Little Lie Premier- Red Carpet Live #GLL #Philmambassadors #Wakurugenzi",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 2183
+  },
+  {
+   "youtubeId": "W61J_meErgk",
+   "title": "A Grand Little Lie Teaser Live #GLL #PhilmAmbassadors #Wakurugenzi",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 1618
+  },
+  {
+   "youtubeId": "OxtFBDmd1CM",
+   "title": "Stories Of My Life - (First Meeting With Nairobi)",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 3890
+  },
+  {
+   "youtubeId": "ql7VXosg25c",
+   "title": "Stories Of My Life Ep 13 (How I Met This Mother) Live",
+   "show": "Live Streams",
+   "season": null,
+   "episode": 13,
+   "durationSec": 5111
+  },
+  {
+   "youtubeId": "KcCDXZzTEy4",
+   "title": "Young & Stupid Q&A",
+   "show": "Live Streams",
+   "season": null,
+   "episode": null,
+   "durationSec": 3958
+  }
+ ],
+ "podcast": {
+  "spotify": "",
+  "youtube": ""
+ },
+ "films": [
+  {
+   "title": "Click Click Bang",
+   "url": "https://www.philittv.com"
+  },
+  {
+   "title": "Grand Little Lie",
+   "url": "https://www.philittv.com"
+  },
+  {
+   "title": "Makosa Ni Yangu",
+   "url": "https://www.philittv.com",
+   "trailerYoutubeId": "yhi-c1fwK_M"
+  }
+ ],
+ "merch": {
+  "url": ""
+ },
+ "contact": {
+  "email": "",
+  "formUrl": ""
+ },
+ "featuredVideo": "lAI0QRtxqVE",
+ "announcements": [],
+ "stats": {
+  "youtubeSubscribers": 1080000,
+  "milestoneDate": "2026-06-24"
+ },
+ "shows": [
+  "Celebrity First Encounters",
+  "Headline Hitters",
+  "Live Streams",
+  "Mkurugenzi Diastories",
+  "Mkurugenzi Minisodes",
+  "Other Stories",
+  "Shorts",
+  "Stories of My Life",
+  "The Play House",
+  "Young and Stupid"
+ ]
 }

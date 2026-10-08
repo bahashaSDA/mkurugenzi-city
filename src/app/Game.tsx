@@ -7,6 +7,7 @@ import { Environment } from '../world/Environment';
 import { StreamedCell, WorldStreamer } from '../world/streaming';
 import { TestMap } from '../districts/testmap/TestMap';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
+import { Hub } from '../districts/hub/Hub';
 import { Player } from '../systems/player/Player';
 import { attachInput } from '../systems/input';
 import { PerfMonitor, PerfOverlay, perfStats } from '../perf/PerfMonitor';
@@ -17,6 +18,9 @@ import { TouchControls } from '../ui/TouchControls';
 
 const params = new URLSearchParams(location.search);
 const showPerf = import.meta.env.DEV || params.has('perf');
+// Dev/test aid: ?minimal keeps every collider but skips district rendering, so physics tests
+// run fast under software GL.
+const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
   (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame };
@@ -38,7 +42,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
     <div className="game-root">
       <Canvas
         dpr={dpr}
-        shadows={{ type: THREE.PCFSoftShadowMap }}
+        shadows={{ type: THREE.PCFShadowMap }}
         camera={{ fov: 62, near: 0.1, far: 2500, position: [0, 3, 14] }}
         gl={{ antialias: tier !== 'low', powerPreference: 'high-performance', stencil: false }}
         onCreated={({ gl }) => {
@@ -51,6 +55,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
           <Environment />
           <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60} paused={phase !== 'playing'}>
             <TestMap />
+            <Hub render={!minimal} />
             {/* The letters sit in the spawn cell; they unmount when it streams out. */}
             <StreamedCell x={0} z={0}>
               {/* Own boundary: streamed-in content must never suspend the whole scene. */}

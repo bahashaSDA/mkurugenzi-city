@@ -45,7 +45,9 @@ roof["no_collider"] = True  # covered by the kiosk box collider
 
 here = os.path.dirname(__file__)
 for script in ("generate_lods.py", "make_colliders.py"):
-    exec(compile(open(os.path.join(here, script)).read(), script, "exec"), {"__name__": "__main__", "__file__": script})
+    path = os.path.join(here, script)
+    exec(compile(open(path).read(), path, "exec"), {"__name__": "__main__", "__file__": path})
 
 sys.argv = [sys.argv[0], "--", "--district", "test", "--out", OUT]
-exec(compile(open(os.path.join(here, "export_district.py")).read(), "export_district.py", "exec"), {"__name__": "__main__"})
+exp = os.path.join(here, "export_district.py")
+exec(compile(open(exp).read(), exp, "exec"), {"__name__": "__main__", "__file__": exp})

@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "serve:phone": "vite build && vite preview --host --port 4173",
     "typecheck": "tsc --noEmit",
     "assets:optimize": "node tools/optimize-assets.mjs",
     "assets:audit": "node tools/collider-audit.mjs",
@@ -25,6 +26,7 @@
     "zustand": "5.0.15"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
     "@gltf-transform/core": "4.5.1",
     "@gltf-transform/extensions": "4.5.1",
     "@gltf-transform/functions": "4.5.1",

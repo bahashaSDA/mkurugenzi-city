@@ -79,44 +79,6 @@ export function tarmacTexture(): THREE.Texture {
   return tarmac;
 }
 
-let mabati: { map: THREE.Texture; normal: THREE.Texture } | null = null;
-/** Corrugated iron sheet, aged, with rust streaks. Corrugations run along V. */
-export function mabatiTextures() {
-  if (mabati) return mabati;
-  const size = 256;
-  const { c, ctx } = canvas(size);
-  const n = canvas(size);
-  const r = rng(3);
-  const ribs = 16;
-  for (let x = 0; x < size; x++) {
-    const phase = Math.sin((x / size) * ribs * Math.PI * 2);
-    const shade = 120 + phase * 18;
-    ctx.fillStyle = `rgb(${shade},${shade + 5},${shade + 8})`;
-    ctx.fillRect(x, 0, 1, size);
-    // normal map: slope of the sine
-    const slope = Math.cos((x / size) * ribs * Math.PI * 2);
-    const nx = Math.round(128 + slope * 90);
-    n.ctx.fillStyle = `rgb(${nx},128,255)`;
-    n.ctx.fillRect(x, 0, 1, size);
-  }
-  // rust streaks from the lower edge and nail lines
-  for (let i = 0; i < 40; i++) {
-    const x = r() * size;
-    const h = 30 + r() * 120;
-    const g = ctx.createLinearGradient(0, size, 0, size - h);
-    g.addColorStop(0, `rgba(138,75,35,${0.5 + r() * 0.4})`);
-    g.addColorStop(1, 'rgba(138,75,35,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(x, size - h, 3 + r() * 12, h);
-  }
-  for (let i = 0; i < 300; i++) {
-    ctx.fillStyle = `rgba(94,46,20,${r() * 0.5})`;
-    ctx.fillRect(r() * size, r() * size, 2 + r() * 5, 2 + r() * 5);
-  }
-  mabati = { map: finish(c, 1), normal: finish(n.c, 1, false) };
-  return mabati;
-}
-
 let kerb: THREE.Texture | null = null;
 /** Black-and-white painted kerb stripes (about 1 m per band). */
 export function kerbTexture(): THREE.Texture {

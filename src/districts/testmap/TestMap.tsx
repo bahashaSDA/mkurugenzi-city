@@ -1,9 +1,8 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
-import { CuboidCollider, CylinderCollider, HeightfieldCollider, RigidBody } from '@react-three/rapier';
+import { useMemo } from 'react';
+import { CuboidCollider, HeightfieldCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { WORLD_HALF } from '../../config/world';
 import { kerbTexture, murramTexture, tarmacTexture } from '../../world/proceduralTextures';
-import { ShackKit } from './ShackKit';
 
 // Phase 0 test map: verifies the controller against every collision case in SPEC 8.1 / 9
 // (walls, steps <= 0.35 m, steps > 0.35 m, 30° and 55° slopes, stairs, kerbs, poles).
@@ -127,46 +126,11 @@ function Stairs({ pos, steps = 10, rise = 0.17, run = 0.3, width = 2.4 }: { pos:
   );
 }
 
-function Poles() {
-  const positions = useMemo(() => {
-    const out: [number, number][] = [];
-    for (let z = 60; z >= -260; z -= 35) out.push([19.5, z]);
-    return out;
-  }, []);
-  const mesh = useRef<THREE.InstancedMesh>(null);
-  useLayoutEffect(() => {
-    const m = mesh.current;
-    if (!m) return;
-    const o = new THREE.Object3D();
-    positions.forEach(([x, z], i) => {
-      o.position.set(x, 4.5, z);
-      o.updateMatrix();
-      m.setMatrixAt(i, o.matrix);
-    });
-    m.instanceMatrix.needsUpdate = true;
-    m.computeBoundingSphere();
-  }, [positions]);
-  return (
-    <>
-      <instancedMesh ref={mesh} args={[undefined, undefined, positions.length]} castShadow>
-        <cylinderGeometry args={[0.1, 0.14, 9, 8]} />
-        <meshStandardMaterial color="#5b4636" roughness={1} />
-      </instancedMesh>
-      <RigidBody type="fixed" colliders={false}>
-        {positions.map(([x, z], i) => (
-          <CylinderCollider key={i} args={[4.5, 0.14]} position={[x, 4.5, z]} />
-        ))}
-      </RigidBody>
-    </>
-  );
-}
-
 export function TestMap() {
   return (
     <>
       <Ground />
       <Avenue />
-      <Poles />
 
       {/* Collision test course, west of spawn */}
       <group position={[-14, 0, 0]}>
@@ -180,9 +144,6 @@ export function TestMap() {
         <Ramp pos={[-18, 0, 0]} angleDeg={30} />
         <Ramp pos={[-22, 0, 0]} angleDeg={55} />
       </group>
-
-      <ShackKit seed={42} origin={[-40, 0, -40]} rows={4} cols={6} />
-      <ShackKit seed={7} origin={[30, 0, -70]} rows={3} cols={5} />
     </>
   );
 }

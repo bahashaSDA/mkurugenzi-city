@@ -34,10 +34,11 @@ src/config     world layout, district coordinates, quality presets
 | 0.3 | Player: kinematic controller, third-person camera with collision, first-person toggle, sprint/jump | done |
 | 0.4 | Test map with solid walls, steps, slope, dynamic MKURUGENZI letters | done |
 | 0.5 | Streaming skeleton | done |
-| 0.6 | Blender headless scripts + gltf-transform pipeline + collider audit | scripts written; need Blender installed to run |
-| 1.x | Hub dressing, video hall, NPCs, day-night, phone, minimap, mobile controls | next sessions |
+| 0.6 | Blender headless scripts + gltf-transform pipeline + collider audit | done (Blender 4.5.10, KTX-Software 4.4.2) |
+| 1.1 | Hub kit in Blender (10 pieces, hand-made LODs) + instanced layout | done |
+| 1.x | Video hall, NPCs, wires/clutter, day-night, phone, minimap | next sessions |
 
 ## Risks
-- **Blender is not installed on this machine**, so the scripted pipeline can't be verified yet.
+- Blender 4.5 LTS is installed; the scripted pipeline is verified end to end.
 - Abel's likeness depends on the capture session (SPEC 5.5); a temporary capsule/proxy is used until then.
 - Real-device perf testing (Tecno/Infinix) needs a human with the phone; results go in PROGRESS.md.
