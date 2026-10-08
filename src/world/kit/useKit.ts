@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js';
+import { getKTX2Loader } from '../ktx2';
 
 // A "kit" GLB (built by blender/scripts/build_*_kit.py) holds many pieces, each as nodes
 //   <piece>_LOD0, <piece>_LOD1, <piece>_LOD2   render meshes (any number of primitives)
@@ -27,13 +27,10 @@ export interface KitPiece {
 
 export type Kit = Map<string, KitPiece>;
 
-let ktx2: KTX2Loader | null = null;
-
 export function useKit(url: string): Kit {
   const gl = useThree((s) => s.gl);
   const gltf = useGLTF(url, false, true, (loader) => {
-    // One shared KTX2 loader per renderer: the transcoder runs in workers.
-    if (!ktx2) ktx2 = new KTX2Loader().setTranscoderPath('/basis/').detectSupport(gl);
+    const ktx2 = getKTX2Loader(gl); // shared with runtime materials (one worker pool)
     // drei types its loader with three-stdlib; three's own KTX2Loader is used deliberately because
     // it matches the basis transcoder copied from three into /public/basis.
     loader.setKTX2Loader(ktx2 as unknown as Parameters<typeof loader.setKTX2Loader>[0]);

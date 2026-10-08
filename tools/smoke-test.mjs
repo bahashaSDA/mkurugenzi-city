@@ -16,7 +16,7 @@ async function run(name, query, keys, ms, check) {
   const page = await browser.newPage({ viewport: { width: 480, height: 270 } });
   page.on('pageerror', (e) => errors.push(`${name}: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`${name} console: ${m.text()}`); });
-  await page.goto(base + '?debug&perf&minimal&tier=low&' + query);
+  await page.goto(base + '?debug&perf&minimal&testcourse&tier=low&' + query);
   const btn = page.getByRole('button', { name: 'Tap to enter' });
   await btn.waitFor({ timeout: 60000 });
   await btn.click();

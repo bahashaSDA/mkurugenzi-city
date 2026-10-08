@@ -29,7 +29,7 @@ const _homeQ = new THREE.Quaternion();
 export function SpawnLetters() {
   const font = useLoader(FontLoader, '/fonts/droid_sans_bold_caps.typeface.json');
   const material = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#FFC72C', roughness: 0.5, metalness: 0.1 }),
+    () => new THREE.MeshStandardMaterial({ color: '#E8A920', roughness: 0.62, metalness: 0.35 }), // painted steel
     [],
   );
 

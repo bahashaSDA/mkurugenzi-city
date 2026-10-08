@@ -43,8 +43,8 @@ export const BUDGETS: Record<Tier, TierBudget> = {
     maxNpcs: 150,
     maxVehicles: 50,
     streamRadiusCells: 2,
-    shadowMapSize: 2048,
-    shadowDistance: 80,
+    shadowMapSize: 4096,
+    shadowDistance: 70,
     dprMax: 2,
   },
 };

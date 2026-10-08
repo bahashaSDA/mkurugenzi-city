@@ -23,6 +23,11 @@ const EYE_HEIGHT = 1.62;
 const LOOK_SENS = 0.0025;
 const RECENTER_DELAY = 2000;
 
+const FIXED_CAM = (() => {
+  const v = new URLSearchParams(location.search).get('cam')?.split(',').map(Number);
+  return v && v.length === 6 && v.every(Number.isFinite) ? v : null;
+})();
+
 // Scratch objects: allocated once, reused every frame (SPEC 10.9).
 const _move = new THREE.Vector3();
 const _fwd = new THREE.Vector3();
@@ -137,6 +142,12 @@ export function Player() {
 
     // --- Camera ---
     if (benchmark.running) return; // the benchmark flies its own fixed path
+    if (FIXED_CAM) {
+      // ?cam=x,y,z,tx,ty,tz : locked camera for visual regression screenshots
+      camera.position.set(FIXED_CAM[0]!, FIXED_CAM[1]!, FIXED_CAM[2]!);
+      camera.lookAt(FIXED_CAM[3]!, FIXED_CAM[4]!, FIXED_CAM[5]!);
+      return;
+    }
     const now = performance.now();
     if (cameraMode === 'third' && mag > 0.1 && now - input.lastLookTime > RECENTER_DELAY) {
       // GTA-style auto recentre behind the player when moving without look input.

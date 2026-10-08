@@ -32,6 +32,12 @@ function rng(seed: number) {
   };
 }
 
+let cached: Placement[] | null = null;
+/** The hub layout, built once and shared (terrain mask, kit instances, tests). */
+export function getHubLayout(): Placement[] {
+  return (cached ??= buildHubLayout());
+}
+
 export function buildHubLayout(seed = 254): Placement[] {
   const r = rng(seed);
   const out: Placement[] = [];

@@ -5,7 +5,10 @@ import * as THREE from 'three';
 import { useGame } from './store';
 import { Environment } from '../world/Environment';
 import { StreamedCell, WorldStreamer } from '../world/streaming';
-import { TestMap } from '../districts/testmap/TestMap';
+import { TEST_COURSE, TestMap } from '../districts/testmap/TestMap';
+import { Terrain } from '../world/Terrain';
+import { Avenue } from '../world/Roads';
+import { PostFX } from '../world/PostFX';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
 import { Hub } from '../districts/hub/Hub';
 import { Player } from '../systems/player/Player';
@@ -14,6 +17,7 @@ import { PerfMonitor, PerfOverlay, perfStats } from '../perf/PerfMonitor';
 import { playerPosition } from '../systems/player/playerState';
 import { Benchmark, benchmark, type BenchmarkResult } from '../perf/Benchmark';
 import { Hud } from '../ui/Hud';
+import { isAvailable, loadContent } from '../content/episodes';
 import { TouchControls } from '../ui/TouchControls';
 
 const params = new URLSearchParams(location.search);
@@ -23,7 +27,7 @@ const showPerf = import.meta.env.DEV || params.has('perf');
 const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
-  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame };
+  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable } };
 }
 
 function Ready({ onReady }: { onReady: () => void }) {
@@ -33,7 +37,6 @@ function Ready({ onReady }: { onReady: () => void }) {
 
 export default function Game({ onReady }: { onReady: () => void }) {
   const dpr = useGame((s) => s.dpr);
-  const tier = useGame((s) => s.tier);
   const phase = useGame((s) => s.phase);
   const isTouch = useGame((s) => s.isTouch);
   const [bench, setBench] = useState<BenchmarkResult | null>(null);
@@ -44,7 +47,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
         dpr={dpr}
         shadows={{ type: THREE.PCFShadowMap }}
         camera={{ fov: 62, near: 0.1, far: 2500, position: [0, 3, 14] }}
-        gl={{ antialias: tier !== 'low', powerPreference: 'high-performance', stencil: false }}
+        gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.AgXToneMapping;
           gl.toneMappingExposure = 1.05;
@@ -54,7 +57,9 @@ export default function Game({ onReady }: { onReady: () => void }) {
         <Suspense fallback={null}>
           <Environment />
           <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60} paused={phase !== 'playing'}>
-            <TestMap />
+            <Terrain />
+            <Avenue />
+            {TEST_COURSE && <TestMap />}
             <Hub render={!minimal} />
             {/* The letters sit in the spawn cell; they unmount when it streams out. */}
             <StreamedCell x={0} z={0}>
@@ -67,6 +72,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
           </Physics>
           <WorldStreamer />
           <PerfMonitor />
+          <PostFX />
           {benchmark.enabled && phase === 'playing' && !bench && <Benchmark onDone={setBench} />}
           <Ready onReady={onReady} />
         </Suspense>

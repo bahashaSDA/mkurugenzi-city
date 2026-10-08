@@ -1,6 +1,68 @@
 # PROGRESS
 
-_Last updated: 2026-10-08 (session 2)_
+_Last updated: 2026-10-08 (session 3)_
+
+## Session 3: auto-updating episodes, real-world references, visual overhaul started
+
+### Episodes update automatically
+| Situation | How it's handled | Status |
+|---|---|---|
+| Video **removed or privated** | `isAvailable()` asks YouTube oEmbed (CORS-enabled, 404 = gone) right before a video is shown or played; cached 24 h | Tested: real ID available, fake ID hidden |
+| **New upload** | `api/latest-episodes.ts` (Vercel Edge function, no API key) reads the channel feed; the game merges new uploads into `content.json` | Tested locally: merged 2 new videos live (644 total). Works on any host once deployed |
+| **Full refresh** | `.github/workflows/refresh-episodes.yml` reruns `tools/fetch-episodes.py` daily at 06:00 Nairobi and commits changes; the host redeploys | Needs the repo on GitHub plus a host |
+
+The same `/api/latest-episodes` handler is mounted in `vite dev`/`vite preview` (vite.config.ts), so it works locally too.
+
+### Real-world reference library
+- `tools/fetch-references.py`: about 90 freely licensed Wikimedia Commons photos across 9 topics: kiosks, informal settlement, Kibera railway, matatus, boda boda, CBD streets, markets, roads, landmarks. Attribution is in each folder's `SOURCES.md`. They are study only (photos are git-ignored and re-downloadable).
+- `tools/sample-palettes.py` produces `research/visual-references/PALETTES.md`, colours measured from the photos. Key findings:
+  - Real murram is pale dusty tan (`#CDB596`), not saturated red.
+  - Sunlit tarmac reads pale grey.
+  - Kibera roofs are rust-brown and bleached.
+  - Kiosk red is `#AF3339` / `#9F1F29`.
+
+### Visual overhaul (VISUAL_OVERHAUL_SPEC.md, the owner's brief saved in the repo)
+- `VISUAL_AUDIT.md`: 5 critical, 8 high, 5 medium and 1 low finding, with causes, files, fixes and perf impact.
+- `VISUAL_OVERHAUL_PLAN.md`: milestones V1-V11, each done only when it works, passes the realism gate and stays performant.
+- **V1 rendering foundation (first pass):**
+  - Sky-matched IBL with a warm murram ground bounce (fixes black metal roofs and black shade).
+  - Tiered post-processing: N8AO, SMAA, light bloom and vignette, AgX.
+  - Shadows: 4096 on high, texel-snapped to stop shimmer.
+  - Haze-coloured aerial fog; the test course is hidden unless `?testcourse`.
+- **V2 ground and road (first pass):**
+  - PBR murram (ambientCG CC0, KTX2) tinted to measured colours, with two-scale anti-tiling and macro variation.
+  - Worn red-brown paths and grass patches from a mask generated from the hub layout.
+  - Bleached PBR asphalt with edge dust, wheel tracks and worn dashes.
+- **V3 real Nairobi kiosk (first pass)**, rebuilt from the photos:
+  - welded steel box with a canted front
+  - wire-mesh hatch, vent perforations, price-circle stickers
+  - raised sign box, painted side brand, posters
+  - stocked shelves, mabati lean-to, broken slab
+  - fictional brands: "MAMA WANJIKU KIOSK / SODA BARIDI" and "PESA HARAKA AGENT"
+- Visual regression baselines: `research/visual-tests/v0-before-overhaul/` and `v1-lighting-ground/` (`node tools/visual-tests.mjs <label>`, fixed cameras via `?cam=`).
+
+### Session 3 tests and budgets
+- Typecheck and build pass. Smoke test 7/7, physics pass, collider audit pass, hub_kit 3.30 MB.
+- Whole-frame budgets (now counting shadow and post passes; the overlay previously undercounted with post-processing on):
+
+  | Tier | Draw calls (budget) | Triangles (budget) |
+  |---|---|---|
+  | Low | 168 (250) | 225k (400k) |
+  | Mid | 231 (500) | 316k (1.2M) |
+  | High | 246 (900) | 429k (3M) |
+
+- First load is now about 6.2 MB: JS 1.2 + kit 3.3 + ground/road textures 1.6 (budget 10 MB).
+
+### Honest status against the overhaul bar
+Better lit and grounded, but **not yet game-quality**. Still missing:
+- people, vehicles and trees
+- terraced housing and an organic layout
+- cables and clutter
+- a horizon
+- a real character
+
+Those are V4-V8. Known limitation: vertex-colour grime can only darken, so dust doesn't show on red paint. That needs the shader dust layer in the material library.
+
 
 ## Session 2: what was finished
 
@@ -109,7 +171,8 @@ Problems found and fixed during testing:
 8. Real-device benchmarks are still pending (see "How to benchmark").
 
 ## Exact next step
-Send the benchmark numbers. Then Phase 1 continues:
-1. Kibanda Video Hall (Blender hero building) with the VHS shelf wired to the 642 real episodes and the YouTube IFrame modal.
-2. Overhead wires, posters and drains, plus the realism pass on the kit.
-3. Street NPCs and boda bodas.
+Per VISUAL_OVERHAUL_SPEC, no new gameplay until the visual foundation passes:
+1. **V4:** a row-house generator in Blender (terraced rooms, shared rust-brown roofs, patchwork walls) and an organic curved-alley layout matching the Kibera photos.
+2. **V5:** catenary cables and service drops, plus the clutter kit.
+3. **V6:** real trees with impostors, grass cards, and the horizon layer.
+4. Real-device benchmark numbers are still needed (see "How to benchmark").

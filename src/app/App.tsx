@@ -23,6 +23,7 @@ export function App() {
       const g = useGame.getState();
       if (tooWeak) return g.setPhase('fallback');
       g.setDetected(tier, gpu);
+      if (gpu === 'forced') g.setQuality(tier); // ?tier=… pins quality (no adaptive changes)
       g.setDpr(Math.min(BUDGETS[tier].dprMax, window.devicePixelRatio || 1));
       g.setPhase('splash');
     });

@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react';
-
-interface Content {
-  links: Record<string, string>;
-  episodes: { youtubeId: string; title: string; show: string }[];
-  contact?: { email?: string };
-}
+import { loadContent, onlyAvailable, type Content } from '../content/episodes';
 
 /** SPEC 14: shown when WebGL2 is missing or the device is too weak for the 3D city. */
 export function Fallback() {
   const [content, setContent] = useState<Content | null>(null);
   useEffect(() => {
-    fetch('/content/content.json')
-      .then((r) => r.json())
-      .then(setContent)
-      .catch(() => setContent(null));
+    // Newest 40 episodes, with removed/private videos filtered out live.
+    loadContent()
+      .then(async (c) => ({ ...c, episodes: await onlyAvailable(c.episodes.slice(0, 40)) }))
+      .then(setContent);
   }, []);
 
   return (

@@ -29,9 +29,12 @@ export function PerfMonitor() {
     a.lastNow = now;
     a.frames++;
     a.time += dt;
-    // gl.info holds the previous frame's numbers at this point (reset at render start).
+    // With post-processing a frame is several render passes (shadows, scene, AO, bloom...), and
+    // three resets gl.info per pass by default. Count the whole frame: auto-reset off, reset here.
+    gl.info.autoReset = false;
     perfStats.calls = gl.info.render.calls;
     perfStats.tris = gl.info.render.triangles;
+    gl.info.reset();
     if (a.time < 1) return;
 
     perfStats.fps = a.frames / a.time;

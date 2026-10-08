@@ -10,3 +10,8 @@ blender/cache
 blender/textures
 blender/previews
 __pycache__/
+
+# reference photos are re-downloadable (tools/fetch-references.py); attribution files are kept
+research/visual-references/**/*.jpg
+research/visual-references/**/*.jpeg
+research/visual-references/**/*.JPG

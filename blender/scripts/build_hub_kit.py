@@ -102,6 +102,24 @@ def pbr(name, tex_id=None, tint=None, rough=None, metal=None, color=None):
     return mat
 
 
+def painted_steel(name, color, rough=0.5):
+    """Enamel-painted sheet steel (kiosks): flat colour, subtle dents/brush normal from Metal021."""
+    mat = bpy.data.materials.get(name)
+    if mat:
+        return mat
+    mat = pbr(name, color=color, rough=rough, metal=0.25)
+    nt = mat.node_tree
+    nrm = _img("Metal021", "NormalGL", True)
+    if nrm:
+        n = nt.nodes.new("ShaderNodeTexImage")
+        n.image = nrm
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nm.inputs["Strength"].default_value = 0.35
+        nt.links.new(n.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], nt.nodes["Principled BSDF"].inputs["Normal"])
+    return mat
+
+
 M = {
     # One galvanised texture for every roof; age/rust varies per piece via vertex colour.
     "roof_rust": pbr("mabati_roof", "CorrugatedSteel005"),
@@ -128,6 +146,13 @@ M = {
     "sign_black": pbr("sign_black", color=(0.05, 0.05, 0.05), rough=0.7, metal=0.0),
     "stone": pbr("stone", "Concrete040", tint=(0.75, 0.68, 0.6)),
     "steel": pbr("steel_grille", color=(0.18, 0.18, 0.2), rough=0.5, metal=0.9),
+    # measured from Nairobi kiosk photos (PALETTES.md): enamel red #AF3339/#9F1F29
+    "kiosk_red": painted_steel("kiosk_red", (0.56, 0.06, 0.07)),
+    "kiosk_green": painted_steel("kiosk_green", (0.05, 0.36, 0.14)),
+    "mesh_dark": pbr("mesh_dark", color=(0.10, 0.10, 0.10), rough=0.6, metal=0.6),
+    "vent_hole": pbr("vent_hole", color=(0.015, 0.012, 0.012), rough=0.9, metal=0.0),
+    "poster": [pbr(f"poster_{i}", color=c, rough=0.8, metal=0.0) for i, c in enumerate(
+        [(0.9, 0.82, 0.2), (0.15, 0.35, 0.75), (0.9, 0.9, 0.88)])],
     "cloth": [pbr(f"cloth_{i}", color=c, rough=0.9, metal=0.0) for i, c in enumerate(
         [(0.8, 0.15, 0.1), (0.1, 0.3, 0.7), (0.95, 0.85, 0.2), (0.9, 0.9, 0.9), (0.2, 0.55, 0.3)])],
 }
@@ -367,50 +392,146 @@ def _(name, lod):
     return shack(name, lod, 3.6, 3.0, 2.45, M["mud_plaster"], M["roof_new"], stones=2, plaster_base=True, rust=0.15)
 
 
-def kiosk(name, lod, body_mat, sign_lines, sign_mat, text_mat):
-    """Roadside duka (research: 2.4 x 1.8 m, counter 1.0 m, steel grille, hand-painted board).
-    LOD1 keeps the main sign line and drops the grille; LOD2 is body, board and roof."""
-    w, d, h = 2.4, 1.8, 2.3
-    mats = [body_mat, M["roof_rust"], M["steel"], sign_mat, text_mat, M["timber"], M["concrete"]]
+def kiosk(name, lod, body_mat, sign_lines, side_word, sign_mat, text_mat):
+    """Nairobi roadside kiosk, built from reference photos (research/visual-references/kiosks:
+    Argwings Kodhek Rd, Tigoni Rd, Chaka Rd). Welded sheet-steel box in one enamel colour:
+    canted lower front, welded-wire mesh hatch with centre bar, perforated vent strip, white
+    price-circle stickers, raised sign box, painted side graphic, glued posters, mabati lean-to
+    at the back, on a broken concrete slab. Brands are fictional (SPEC 2.5).
+    Real proportions (est. from a 1.75 m person and a standard door): 2.2 W x 1.5 D x 2.35 H."""
+    w, d, h = 2.2, 1.5, 2.35
+    win0, win1 = 1.08, 1.9  # serving hatch, counter height to header
+    cant = 0.2  # lower front leans out by 20 cm at counter height
+    mats = [body_mat, M["mesh_dark"], M["concrete"], sign_mat, text_mat, M["sign_white"],
+            M["roof_rust"], M["vent_hole"], M["timber"]] + M["poster"] + [
+            M["poster"][0], M["poster"][1], M["poster"][2], M["plastic_red"], M["plastic_yellow"], M["sign_white"]]
+    POSTER0 = 9
     bm = bmesh.new()
-    add_box(bm, (w + 0.2, d + 0.2, 0.15), (0, 0, 0.075), 6)  # concrete plinth
-    add_box(bm, (w, d, 1.0), (0, 0, 0.65), 0)  # counter-height walls
-    add_box(bm, (0.12, d, h - 1.15), (-w / 2 + 0.06, 0, 1.15 + (h - 1.15) / 2), 0)
-    add_box(bm, (0.12, d, h - 1.15), (w / 2 - 0.06, 0, 1.15 + (h - 1.15) / 2), 0)
-    add_box(bm, (w, 0.12, h - 1.15), (0, d / 2 - 0.06, 1.15 + (h - 1.15) / 2), 0)
-    add_box(bm, (w + 0.1, 0.35, 0.05), (0, -d / 2 - 0.1, 1.17), 5)  # timber counter shelf
-    # steel security grille over the serving hatch
-    for i in range(13 if lod == 0 else 0):
-        add_box(bm, (0.018, 0.018, h - 1.25), (-w / 2 + 0.2 + i * (w - 0.4) / 12, -d / 2 + 0.03, 1.2 + (h - 1.25) / 2), 2)
-    for z in (1.25, 1.75, 2.25) if lod == 0 else ():
-        add_box(bm, (w - 0.3, 0.02, 0.03), (0, -d / 2 + 0.03, z), 2)
-    # painted sign board above
-    add_box(bm, (w + 0.3, 0.05, 0.6), (0, -d / 2 - 0.06, h + 0.35), 3)
+
+    # broken concrete slab, irregular outline
+    sb = bmesh.new()
+    ring = []
+    for i in range(10):
+        a = i / 10 * 2 * math.pi
+        rr = 1.0 + random.uniform(-0.12, 0.1)
+        ring.append((math.cos(a) * (w / 2 + 0.35) * rr, math.sin(a) * (d / 2 + 0.45) * rr - 0.15))
+    top = [sb.verts.new((x, y, 0.1)) for x, y in ring]
+    bot = [sb.verts.new((x, y, -0.05)) for x, y in ring]
+    sb.faces.new(top)
+    sb.faces.new(list(reversed(bot)))
+    for i in range(len(ring)):
+        j = (i + 1) % len(ring)
+        sb.faces.new((bot[i], bot[j], top[j], top[i]))
+    merge_bm(bm, sb, Matrix.Identity(4), 2)
+
+    # lower body: counter-height box whose front leans outward with height (the canted panel)
+    lower = bmesh.new()
+    add_box(lower, (w, d, win0 - 0.1), (0, 0, 0.1 + (win0 - 0.1) / 2), 0)
+    for v in lower.verts:
+        if v.co.y < 0:
+            v.co.y -= cant * (v.co.z - 0.1) / (win0 - 0.1)
+    merge_bm(bm, lower, Matrix.Identity(4), 0)
+    # counter ledge on top of the canted panel
+    add_box(bm, (w + 0.06, 0.32, 0.04), (0, -d / 2 - cant + 0.12, win0 + 0.02), 0)
+    # upper walls: sides, back, header band (hatch opening in front)
+    add_box(bm, (0.06, d, h - win0), (-w / 2 + 0.03, 0, win0 + (h - win0) / 2), 0)
+    add_box(bm, (0.06, d, h - win0), (w / 2 - 0.03, 0, win0 + (h - win0) / 2), 0)
+    add_box(bm, (w, 0.06, h - win0), (0, d / 2 - 0.03, win0 + (h - win0) / 2), 0)
+    add_box(bm, (w, 0.06, h - win1), (0, -d / 2 + 0.03, win1 + (h - win1) / 2), 0)
+    # flat steel roof with overhang
+    add_box(bm, (w + 0.3, d + 0.3, 0.05), (0, -0.05, h + 0.025), 0)
+
+    # welded-wire mesh hatch: two panes either side of a centre bar
+    fy = -d / 2 - 0.005
+    add_box(bm, (0.045, 0.04, win1 - win0), (0, fy, (win0 + win1) / 2), 0)
+    if lod == 0:
+        x = -w / 2 + 0.09
+        while x < w / 2 - 0.08:
+            add_box(bm, (0.006, 0.006, win1 - win0 - 0.04), (x, fy, (win0 + win1) / 2), 1)
+            x += 0.06
+        z = win0 + 0.04
+        while z < win1 - 0.02:
+            add_box(bm, (w - 0.16, 0.006, 0.006), (0, fy - 0.004, z), 1)
+            z += 0.06
+    elif lod == 1:
+        add_box(bm, (w - 0.16, 0.01, win1 - win0 - 0.04), (0, fy, (win0 + win1) / 2), 1)
+
+    # stock behind the mesh: two shelves packed with goods (crates of soda, bread, packets),
+    # the way every reference kiosk is stocked floor to ceiling
+    if lod < 2:
+        GOODS = [M["poster"][0], M["poster"][1], M["poster"][2], M["plastic_red"], M["plastic_yellow"], M["sign_white"]]
+        for zi, z in enumerate((win0 + 0.02, win0 + 0.42)):
+            add_box(bm, (w - 0.16, 0.42, 0.025), (0, d / 2 - 0.3, z), 8)  # timber shelf
+            if lod == 0:
+                x = -w / 2 + 0.12
+                while x < w / 2 - 0.15:
+                    gw, gh = random.uniform(0.07, 0.16), random.uniform(0.12, 0.3)
+                    gi = random.randrange(len(GOODS))
+                    add_box(bm, (gw, random.uniform(0.08, 0.2), gh), (x + gw / 2, d / 2 - 0.3 + random.uniform(-0.08, 0.08), z + 0.0125 + gh / 2), 12 + gi)
+                    x += gw + random.uniform(0.005, 0.03)
+    # price-circle stickers on the header and a perforated vent strip along the top
+    if lod < 2:
+        for i in range(4):
+            cb = bmesh.new()
+            bmesh.ops.create_cone(cb, cap_ends=True, segments=16, radius1=0.1, radius2=0.1, depth=0.006)
+            merge_bm(bm, cb, Matrix.Translation((-0.66 + i * 0.44, -d / 2 - 0.004, 2.03)) @ Matrix.Rotation(math.pi / 2, 4, "X"), 5)
+    if lod == 0:
+        for i in range(34):
+            vb = bmesh.new()
+            bmesh.ops.create_cone(vb, cap_ends=True, segments=6, radius1=0.014, radius2=0.014, depth=0.004)
+            merge_bm(bm, vb, Matrix.Translation((-w / 2 + 0.1 + i * (w - 0.2) / 33, -d / 2 - 0.003, 2.25)) @ Matrix.Rotation(math.pi / 2, 4, "X"), 7)
+            if i % 2 == 0:  # the side panels are perforated too
+                vb = bmesh.new()
+                bmesh.ops.create_cone(vb, cap_ends=True, segments=6, radius1=0.014, radius2=0.014, depth=0.004)
+                merge_bm(bm, vb, Matrix.Translation((-w / 2 - 0.003, -d / 2 + 0.08 + i * (d - 0.16) / 33, 2.25)) @ Matrix.Rotation(math.pi / 2, 4, "Y"), 7)
+
+    # raised sign box above the roof, slightly forward
+    add_box(bm, (w + 0.4, 0.12, 0.6), (0, -d / 2 + 0.05, h + 0.36), 3)
+    add_box(bm, (0.05, 0.05, 0.3), (-w / 2 + 0.2, -d / 2 + 0.12, h + 0.1), 1)  # bracket
+    add_box(bm, (0.05, 0.05, 0.3), (w / 2 - 0.2, -d / 2 + 0.12, h + 0.1), 1)
     box_uv(bm, tile=1.5)
     for i, line in enumerate(sign_lines[: (2, 1, 0)[lod]]):
-        tb = text_mesh(line, 0.24 if i == 0 else 0.13, depth=0.008, resolution=(3, 1, 1)[lod])
-        rot = Matrix.Rotation(math.radians(90), 4, "X")
-        merge_bm(bm, tb, Matrix.Translation((0, -d / 2 - 0.09, h + 0.45 - i * 0.24)) @ rot, 4)
-    rb = bmesh.new()
-    if lod == 0:
-        corrugated_sheet(rb, w + 0.6, d + 0.7, mat_index=1)
-    else:
-        flat_sheet(rb, w + 0.6, d + 0.7, 1)
-    box_uv(rb, 1.6)
-    merge_bm(bm, rb, Matrix.Translation((0, 0.1, h + 0.08)) @ Matrix.Rotation(math.radians(-6), 4, "X"), 1)
+        tb = text_mesh(line, 0.2 if i == 0 else 0.11, depth=0.006, resolution=(3, 1, 1)[lod])
+        merge_bm(bm, tb, Matrix.Translation((0, -d / 2 - 0.015, h + 0.43 - i * 0.2)) @ Matrix.Rotation(math.pi / 2, 4, "X"), 4)
+    # big painted brand word on the street-facing side panel (like the soda-brand murals)
+    if lod < 2 and side_word:
+        tb = text_mesh(side_word, 0.36, depth=0.004, resolution=(3, 1, 1)[lod])
+        side = Matrix.Translation((-w / 2 - 0.006, 0.0, 0.62)) @ Matrix.Rotation(-math.pi / 2, 4, "Z") @ Matrix.Rotation(math.pi / 2, 4, "X")
+        merge_bm(bm, tb, side, 5)
+    # glued posters, slightly askew (paper, not paint)
+    if lod < 2:
+        for k, (px, pz, pw, ph) in enumerate(((-0.78, 0.62, 0.3, 0.42), (0.7, 1.55, 0.26, 0.36), (0.55, 0.55, 0.32, 0.22))):
+            pb = bmesh.new()
+            add_box(pb, (pw, 0.003, ph), (0, 0, 0), 0)
+            y = -d / 2 - 0.01 - (cant * (pz - 0.1) / (win0 - 0.1) if pz < win0 else 0.0)
+            merge_bm(bm, pb, Matrix.Translation((px, y, pz)) @ Matrix.Rotation(random.uniform(-0.06, 0.06), 4, "Y"), POSTER0 + k % 3)
+
+    # mabati lean-to behind on two timber poles (storage/cover)
+    if lod < 2:
+        rb = bmesh.new()
+        if lod == 0:
+            corrugated_sheet(rb, w + 0.4, 1.4, mat_index=6)
+        else:
+            flat_sheet(rb, w + 0.4, 1.4, 6)
+        box_uv(rb, 1.6)
+        merge_bm(bm, rb, Matrix.Translation((0, d / 2 + 0.68, 2.0)) @ Matrix.Rotation(math.radians(12), 4, "X"), 6)
+        for x in (-w / 2, w / 2):
+            add_box(bm, (0.08, 0.08, 1.85), (x, d / 2 + 1.3, 0.92), 8)
     ob = new_obj(name, bm, mats)
-    paint_grime(ob, dust_height=0.6, strength=0.5, streak=0.08, rust=0.3, rust_mats=(1, 2))
+    paint_grime(ob, dust_height=0.7, strength=0.55, streak=0.12, rust=0.35, rust_mats=(0, 6))
     return ob
 
 
 @piece("kiosk_pesa", lods=True)
 def _(name, lod):
-    return kiosk(name, lod, M["paint_green"], ["PESA HARAKA", "TUMA • TOA • LIPA"], M["sign_white"], M["sign_black"])
+    return kiosk(name, lod, M["kiosk_green"], ["PESA HARAKA AGENT", "TUMA  -  TOA  -  LIPA"], "PESA",
+                 M["sign_white"], M["sign_black"])
 
 
 @piece("kiosk_duka", lods=True)
 def _(name, lod):
-    return kiosk(name, lod, M["paint_yellow"], ["DUKA LA MAMA", "SODA BARIDI • MKATE • SUKARI"], M["sign_red"], M["sign_white"])
+    return kiosk(name, lod, M["kiosk_red"], ["MAMA WANJIKU KIOSK", "SODA BARIDI  -  MKATE  -  AIRTIME"], "SODA",
+                 M["sign_red"], M["sign_white"])
 
 
 @piece("block_flat", lods=True)
@@ -684,4 +805,6 @@ if PREVIEW:
 
     shot("kit_overview.png", (x / 2, -26, 9), (x / 2, 0, 1.5))
     shot("kit_closeup_shacks.png", (5, -9, 2.2), (6, 0, 1.4))
-    shot("kit_closeup_kiosks.png", (x * 0.42, -7, 1.9), (x * 0.42, 0, 1.6))
+    kx = PIECES["kiosk_duka"][0].location.x
+    shot("kit_closeup_kiosks.png", (kx - 3.2, -5.2, 1.7), (kx - 1.0, 0, 1.4))
+    shot("kit_kiosk_front.png", (kx, -4.5, 1.6), (kx, 0, 1.5))

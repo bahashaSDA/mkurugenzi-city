@@ -17,6 +17,9 @@ export const TEXTURES = {
   Planks021: 'raw rough timber (doors, shutters, benches)',
   Ground048: 'brown soil, tinted to red murram',
   Metal021: 'old leaking rusty metal (grilles, tanks)',
+  Ground109: 'dry beige-brown dirt: base murram (runtime ground)',
+  Ground102: 'compressed dry dirt: worn paths (runtime ground)',
+  Asphalt031: 'light grey asphalt: sun-bleached Nairobi tarmac (runtime road)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';

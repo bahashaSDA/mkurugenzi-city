@@ -1,0 +1,34 @@
+# Daily full refresh of the episode catalogue from Abel's official channel.
+# Commits public/content/content.json only when it changed; the host (Vercel / Cloudflare
+# Pages) redeploys automatically on push. Metadata only: no video is downloaded.
+name: Refresh episodes
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 06:00 Nairobi time
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install yt-dlp
+      - run: python tools/fetch-episodes.py
+      - name: Commit if changed
+        run: |
+          if git diff --quiet public/content/content.json; then
+            echo "No episode changes."
+          else
+            git config user.name "episode-bot"
+            git config user.email "episode-bot@users.noreply.github.com"
+            git add public/content/content.json
+            git commit -m "Refresh episode list from YouTube"
+            git push
+          fi
