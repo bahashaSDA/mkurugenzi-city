@@ -10,8 +10,8 @@ Follows VISUAL_OVERHAUL_SPEC section 63. Each milestone is **done only when it w
 | V4 | **Row-house generator and organic layout:** terraced rooms, shared rusty roofs, patchwork walls, curved alleys | H2, H3 | |
 | V5 | **Utility cables and clutter kit:** catenary wires, service drops, buckets, washing lines, crates, umbrellas, bins, charcoal sacks | H5, M3 | |
 | V6 | **Vegetation and horizon:** real trees (jacaranda in bloom, eucalyptus, street trees) with impostors and wind; grass cards; skyline and hills layer; tighter natural boundary | C3 | |
-| V7 | **Human characters:** MPFB2 realistic temporary Abel and an NPC base set, rigged, idle/walk/run blended, foot IK | C4 | |
-| V8 | **Life:** NPC crowds with behaviours, boda bodas, hero matatu, traffic on the left | C5 | |
+| V7 | **Human characters:** MPFB2 realistic temporary Abel and an NPC base set, rigged, idle/walk/run blended, foot IK | C4 | first pass done (session 4): Abel stand-in + 8 pedestrians, 27/9 retargeted clips. Open: foot IK, material atlas, more variety (headwraps, uniforms, reflector vests) |
+| V8 | **Life:** NPC crowds with behaviours, boda bodas, hero matatu, traffic on the left | C5 | pedestrians first pass done (walk / stand+nod / sit). Next: vehicles |
 | V9 | **Time of day:** 24-minute day, real night lighting, rain | - | |
 | V10 | **Streaming and LOD v2:** per-cell placement streaming, predictive loading, LOD cross-fade, impostors | M5 | |
 | V11 | **Profiling and regression:** real-device benchmarks on all tiers, visual regression set (day, sunset, night) | - | |

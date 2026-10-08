@@ -27,6 +27,9 @@ Every model, texture, sound, font and animation used in the build. Source, autho
 | Bark 007 (tree bark) | inside `street_kit.glb` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Bark007 |
 | Foliage 003 (weeds atlas, fetched for the grass pass) | `blender/textures` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Foliage003 |
 | Blender built-in font (kiosk sign lettering, converted to mesh) | inside `hub_kit.glb` | Blender (Bfont, DejaVu Sans derived) | DejaVu fonts team / Bitstream | Bitstream Vera licence (free, permissive) | https://dejavu-fonts.github.io/License.html |
+| Abel stand-in + 8 pedestrians (bodies, skins, eyes, brows, lashes, hair, clothes, shoes) | `public/models/abel.glb`, `public/models/npc_*.glb` | MakeHuman system assets via MPFB2 (`blender/scripts/build_humans.py`) | MakeHuman Community | CC0 1.0 | https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html |
+| MPFB2 (Blender add-on used to generate the characters; not shipped) | tool | extensions.blender.org | MakeHuman Community | GPL-3.0 (tool only; generated assets are CC0) | https://extensions.blender.org/add-ons/mpfb/ |
+| Universal Animation Library 1 + 2, Standard (idle, walk, jog, sprint, jump, sit, talk, phone, carry, climb...) retargeted to the characters | inside character GLBs | Quaternius | Quaternius | CC0 1.0 | https://quaternius.com/packs/universalanimationlibrary.html |
 | Basis Universal transcoder | `public/basis/` | three.js r186 | Binomial LLC | Apache 2.0 | https://github.com/BinomialLLC/basis_universal |
 
 Texture source files are downloaded by `node tools/fetch-textures.mjs` and are not committed. No third-party models, sounds or animations are in the build yet.

@@ -32,6 +32,43 @@ Owner screenshot: the avenue in an empty beige plain with a capsule player.
 - `src/world/Cables.tsx`: power conductors, slack telecom lines and service drops to the shops, all in ONE merged mesh.
 - Spawn moved to the west pavement, looking up the street.
 
+## Session 4b: people (VISUAL_OVERHAUL V7, first pass)
+**Characters**
+- MPFB2 (MakeHuman for Blender) installed as a Blender extension, plus the MakeHuman CC0 system assets.
+- `blender/scripts/build_humans.py` builds characters headless from data: phenotype, African skin set, eyes, brows, hair, clothes, shoes, and the `game_engine` rig.
+- **Abel stand-in**: a man of about 38, sturdy build, short black hair, shirt, jeans and shoes. It stays a stand-in until the SPEC 5.5 capture.
+- **8 pedestrians**: mama mboga, hustler, office worker, student, elder, young woman, worker, auntie.
+
+**Animations**
+- Quaternius Universal Animation Library 1 + 2 (CC0), retargeted by `blender/scripts/retarget.py`. It aligns rest directions per bone and transfers rotation deltas, scaling pelvis motion by leg length.
+- Abel has 27 clips: idle, walk, jog, sprint, jump, sit, phone, talk, carry, climb, dance and others. No combat clips.
+- Pedestrians have 9 clips each.
+- Verified with pose renders (`check_anims.py`) and a lineup (`check_lineup.py`).
+
+**Optimisation**
+- Pedestrians are simplified with meshoptimizer, which preserves UV seams. Blender's decimation at 17% shattered the textures and was rejected after the lineup check.
+- Static animation channels are stripped and keys resampled.
+- Pedestrians drop normal maps.
+- Sizes: Abel 1.93 MB (budget 2.5); each pedestrian 0.54-0.58 MB (budget 0.6).
+
+**Runtime**
+- `AbelModel.tsx`: the clip follows real ground speed, with playback scaled to it so feet don't slide. Jump states are handled, and idle personality kicks in after 10 s (folded arms, phone, talking).
+- `Pedestrians.tsx`:
+  - **Walkers** stroll under the verandas and step aside for Abel.
+  - **Standers** wait at kiosks and shops, then turn and nod "Yes" when Abel passes.
+  - **Sitters** use the chairs.
+  - Every pedestrian has a kinematic capsule collider.
+  - Pool sizes: low 10, mid 18, high 28. Only people near the camera animate.
+
+**Tests**
+- Typecheck, build, collider audit and physics all pass.
+- Smoke test: 5/7. The 2 "did not move far enough" checks ran at 1-4 FPS. A CPU profile showed the page main thread **56% idle**, so the cost is SwiftShader (software GPU) competing with other processes (CPU at 87%: the user's Chrome tab, a VS Code update). This is an environment limit, not game code, but **real-device numbers are still needed**.
+
+**Honest gaps**
+- First load is now about **15 MB**: JS 1.2, kits 6.1, textures 1.6, characters 6.5. That's over the SPEC 10 MB target. Fix: load pedestrians and far kit LODs after "Tap to enter" (progressive streaming, V10).
+- Character materials: each person costs 5-7 draw calls. Atlasing is needed before larger crowds.
+- No vehicles yet (V8). Abel is a stand-in, not the likeness (SPEC 5.5).
+
 ## Session 3: auto-updating episodes, real-world references, visual overhaul started
 
 ### Episodes update automatically

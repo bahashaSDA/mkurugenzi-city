@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { CapsuleCollider, RigidBody, useRapier, type RapierRigidBody } from '@react-three/rapier';
 import type { Collider, KinematicCharacterController } from '@dimforge/rapier3d-compat';
@@ -7,6 +7,7 @@ import { input, onCameraToggle, pad, pollGamepad } from '../input';
 import { useGame } from '../../app/store';
 import { SPAWN } from '../../config/world';
 import { playerPosition } from './playerState';
+import { AbelModel, playerAnim } from './AbelModel';
 import { benchmark } from '../../perf/Benchmark';
 
 // Tuning (SPEC 8.1). Relaxed exploration speeds, no stamina.
@@ -123,6 +124,10 @@ export function Player() {
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = controller.computedMovement();
     s.grounded = controller.computedGrounded();
+    // actual ground speed (not the input): animations follow what the body really does
+    playerAnim.speed = Math.hypot(m.x, m.z) / dt;
+    playerAnim.grounded = s.grounded;
+    playerAnim.vy = s.vy;
     if (s.grounded && s.vy < 0) s.vy = 0;
     const p = rb.translation();
     const nx = p.x + m.x;
@@ -199,21 +204,19 @@ export function Player() {
       ccd
     >
       <CapsuleCollider ref={collider} args={[CAPSULE_HALF, CAPSULE_R]} />
-      {/* Temporary proxy for Abel until the capture-pipeline GLB exists (SPEC 5.4/5.5). */}
+      {/* Abel: realistic MPFB2 stand-in with retargeted animations (final likeness via SPEC 5.5).
+          The capsule only shows for a moment while the model streams in. */}
       <group ref={visual} position={[0, -(CAPSULE_HALF + CAPSULE_R), 0]}>
-        <mesh position={[0, 0.85, 0]} castShadow>
-          <capsuleGeometry args={[0.24, 0.9, 4, 12]} />
-          <meshStandardMaterial color="#1d1f24" roughness={0.8} />
-        </mesh>
-        <mesh position={[0, 1.6, 0]} castShadow>
-          <sphereGeometry args={[0.13, 16, 12]} />
-          <meshStandardMaterial color="#5a3a26" roughness={0.6} />
-        </mesh>
-        {/* chest print stripe, faces forward (+Z local) */}
-        <mesh position={[0, 1.15, 0.235]}>
-          <planeGeometry args={[0.3, 0.08]} />
-          <meshStandardMaterial color="#FFC72C" emissive="#FFC72C" emissiveIntensity={0.2} />
-        </mesh>
+        <Suspense
+          fallback={
+            <mesh position={[0, 0.85, 0]} castShadow>
+              <capsuleGeometry args={[0.24, 0.9, 4, 12]} />
+              <meshStandardMaterial color="#1d1f24" roughness={0.8} />
+            </mesh>
+          }
+        >
+          <AbelModel />
+        </Suspense>
       </group>
     </RigidBody>
   );

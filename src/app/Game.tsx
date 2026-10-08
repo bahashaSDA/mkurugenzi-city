@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { useGame } from './store';
@@ -11,6 +11,7 @@ import { Avenue } from '../world/Roads';
 import { PostFX } from '../world/PostFX';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
 import { Hub } from '../districts/hub/Hub';
+import { Pedestrians } from '../systems/npc/Pedestrians';
 import { Player } from '../systems/player/Player';
 import { attachInput } from '../systems/input';
 import { PerfMonitor, PerfOverlay, perfStats } from '../perf/PerfMonitor';
@@ -28,6 +29,17 @@ const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
   (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable } };
+}
+
+/** ?debug: expose the live scene/renderer for profiling from tests and the console. */
+function DebugHandles() {
+  const scene = useThree((st) => st.scene);
+  const gl = useThree((st) => st.gl);
+  useEffect(() => {
+    const mk = (window as unknown as { __mk?: Record<string, unknown> }).__mk;
+    if (mk) Object.assign(mk, { scene, gl, THREE });
+  }, [scene, gl]);
+  return null;
 }
 
 function Ready({ onReady }: { onReady: () => void }) {
@@ -69,11 +81,17 @@ export default function Game({ onReady }: { onReady: () => void }) {
               </Suspense>
             </StreamedCell>
             <Player />
+            {!minimal && (
+              <Suspense fallback={null}>
+                <Pedestrians />
+              </Suspense>
+            )}
           </Physics>
           <WorldStreamer />
           <PerfMonitor />
           <PostFX />
           {benchmark.enabled && phase === 'playing' && !bench && <Benchmark onDone={setBench} />}
+          {params.has('debug') && <DebugHandles />}
           <Ready onReady={onReady} />
         </Suspense>
       </Canvas>
