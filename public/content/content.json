@@ -1,0 +1,24 @@
+{
+  "_note": "Everything Abel's team may change lives here (SPEC 8.14). Episode IDs below are PLACEHOLDERS: replace with real YouTube video IDs from the official channel.",
+  "links": {
+    "YouTube": "https://www.youtube.com/@mkurugenziii",
+    "Phil-It TV": "https://www.philittv.com",
+    "Instagram": "https://www.instagram.com/abelmutua/",
+    "TikTok": "https://www.tiktok.com/@abel_mutua"
+  },
+  "episodes": [
+    { "youtubeId": "PLACEHOLDER_1", "title": "Replace with a Young and Stupid episode", "show": "Young and Stupid" },
+    { "youtubeId": "PLACEHOLDER_2", "title": "Replace with a Headline Hitters episode", "show": "Headline Hitters" }
+  ],
+  "podcast": { "spotify": "", "youtube": "" },
+  "films": [
+    { "title": "Click Click Bang", "url": "https://www.philittv.com" },
+    { "title": "Grand Little Lie", "url": "https://www.philittv.com" },
+    { "title": "Makosa Ni Yangu", "url": "https://www.philittv.com" }
+  ],
+  "merch": { "url": "" },
+  "contact": { "email": "", "formUrl": "" },
+  "featuredVideo": "",
+  "announcements": [],
+  "stats": { "youtubeSubscribers": "1M+", "milestoneDate": "2026-06-24" }
+}

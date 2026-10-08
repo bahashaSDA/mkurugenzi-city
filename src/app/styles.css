@@ -1,0 +1,95 @@
+:root {
+  --matatu-yellow: #ffc72c;
+  --deep-green: #0b5d3b;
+  --neon-pink: #ff2e88;
+  --ink: #0e0e10;
+  --paper: #f6f1e7;
+  --display: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; height: 100%; background: var(--ink); color: var(--paper); font-family: var(--sans); }
+body { overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+button, select { font: inherit; }
+
+.game-root { position: fixed; inset: 0; touch-action: none; }
+
+/* ---------- Splash ---------- */
+.splash {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(156, 74, 42, 0.55), transparent 60%),
+    linear-gradient(180deg, #121014 0%, #1b1410 100%);
+}
+.splash-inner { width: min(560px, 100%); text-align: center; }
+.splash-kicker { margin: 0 0 6px; letter-spacing: 0.2em; text-transform: uppercase; font-size: 12px; color: var(--matatu-yellow); }
+.splash-title { margin: 0 0 28px; font-family: var(--display); font-weight: 400; font-size: clamp(48px, 13vw, 96px); line-height: 0.9; letter-spacing: 0.02em; }
+.splash-title span { color: var(--matatu-yellow); }
+.route { position: relative; height: 64px; margin: 0 12px 28px; }
+.route-line { position: absolute; left: 0; right: 0; top: 34px; height: 4px; background: repeating-linear-gradient(90deg, #555 0 14px, transparent 14px 24px); border-radius: 2px; }
+.route-stops { position: absolute; left: 0; right: 0; top: 44px; display: flex; justify-content: space-between; font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.1em; }
+.matatu { position: absolute; top: 6px; transform: translateX(-50%); transition: left 0.1s linear; filter: drop-shadow(0 0 6px rgba(255, 46, 136, 0.6)); }
+.enter-btn {
+  min-width: 220px; min-height: 52px; padding: 0 28px; border: 0; border-radius: 999px; cursor: pointer;
+  background: var(--matatu-yellow); color: var(--ink); font-family: var(--display); font-size: 26px; letter-spacing: 0.05em;
+}
+.enter-btn:disabled { background: #3a3a3a; color: #999; cursor: progress; }
+.splash-note { margin-top: 18px; font-size: 12px; color: #9a958c; }
+
+/* ---------- HUD ---------- */
+.hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+.hud-quest {
+  position: absolute; top: calc(12px + var(--safe-t)); right: calc(12px + var(--safe-r)); max-width: min(320px, 70vw);
+  padding: 10px 14px; background: rgba(14, 14, 16, 0.62); border-left: 3px solid var(--matatu-yellow); border-radius: 6px;
+  display: grid; gap: 2px; font-size: 14px;
+}
+.hud-quest small { color: var(--matatu-yellow); text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; }
+.hud-hint {
+  position: absolute; bottom: calc(24px + var(--safe-b)); left: 50%; transform: translateX(-50%);
+  padding: 8px 14px; background: rgba(14, 14, 16, 0.7); border-radius: 999px; font-size: 13px; white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis;
+}
+.hud-settings { position: absolute; top: calc(12px + var(--safe-t)); left: calc(12px + var(--safe-l)); display: flex; gap: 8px; pointer-events: auto; }
+.hud-settings button, .hud-settings select {
+  min-height: 40px; min-width: 44px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(14, 14, 16, 0.7); color: var(--paper);
+}
+
+/* ---------- Touch ---------- */
+.touch { position: fixed; inset: 0; z-index: 9; }
+.touch-look { position: absolute; top: 0; right: 0; bottom: 0; width: 55%; }
+.touch-stick {
+  position: absolute; left: calc(28px + var(--safe-l)); bottom: calc(32px + var(--safe-b)); width: 132px; height: 132px; border-radius: 50%;
+  background: rgba(14, 14, 16, 0.35); border: 2px solid rgba(255, 255, 255, 0.25); display: grid; place-items: center; touch-action: none;
+}
+.touch-knob { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 199, 44, 0.85); pointer-events: none; }
+.touch-buttons { position: absolute; right: calc(24px + var(--safe-r)); bottom: calc(36px + var(--safe-b)); display: flex; gap: 14px; }
+.touch-btn {
+  width: 68px; height: 68px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3); background: rgba(14, 14, 16, 0.55);
+  color: var(--paper); font-family: var(--display); font-size: 20px; letter-spacing: 0.05em; touch-action: none;
+}
+
+/* ---------- Perf ---------- */
+.perf-overlay {
+  position: fixed; left: calc(8px + var(--safe-l)); bottom: calc(8px + var(--safe-b)); z-index: 40; margin: 0; padding: 6px 8px;
+  font: 11px/1.35 ui-monospace, Consolas, monospace; color: #b8f5c8; background: rgba(0, 0, 0, 0.65); border-radius: 4px; pointer-events: none;
+}
+.perf-overlay[data-over='1'] { color: #ff8a8a; }
+.bench-result {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 60; width: min(420px, calc(100vw - 32px));
+  padding: 16px; background: rgba(14, 14, 16, 0.92); border: 1px solid var(--matatu-yellow); border-radius: 10px;
+}
+.bench-result pre { font-size: 11px; white-space: pre-wrap; word-break: break-all; }
+.bench-result button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 6px; background: var(--matatu-yellow); color: var(--ink); cursor: pointer; }
+
+/* ---------- Fallback ---------- */
+.fallback { max-width: 640px; margin: 0 auto; padding: 32px 16px; overflow-y: auto; height: 100%; }
+.fallback h1 { font-family: var(--display); font-weight: 400; font-size: 56px; color: var(--matatu-yellow); margin: 0; }
+.fallback a { color: var(--matatu-yellow); }
+.fallback-links { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.fallback-episodes { padding: 0; list-style: none; display: grid; gap: 8px; }
+.fallback-episodes small { display: block; color: #9a958c; }
