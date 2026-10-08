@@ -1,28 +1,34 @@
 import type { Placement } from '../../world/kit/KitInstances';
 
-// Mtaa wa Mkurugenzi layout (research/references/hub-mtaa-wa-mkurugenzi.md).
-//   * Market lane: murram, N-S along x = 0, lined with kiosks facing the lane.
-//   * Central avenue: tarmac at x = 14 (see TestMap Avenue), block flats on its east frontage.
-//   * Dense single-room shacks behind, ~1 m footpaths, the odd E-W path, water tanks.
-// Kit pieces face +Z by default (their door/serving side), so rotY turns the front.
+// Mtaa wa Mkurugenzi layout v2 ("vertical slice"): density at street level first.
+//   * Central avenue (tarmac, x = 14, kerbs at x = 10 / 18) lined on BOTH sides by a continuous
+//     Eastlands-style shop frontage: facades 4 m back from the kerb, mabati verandas over a
+//     dusty pavement, power poles and street trees on the shoulder, alleys every few plots.
+//   * Market lane (murram, x = LANE_X) behind the west frontage, lined with steel kiosks.
+//   * Dense shack fields beyond, block flats behind the east frontage.
+// Kit pieces face +Z by default (door/serving side), so rotY turns the front.
+
+export const AVENUE_X = 14;
+export const KERB_W = 10; // west kerb line
+export const KERB_E = 18; // east kerb line
+export const LANE_X = -12;
+export const STREET_Z: [number, number] = [-150, 100];
 
 const FACE_EAST = Math.PI / 2; // front toward +X
 const FACE_WEST = -Math.PI / 2; // front toward -X
 const SHACKS = ['shack_mabati_green', 'shack_mabati_blue', 'shack_mud_plaster'];
 const KIOSKS = ['kiosk_pesa', 'kiosk_duka'];
+const SHOPS = ['shop_hardware', 'shop_barber', 'shop_hoteli', 'shop_butchery', 'shop_electronics', 'shop_mshop', 'shop_boutique'];
+const UNIT_W = 4.6; // shop plot width (street_kit)
+const FRONT_SETBACK = 4; // kerb to facade: 1.7 m shoulder + 2.3 m veranda
 
 type Rect = [x0: number, z0: number, x1: number, z1: number];
-// Kept clear: spawn plaza + letters, the Phase 0 collision test course (smoke tests use it),
-// the avenue, the market lane, and the matatu stage to the south (SPEC 6: stage at z = 120).
-const KEEP_CLEAR: Rect[] = [
-  [-16, -16, 16, 18],
-  [-46, -12, -8, 16],
-  [9, -400, 21, 400],
-  [-9, -400, 9, 400],
-  [-30, 104, 40, 150],
-];
+// Kept clear: spawn plaza + letters, the avenue, the market lane, the matatu stage (SPEC 6).
+const PLAZA: Rect = [-16, -17, 9, 19];
+const KEEP_CLEAR: Rect[] = [PLAZA, [9, -400, 19, 400], [LANE_X - 4.4, -400, LANE_X + 4.4, 400], [-30, 104, 40, 150]];
 const clear = (x: number, z: number, pad = 0) =>
   !KEEP_CLEAR.some(([x0, z0, x1, z1]) => x > x0 - pad && x < x1 + pad && z > z0 - pad && z < z1 + pad);
+const inPlaza = (z: number) => z > PLAZA[1] - UNIT_W / 2 && z < PLAZA[3] + UNIT_W / 2;
 
 function rng(seed: number) {
   let s = seed >>> 0;
@@ -33,7 +39,7 @@ function rng(seed: number) {
 }
 
 let cached: Placement[] | null = null;
-/** The hub layout, built once and shared (terrain mask, kit instances, tests). */
+/** The hub layout, built once and shared (terrain mask, kit instances, cables, tests). */
 export function getHubLayout(): Placement[] {
   return (cached ??= buildHubLayout());
 }
@@ -43,25 +49,56 @@ export function buildHubLayout(seed = 254): Placement[] {
   const out: Placement[] = [];
   const pick = <T,>(a: T[]) => a[Math.floor(r() * a.length)]!;
 
-  // --- kiosks along the market lane, with chairs and jerricans out front ---
-  for (let z = -150; z <= 100; z += 4.6) {
-    for (const side of [-1, 1]) {
-      if (r() < 0.25 || Math.abs(z) < 18) continue;
-      const x = side * 6.6;
-      out.push({ piece: pick(KIOSKS), x, z: z + (r() - 0.5) * 0.6, rotY: side < 0 ? FACE_EAST : FACE_WEST });
-      if (r() < 0.45) out.push({ piece: 'plastic_chair', x: side * 4.2, z: z + (r() - 0.5) * 2, rotY: r() * Math.PI * 2 });
-      if (r() < 0.35) out.push({ piece: 'jerrican', x: side * 4.7, z: z + 1.2 + r(), rotY: r() * Math.PI * 2 });
+  // --- shop frontage along both sides of the avenue ---
+  for (const side of [-1, 1] as const) {
+    const facade = side < 0 ? KERB_W - FRONT_SETBACK : KERB_E + FRONT_SETBACK;
+    const x = facade + side * 4.5; // unit is 9 m deep
+    let sinceAlley = 0;
+    let last = '';
+    for (let z = STREET_Z[0]; z <= STREET_Z[1]; z += UNIT_W) {
+      if (side < 0 && inPlaza(z)) continue;
+      // an alley (one empty plot) every 5-8 shops, leading back to the lane / shacks
+      if (sinceAlley > 4 && r() < 0.3) {
+        sinceAlley = 0;
+        continue;
+      }
+      sinceAlley++;
+      let s = pick(SHOPS);
+      if (s === last) s = pick(SHOPS); // avoid identical neighbours
+      last = s;
+      out.push({ piece: s, x, z, rotY: side < 0 ? FACE_EAST : FACE_WEST });
     }
   }
 
-  // --- power poles along the lane and the avenue ---
-  for (let z = -150; z <= 100; z += 32) if (Math.abs(z) > 14) out.push({ piece: 'power_pole', x: -3.8, z, rotY: 0 });
-  for (let z = 95; z >= -260; z -= 35) out.push({ piece: 'power_pole', x: 19.6, z, rotY: Math.PI / 2 });
+  // --- shoulder: power poles (crossarm across the street) and street trees ---
+  for (let z = 95; z >= -150; z -= 32) {
+    out.push({ piece: 'power_pole', x: KERB_W - 0.7, z, rotY: 0 });
+    out.push({ piece: 'power_pole', x: KERB_E + 0.7, z: z - 16, rotY: 0 });
+  }
+  for (let z = 88; z >= -150; z -= 21 + r() * 8) {
+    const west = r() < 0.5;
+    const tz = z + (r() - 0.5) * 4;
+    if (west && inPlaza(tz)) continue;
+    // ~60% jacarandas: it is October and they are in bloom across Nairobi
+    out.push({ piece: r() < 0.6 ? 'tree_jacaranda' : 'tree_street', x: west ? KERB_W - 1.0 : KERB_E + 1.0, z: tz, rotY: r() * Math.PI * 2 });
+  }
 
-  // --- block flats fronting the avenue (east side) ---
-  for (const z of [-110, -78, -46, 46, 78]) out.push({ piece: 'block_flat', x: 27.5, z, rotY: FACE_WEST });
+  // --- market lane kiosks (facing the lane), with chairs and jerricans ---
+  for (let z = -150; z <= 100; z += 4.6) {
+    for (const side of [-1, 1]) {
+      if (r() < 0.25 || inPlaza(z)) continue;
+      const x = LANE_X + side * 4.4;
+      out.push({ piece: pick(KIOSKS), x, z: z + (r() - 0.5) * 0.6, rotY: side < 0 ? FACE_EAST : FACE_WEST });
+      if (r() < 0.45) out.push({ piece: 'plastic_chair', x: LANE_X + side * 2.1, z: z + (r() - 0.5) * 2, rotY: r() * Math.PI * 2 });
+      if (r() < 0.35) out.push({ piece: 'jerrican', x: LANE_X + side * 2.6, z: z + 1.2 + r(), rotY: r() * Math.PI * 2 });
+    }
+  }
+  for (let z = -150; z <= 100; z += 32) if (!inPlaza(z)) out.push({ piece: 'power_pole', x: LANE_X + 2.6, z, rotY: 0 });
 
-  // --- shack fields west of the lane and east of the flats ---
+  // --- block flats behind the east frontage ---
+  for (const z of [-110, -55, 45, 80]) out.push({ piece: 'block_flat', x: 41, z, rotY: FACE_WEST });
+
+  // --- shack fields ---
   const field = (x0: number, x1: number, z0: number, z1: number) => {
     let row = 0;
     for (let z = z0; z <= z1; z += 4.9, row++) {
@@ -75,8 +112,8 @@ export function buildHubLayout(seed = 254): Placement[] {
       }
     }
   };
-  field(-78, -12, -150, 100);
-  field(37, 80, -150, 100);
+  field(-80, -21, -150, 100);
+  field(50, 86, -150, 100);
 
   return out;
 }

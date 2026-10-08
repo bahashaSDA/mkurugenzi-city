@@ -27,7 +27,7 @@ function spawnFromUrl(): [number, number, number] {
   const raw = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('spawn') : null;
   const parts = raw?.split(',').map(Number);
   if (parts && parts.length === 2 && parts.every(Number.isFinite)) return [parts[0]!, 2, parts[1]!];
-  return [0, 2, 8];
+  return [7.6, 2, 30]; // west pavement of the avenue, looking north up the shopping street
 }
 
 export const SPAWN: [number, number, number] = spawnFromUrl();

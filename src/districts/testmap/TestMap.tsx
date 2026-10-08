@@ -5,6 +5,7 @@ import * as THREE from 'three';
 // stairs). Development geometry: only mounted with ?testcourse (VISUAL_AUDIT H6). The smoke
 // tests pass that flag.
 export const TEST_COURSE = new URLSearchParams(location.search).has('testcourse');
+export const TEST_COURSE_ORIGIN: [number, number] = [-600, 600];
 
 const concrete = new THREE.MeshStandardMaterial({ color: '#b9ad98', roughness: 0.92 });
 const block = new THREE.MeshStandardMaterial({ color: '#d9c9a3', roughness: 0.9 });
@@ -47,8 +48,8 @@ function Stairs({ pos, steps = 10, rise = 0.17, run = 0.3, width = 2.4 }: { pos:
 export function TestMap() {
   return (
     <>
-      {/* Collision test course, west of spawn */}
-      <group position={[-14, 0, 0]}>
+      {/* Collision test course, far from the neighbourhood (smoke tests spawn here) */}
+      <group position={[TEST_COURSE_ORIGIN[0], 0, TEST_COURSE_ORIGIN[1]]}>
         <Box pos={[0, 1.5, -6]} size={[10, 3, 0.25]} mat={block} />
         <Box pos={[-5, 1.5, -1]} size={[0.25, 3, 10]} mat={block} />
         <Box pos={[2, 0.5, 2]} size={[3, 1.0, 0.2]} />

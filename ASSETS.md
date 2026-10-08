@@ -21,6 +21,11 @@ Every model, texture, sound, font and animation used in the build. Source, autho
 | Ground 102 (runtime worn-path murram) | `public/textures/murram_path_*.ktx2` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Ground102 |
 | Asphalt 031 (runtime tarmac) | `public/textures/asphalt_*.ktx2` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Asphalt031 |
 | Ground 048 (Blender preview ground only, not shipped) | `blender/textures` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Ground048 |
+| Street kit models (7 shop units, street tree, jacaranda) | `public/models/street_kit.glb` | built by `blender/scripts/build_street_kit.py` | this project | project-owned | n/a |
+| Leaf Set 022 (street-tree leaf clusters, baked into cards) | inside `street_kit.glb` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=LeafSet022 |
+| Leaf Set 024 (jacaranda leaf clusters, baked into cards) | inside `street_kit.glb` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=LeafSet024 |
+| Bark 007 (tree bark) | inside `street_kit.glb` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Bark007 |
+| Foliage 003 (weeds atlas, fetched for the grass pass) | `blender/textures` | ambientCG | Lennart Demes | CC0 1.0 | https://ambientcg.com/view?id=Foliage003 |
 | Blender built-in font (kiosk sign lettering, converted to mesh) | inside `hub_kit.glb` | Blender (Bfont, DejaVu Sans derived) | DejaVu fonts team / Bitstream | Bitstream Vera licence (free, permissive) | https://dejavu-fonts.github.io/License.html |
 | Basis Universal transcoder | `public/basis/` | three.js r186 | Binomial LLC | Apache 2.0 | https://github.com/BinomialLLC/basis_universal |
 

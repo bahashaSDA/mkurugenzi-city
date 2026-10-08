@@ -28,7 +28,7 @@ let missing = 0;
 for (const f of files) {
   const doc = await io.read(path.join(dir, f));
   const nodes = doc.getRoot().listNodes();
-  const colliders = new Set(nodes.filter((n) => n.getName().startsWith('COL_')).map((n) => n.getName().slice(4)));
+  const colliders = new Set(nodes.filter((n) => n.getName().startsWith('COL_')).map((n) => n.getName().slice(4).replace(/__\d+$/, '')));
   const need = new Set();
   for (const n of nodes) {
     const name = n.getName();

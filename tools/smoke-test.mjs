@@ -37,12 +37,14 @@ async function run(name, query, keys, ms, check) {
   await page.close();
 }
 
+const OX = -586; // test course moved from origin (-14,0) to (-600,600)
+const OZ = 600;
 await run('spawn_walk_letters', '', ['KeyW'], 9000, (b, a) => (a.z < b.z - 3 ? 'PASS moved north' : 'FAIL did not move'));
-await run('wall_block', 'spawn=-14,-3', ['KeyW'], 9000, (b, a) => (a.z > -5.7 ? 'PASS wall held (z>-5.7)' : 'FAIL passed through wall'));
-await run('step_030', 'spawn=-16,9', ['KeyW'], 9000, (b, a) => (a.maxY > b.y + 0.25 ? 'PASS stepped up 0.30 m' : 'FAIL no step-up'));
-await run('step_045', 'spawn=-13.5,9', ['KeyW'], 9000, (b, a) => (a.maxY < b.y + 0.1 && a.z > 6.9 ? 'PASS blocked by 0.45 m' : 'FAIL climbed/passed 0.45 m'));
-await run('ramp_55', 'spawn=-36,12', ['KeyW'], 9000, (b, a) => (a.maxY < b.y + 1.0 ? 'PASS could not climb 55°' : 'FAIL climbed 55° ramp'));
-await run('ramp_30', 'spawn=-32,12', ['KeyW'], 9000, (b, a) => (a.maxY > b.y + 3.0 ? 'PASS climbed 30° ramp' : 'FAIL could not climb 30° ramp'));
+await run('wall_block', `spawn=${-14 + OX},${-3 + OZ}`, ['KeyW'], 9000, (b, a) => (a.z > -5.7 + OZ ? 'PASS wall held (z>-5.7)' : 'FAIL passed through wall'));
+await run('step_030', `spawn=${-16 + OX},${9 + OZ}`, ['KeyW'], 9000, (b, a) => (a.maxY > b.y + 0.25 ? 'PASS stepped up 0.30 m' : 'FAIL no step-up'));
+await run('step_045', `spawn=${-13.5 + OX},${9 + OZ}`, ['KeyW'], 9000, (b, a) => (a.maxY < b.y + 0.1 && a.z > 6.9 + OZ ? 'PASS blocked by 0.45 m' : 'FAIL climbed/passed 0.45 m'));
+await run('ramp_55', `spawn=${-36 + OX},${12 + OZ}`, ['KeyW'], 9000, (b, a) => (a.maxY < b.y + 1.0 ? 'PASS could not climb 55°' : 'FAIL climbed 55° ramp'));
+await run('ramp_30', `spawn=${-32 + OX},${12 + OZ}`, ['KeyW'], 9000, (b, a) => (a.maxY > b.y + 3.0 ? 'PASS climbed 30° ramp' : 'FAIL could not climb 30° ramp'));
 // Hub collision: walk straight north (W) into the south side of a real kiosk.
 // (Strafing is not used: the GTA-style camera recentres behind a strafing player, so A/D
 // curves the path.) Pick a west-side kiosk with an empty slot south of it to spawn in.

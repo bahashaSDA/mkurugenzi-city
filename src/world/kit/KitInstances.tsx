@@ -145,26 +145,27 @@ export function KitInstances({ kit, placements, render = true }: { kit: Kit; pla
     <>
       <group ref={group} />
       <RigidBody type="fixed" colliders={false}>
-        {placements.map((p, i) => {
-          const col = kit.get(p.piece)?.collider;
-          if (!col) return null;
-          const rot: [number, number, number] = [0, p.rotY, 0];
-          if (col.kind === 'hull') {
-            return <ConvexHullCollider key={i} args={[col.points]} position={[p.x, p.y ?? 0, p.z]} rotation={rot} />;
-          }
-          // Rotate the collider's centre offset into place with the piece.
-          const c = Math.cos(p.rotY);
-          const s = Math.sin(p.rotY);
-          const [cx, cy, cz] = col.center;
-          return (
-            <CuboidCollider
-              key={i}
-              args={col.halfExtents}
-              position={[p.x + cx * c + cz * s, (p.y ?? 0) + cy, p.z - cx * s + cz * c]}
-              rotation={rot}
-            />
-          );
-        })}
+        {placements.flatMap((p, i) =>
+          (kit.get(p.piece)?.colliders ?? []).map((col, j) => {
+            const rot: [number, number, number] = [0, p.rotY, 0];
+            const key = `${i}.${j}`;
+            if (col.kind === 'hull') {
+              return <ConvexHullCollider key={key} args={[col.points]} position={[p.x, p.y ?? 0, p.z]} rotation={rot} />;
+            }
+            // Rotate the collider's centre offset into place with the piece.
+            const c = Math.cos(p.rotY);
+            const s = Math.sin(p.rotY);
+            const [cx, cy, cz] = col.center;
+            return (
+              <CuboidCollider
+                key={key}
+                args={col.halfExtents}
+                position={[p.x + cx * c + cz * s, (p.y ?? 0) + cy, p.z - cx * s + cz * c]}
+                rotation={rot}
+              />
+            );
+          }),
+        )}
       </RigidBody>
     </>
   );

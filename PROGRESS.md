@@ -1,6 +1,36 @@
 # PROGRESS
 
-_Last updated: 2026-10-08 (session 3)_
+_Last updated: 2026-10-08 (session 4)_
+
+## Session 4: owner feedback "this looks so lame", so we switched to a vertical slice
+Owner screenshot: the avenue in an empty beige plain with a capsule player.
+
+**Diagnosis:**
+1. Emptiness: buildings 30 m+ from the road.
+2. No trees, cables, people or vehicles.
+3. The capsule player.
+
+**Strategy change:** finish ONE dense street to full quality before expanding (studio "vertical slice").
+
+**Done:**
+- `blender/scripts/kitlib.py`: shared kit library (refactored from build_hub_kit.py, identical output). Adds compound colliders (`COL_x__N`), and vertex-colour paint tint on white materials, so dust now *lightens* dark paint.
+- `blender/scripts/build_street_kit.py` produces `street_kit.glb` (2.77 MB):
+  - **7 shop units:** hardware, barber, hoteli, butchery, electronics, M-shop, boutique.
+    - 4.6 x 9 m plots, 1-2 storeys, open stocked shopfronts, folding steel doors, shutter drum
+    - mabati veranda on posts (walkable underneath: compound colliders)
+    - hand-painted fictional signs, grilled upper windows with curtains, roof tanks, dishes
+    - all units share about 10 materials, with paint from vertex colours
+  - **Trees:** street tree and jacaranda in October bloom.
+    - Procedural multi-level branching with bark.
+    - Leaf-cluster cards rendered in Blender from CC0 leaf atlases (ragged sprays; jacaranda panicles).
+    - LOD2 impostor rendered from LOD0. Wind sway in the vertex shader.
+- Layout v2:
+  - Continuous shop frontage on both sides of the avenue, with alleys every 5-8 plots.
+  - Poles and trees (60% jacaranda) on the shoulders.
+  - Market lane moved behind the west frontage (x = -12); block flats behind the east frontage.
+  - Test course moved to (-600, 600).
+- `src/world/Cables.tsx`: power conductors, slack telecom lines and service drops to the shops, all in ONE merged mesh.
+- Spawn moved to the west pavement, looking up the street.
 
 ## Session 3: auto-updating episodes, real-world references, visual overhaul started
 

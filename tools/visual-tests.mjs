@@ -17,7 +17,9 @@ const SHOTS = {
   hub_shacks_close: '-10.2,1.7,-55,-40,1.4,-58',
   hub_avenue: '14,1.7,45,14,1.5,-20',
   hub_kiosk_close: '-2.2,1.65,-38,-6.6,1.6,-40',
-  character_closeup: '0.9,1.55,10.4,0,1.2,8',
+  character_closeup: '8.5,1.55,32.4,7.6,1.2,30',
+  street_spawn_view: '7.6,2.4,34.5,9,2.0,0',
+  street_from_road: '14,1.7,40,14,2.5,-30',
 };
 
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

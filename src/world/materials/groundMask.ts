@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Placement } from '../kit/KitInstances';
+import { KERB_E, KERB_W, LANE_X, STREET_Z } from '../../districts/hub/layout';
 
 // Ground mask for the hub area, generated from the layout (no download):
 //   R = worn, compacted red-brown murram (lane, footpaths, kiosk fronts, doorways)
@@ -73,11 +74,17 @@ export function buildGroundMask(placements: Placement[]): THREE.DataTexture {
   // Market lane: worn along its whole length, noisy edges, heaviest in the middle.
   for (let z = -170; z <= 120; z += 1.2) {
     const wobble = (noise(0.3, z * 0.05) - 0.5) * 3;
-    stamp(worn, wobble, z, 5.5 + noise(1, z * 0.1) * 2, 0.95);
+    stamp(worn, LANE_X + wobble, z, 4.5 + noise(1, z * 0.1) * 1.5, 0.95);
+  }
+  // Avenue pavements: the dusty shoulder between kerb and verandas is trodden flat.
+  for (let z = STREET_Z[0] - 10; z <= STREET_Z[1] + 10; z += 1.5) {
+    stamp(worn, KERB_W - 2 + (noise(2, z * 0.07) - 0.5), z, 2.6, 0.85);
+    stamp(worn, KERB_E + 2 + (noise(3, z * 0.07) - 0.5), z, 2.6, 0.85);
   }
   // Doorways, kiosk fronts and shack footpaths: wear where people actually walk.
   for (const p of placements) {
-    stamp(occupied, p.x, p.z, p.piece === 'block_flat' ? 9 : 3.4, 1);
+    if (p.piece.startsWith('tree')) continue; // grass and dirt reach right up to trunks
+    stamp(occupied, p.x, p.z, p.piece === 'block_flat' ? 9 : p.piece.startsWith('shop') ? 6 : 3.4, 1);
     if (p.piece.startsWith('kiosk')) stamp(worn, p.x + Math.sin(p.rotY) * 2, p.z + Math.cos(p.rotY) * 2, 2.8, 0.9);
     if (p.piece.startsWith('shack')) stamp(worn, p.x + Math.sin(p.rotY) * 2.3, p.z + Math.cos(p.rotY) * 2.3, 2.2, 0.75);
   }

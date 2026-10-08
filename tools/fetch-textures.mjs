@@ -20,6 +20,10 @@ export const TEXTURES = {
   Ground109: 'dry beige-brown dirt: base murram (runtime ground)',
   Ground102: 'compressed dry dirt: worn paths (runtime ground)',
   Asphalt031: 'light grey asphalt: sun-bleached Nairobi tarmac (runtime road)',
+  LeafSet024: 'green leaf atlas with opacity (street-tree foliage cards)',
+  LeafSet022: 'green leaf atlas with opacity (second species)',
+  Bark007: 'light rough bark (street trees)',
+  Foliage003: 'grass/weed atlas with opacity (roadside weeds)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';
