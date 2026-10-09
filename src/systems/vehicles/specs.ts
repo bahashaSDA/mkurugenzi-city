@@ -25,7 +25,7 @@ const flipY = (pts: [number, number][]) => pts.map(([x, y]) => [x, -y] as [numbe
 export const SPECS: Record<VehicleKind, VehicleSpec> = {
   matatu: {
     kind: 'matatu',
-    pieces: ['matatu_van'],
+    pieces: ['matatu_van', 'matatu_van', 'matatu_pimp'], // mostly NTSA white, some pimped
     length: 5.38, width: 1.88, height: 2.28, seatY: 0.82, floorY: 0.4,
     seats: flipY([[-0.55, -0.55], [0, -0.55], [0.55, -0.55], [-0.55, 0.35], [0, 0.35], [0.55, 0.35],
       [-0.55, 1.25], [0, 1.25], [0.55, 1.25], [-0.55, 2.1], [0, 2.1], [0.55, 2.1]]),
@@ -53,7 +53,7 @@ export const SPECS: Record<VehicleKind, VehicleSpec> = {
   },
   car: {
     kind: 'car',
-    pieces: ['car_saloon_0', 'car_saloon_1', 'car_saloon_2'],
+    pieces: ['car_saloon_0', 'car_saloon_1', 'car_saloon_2', 'car_suv_0', 'car_suv_1', 'car_hatch_0', 'car_hatch_1', 'car_pickup_0', 'car_pickup_1'],
     length: 4.3, width: 1.7, height: 1.48, seatY: 0.6, floorY: 0.35,
     seats: [], stand: [], door: [0.9, 0],
     fare: 0, music: 'none', townSpeed: 11,

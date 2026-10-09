@@ -22,7 +22,7 @@ const SHOTS = {
   street_from_road: '14,1.7,40,14,2.5,-30',
   market_aisle: '-44,1.7,40,-44,1.4,70&spawn=-44,46',
   market_wide: '-10,14,30,-45,0,65&spawn=-40,60',
-  matatu_stage: '28,3,142,14,1.5,124',
+  matatu_stage: '24,2.4,108,12,1.4,122&spawn=8,104',
   kibera_rooftops: '-175,26,40,-300,8,-20&spawn=-230,15',
   kibera_lane: '-200,9,14,-240,6,10&spawn=-215,12',
   rocky_ridge: '170,22,430,300,8,440',

@@ -42,8 +42,9 @@ function prepareMaterial(m: THREE.Material) {
   }
   if (m.name.includes('_glow')) {
     // LEDs, screens, lights, sign boxes: self-lit (bloom picks them up)
-    std.emissive = std.color.clone();
-    std.emissiveIntensity = 1.6;
+    std.emissive = std.map ? new THREE.Color(1, 1, 1) : std.color.clone();
+    if (std.map) std.emissiveMap = std.map; // painted signs (nganya headboards) glow with their artwork
+    std.emissiveIntensity = std.map ? 0.9 : 1.6;
     return;
   }
   if (!m.name.includes('_alpha')) return;
