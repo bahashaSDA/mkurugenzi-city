@@ -31,6 +31,49 @@ export interface KitPiece {
 /** Shared wind clock for foliage (advanced by <WindClock/>). */
 export const wind = { uTime: { value: 0 } };
 
+/** Self-lit materials (signs, LEDs, lamps): Environment brightens them after dark. */
+export const glowMaterials = new Set<THREE.MeshStandardMaterial>();
+/** 0 by day, 1 at night: building windows light up (Environment drives it). */
+export const nightWindowUniforms = { uNight: { value: 0 } };
+
+/** Facades: at night a random share of the windows (dark glass in the texture) glow warm. */
+function nightWindows(m: THREE.MeshStandardMaterial) {
+  m.onBeforeCompile = (shader) => {
+    shader.uniforms.uNight = nightWindowUniforms.uNight;
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', `#include <common>
+varying vec3 vWP;`)
+      .replace(
+        '#include <worldpos_vertex>',
+        `#include <worldpos_vertex>
+        #ifdef USE_INSTANCING
+          vWP = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;
+        #else
+          vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;
+        #endif`,
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>
+uniform float uNight; varying vec3 vWP;`)
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        #ifdef USE_MAP
+        if (uNight > 0.01) {
+          vec4 tx = texture2D(map, vMapUv);
+          float lum = dot(tx.rgb, vec3(0.299, 0.587, 0.114));
+          float win = smoothstep(0.34, 0.16, lum) * step(tx.r, tx.b + 0.08);
+          vec3 cell = floor(vWP / vec3(2.6, 3.0, 2.6));
+          float h = fract(sin(dot(cell, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+          vec3 warm = mix(vec3(1.0, 0.68, 0.36), vec3(0.75, 0.85, 1.0), step(0.85, h));
+          totalEmissiveRadiance += warm * win * step(0.42, h) * uNight * 1.6;
+        }
+        #endif`,
+      );
+  };
+  m.customProgramCacheKey = () => 'night-windows';
+}
+
 function prepareMaterial(m: THREE.Material) {
   const std = m as THREE.MeshStandardMaterial;
   if (m.name.includes('glass')) {
@@ -47,6 +90,12 @@ function prepareMaterial(m: THREE.Material) {
     std.emissive = std.map ? new THREE.Color(1, 1, 1) : std.color.clone();
     if (std.map) std.emissiveMap = std.map; // painted signs (nganya headboards) glow with their artwork
     std.emissiveIntensity = std.map ? 0.9 : 1.6;
+    std.userData.baseGlow = std.emissiveIntensity;
+    glowMaterials.add(std);
+    return;
+  }
+  if (/^fac_|_facade/.test(m.name)) {
+    nightWindows(std);
     return;
   }
   if (!m.name.includes('_alpha')) return;

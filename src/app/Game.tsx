@@ -17,6 +17,7 @@ import { TEST_COURSE, TestMap } from '../districts/testmap/TestMap';
 import { Terrain } from '../world/Terrain';
 import { RoadNetwork } from '../world/Roads';
 import { PostFX } from '../world/PostFX';
+import { StreetLights } from '../world/StreetLights';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
 import { Hub } from '../districts/hub/Hub';
 import { Pedestrians } from '../systems/npc/Pedestrians';
@@ -113,6 +114,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
               </Suspense>
             )}
           </Physics>
+          {!minimal && <StreetLights />}
           <WorldStreamer />
           <GameLogic />
           <PerfMonitor />

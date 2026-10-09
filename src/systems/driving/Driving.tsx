@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { CuboidCollider, RigidBody, useBeforePhysicsStep, useRapier, type RapierRigidBody } from '@react-three/rapier';
 import type { DynamicRayCastVehicleController } from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
-import { useKit, type Kit } from '../../world/kit/useKit';
+import { type Kit } from '../../world/kit/useKit';
 import { KitInstances } from '../../world/kit/KitInstances';
 import { register } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
@@ -11,7 +11,7 @@ import { emit } from '../../game/events';
 import { input, onKeyPress } from '../input';
 import { playerAnim } from '../player/AbelModel';
 import { ride } from '../vehicles/state';
-import { VEHICLES_KIT_URL } from '../vehicles/Vehicles';
+import { useVehicleKit } from '../vehicles/vehicleKit';
 import { CAR_DIMS, carKind, drive, useParking } from './state';
 
 // GTA-style driving: parked cars on the road shoulders (instanced, solid), F at the driver's door
@@ -31,7 +31,7 @@ function local(cx: number, cz: number, h: number, lx: number, lz: number): [numb
 }
 
 export function Driving() {
-  const kit = useKit(VEHICLES_KIT_URL);
+  const kit = useVehicleKit();
   const cars = useParking((s) => s.cars);
   const [driving, setDriving] = useState<{ piece: string; x: number; y: number; z: number; rotY: number } | null>(null);
 

@@ -25,8 +25,9 @@ const flipY = (pts: [number, number][]) => pts.map(([x, y]) => [x, -y] as [numbe
 export const SPECS: Record<VehicleKind, VehicleSpec> = {
   matatu: {
     kind: 'matatu',
-    pieces: ['matatu_van', 'matatu_van', 'matatu_pimp'], // mostly NTSA white, some pimped
-    length: 5.38, width: 1.88, height: 2.28, seatY: 0.82, floorY: 0.4,
+    // real VW Crafter (sketchfab, baked by build_real_kit.py): NTSA white x2, black "Story Time" pimped
+    pieces: ['rv_matatu_0', 'rv_matatu_1', 'rv_matatu_2'],
+    length: 5.94, width: 1.94, height: 2.14, seatY: 0.82, floorY: 0.45,
     seats: flipY([[-0.55, -0.55], [0, -0.55], [0.55, -0.55], [-0.55, 0.35], [0, 0.35], [0.55, 0.35],
       [-0.55, 1.25], [0, 1.25], [0.55, 1.25], [-0.55, 2.1], [0, 2.1], [0.55, 2.1]]),
     stand: [[0.6, 1.4]],
@@ -35,8 +36,8 @@ export const SPECS: Record<VehicleKind, VehicleSpec> = {
   },
   nganya: {
     kind: 'nganya',
-    pieces: ['nganya_0', 'nganya_1', 'nganya_2'],
-    length: 7.6, width: 2.3, height: 3.0, seatY: 1.05, floorY: 0.62,
+    pieces: ['rv_nganya_0', 'rv_nganya_1', 'rv_nganya_2'], // real Isuzu NQR nganya, airbrushed liveries
+    length: 7.6, width: 2.2, height: 2.46, seatY: 1.0, floorY: 0.6,
     seats: flipY(Array.from({ length: 24 }, (_, k) => [[-0.75, -0.3, 0.55][k % 3]!, -2.6 + 0.75 * Math.floor(k / 3)] as [number, number])),
     stand: [[0.15, 1.6], [0.15, 0.6], [0.15, -0.4], [0.15, -1.4]],
     door: [1.2, 2.6],
@@ -44,7 +45,7 @@ export const SPECS: Record<VehicleKind, VehicleSpec> = {
   },
   bus: {
     kind: 'bus',
-    pieces: ['sacco_bus'],
+    pieces: ['rv_nganya_0', 'rv_nganya_2'], // until a real Sacco bus model is downloaded (tools/sketchfab-models.json)
     length: 8.2, width: 2.35, height: 3.0, seatY: 1.05, floorY: 0.62,
     seats: flipY(Array.from({ length: 27 }, (_, k) => [[-0.75, -0.3, 0.55][k % 3]!, -2.9 + 0.75 * Math.floor(k / 3)] as [number, number])),
     stand: [[0.15, 1.8], [0.15, 0.8], [0.15, -0.2], [0.15, -1.2]],
@@ -53,8 +54,8 @@ export const SPECS: Record<VehicleKind, VehicleSpec> = {
   },
   car: {
     kind: 'car',
-    pieces: ['car_saloon_0', 'car_saloon_1', 'car_saloon_2', 'car_suv_0', 'car_suv_1', 'car_hatch_0', 'car_hatch_1', 'car_pickup_0', 'car_pickup_1'],
-    length: 4.3, width: 1.7, height: 1.48, seatY: 0.6, floorY: 0.35,
+    pieces: ['rv_car_0', 'rv_car_1', 'rv_car_2', 'rv_car_3'],
+    length: 4.28, width: 1.8, height: 1.49, seatY: 0.6, floorY: 0.35,
     seats: [], stand: [], door: [0.9, 0],
     fare: 0, music: 'none', townSpeed: 11,
   },

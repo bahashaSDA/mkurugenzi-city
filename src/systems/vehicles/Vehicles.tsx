@@ -5,7 +5,7 @@ import { CuboidCollider, RigidBody, type RapierRigidBody } from '@react-three/ra
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { useGame } from '../../app/store';
-import { useKit } from '../../world/kit/useKit';
+import { useVehicleKit } from './vehicleKit';
 import { getKTX2Loader } from '../../world/ktx2';
 import { register, type Interactable } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
@@ -21,7 +21,7 @@ import { Stages } from './Stages';
 import { emit } from '../../game/events';
 import { drive } from '../driving/state';
 
-export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
+
 // passengers: the same mostly-merch crowd (shares the GLBs the pedestrians already loaded)
 const NPC_URLS = ['fan_hoodie_black', 'fan_lady_black', 'fan_tee_burgundy', 'fan_hoodie_sand', 'mama_mboga', 'student'].map((v) => `/models/npc_${v}.glb`);
 
@@ -71,7 +71,7 @@ const _a = { x: 0, y: 0, z: 0, h: 0, hw: false };
 
 export function Vehicles() {
   const tier = useGame((s) => s.tier);
-  const kit = useKit(VEHICLES_KIT_URL);
+  const kit = useVehicleKit();
   const routes = useMemo(() => routeSamples(), []);
   const group = useRef<THREE.Group>(null);
   const bodies = useRef<(RapierRigidBody | null)[]>([]);

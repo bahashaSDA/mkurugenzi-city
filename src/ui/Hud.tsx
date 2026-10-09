@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGame, type QualitySetting } from '../app/store';
+import { formatClock, useClock } from '../world/clock';
 
 /** Phase 0 HUD: controls hint, camera toggle, quality preset. Phase 1 adds minimap, quests and the phone. */
 export function Hud() {
@@ -9,6 +10,7 @@ export function Hud() {
   const cameraMode = useGame((s) => s.cameraMode);
   const toggleCamera = useGame((s) => s.toggleCamera);
   const [hint, setHint] = useState(true);
+  const hours = useClock((s) => s.hours);
 
   useEffect(() => {
     const t = setTimeout(() => setHint(false), 9000);
@@ -24,6 +26,7 @@ export function Hud() {
             : 'Click to look · WASD move · Shift sprint · Space jump · E use · F matatu · I bag · V first-person'}
         </div>
       )}
+      <div className="hud-clock" aria-label="Time of day">{formatClock(hours)}</div>
       <div className="hud-settings">
         <button onClick={toggleCamera} aria-label="Toggle camera">
           {cameraMode === 'third' ? '1st' : '3rd'}

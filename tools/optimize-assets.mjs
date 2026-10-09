@@ -28,6 +28,8 @@ const budgetFor = (name) => {
   if (name.startsWith('abel')) return { bytes: 2.5 * MB, tex: 2048 };
   if (name.startsWith('npc_fan_')) return { bytes: 0.65 * MB, tex: 1024 }; // merch prints (botanical) compress less
   if (name.startsWith('npc_')) return { bytes: 0.6 * MB, tex: 1024 };
+  // real Sketchfab vehicles stream in after the splash (own Suspense boundary), shared by every vehicle
+  if (name.startsWith('real_')) return { bytes: 6 * MB, tex: 1024 };
   return { bytes: 4 * MB, tex: 1024 }; // district chunks and kits
 };
 
@@ -38,8 +40,9 @@ const io = new NodeIO()
   .registerDependencies({ 'meshopt.encoder': MeshoptEncoder, 'meshopt.decoder': MeshoptDecoder });
 
 let files = [];
+const ONLY = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
 try {
-  files = (await readdir(inDir)).filter((f) => f.endsWith('.glb'));
+  files = (await readdir(inDir)).filter((f) => f.endsWith('.glb') && (!ONLY || ONLY.test(f)));
 } catch {
   console.log(`[optimize] no input dir ${inDir}; nothing to do`);
   process.exit(0);
