@@ -312,9 +312,22 @@ def slanted_box(a, b, W, thick=0.3):
     return ((0, (ya + yb) / 2, (za + zb) / 2), (W, ln, thick), ang)
 
 
+# Far LODs: fold the small parts into a few shared materials (each material is a draw call)
+FAR_REMAP = {"AMBER": "HEAD", "PLATE_F": "BLACK", "PLATE_R": "BLACK", "INK": "BLACK", "RED": "TAIL", "WHITE": "BLACK",
+             "SCREEN": "BLACK", "DASH": "BLACK", "CABIN": "BLACK", "FLOOR": "BLACK", "SEAT": "BLACK",
+             "CHROME": "RIM"}
+
+
 def finish_body(name, ob_body, lod, extra, L, H, mats, livery_uv=True):
     bm = baked_bmesh(ob_body)
     extra(bm)
+    if lod >= 1:
+        remap = {S[a]: S[b] for a, b in FAR_REMAP.items()}
+        if lod == 2:
+            remap[S["LED"]] = S["BLACK"]
+            remap[S["GLASS"]] = S["GLASS_DARK"]
+        for f in bm.faces:
+            f.material_index = remap.get(f.material_index, f.material_index)
     uv = bm.loops.layers.uv.verify()
     bm.normal_update()
     for f in bm.faces:

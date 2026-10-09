@@ -91,6 +91,11 @@ col = mix(col, grassCol * 0.9, (1.0 - inMask) * smoothstep(0.5, 0.75, wildN) * 0
 // Kibera: trodden red earth between the houses (owner photo)
 float kib = smoothstep(-150.0, -175.0, vWorldPosG.x) * smoothstep(-300.0, -280.0, vWorldPosG.z) * smoothstep(310.0, 290.0, vWorldPosG.z);
 col = mix(col, pathCol * vec3(1.0, 0.92, 0.85), kib * (0.55 + 0.25 * gNoise(vWorldPosG.xz * 0.2)));
+// ...and dirt: dark wet mud patches, grey ash from jikos, scattered rubbish stains
+float mud = smoothstep(0.55, 0.8, gNoise(vWorldPosG.xz * 0.11 + 7.0) * 0.7 + gNoise(vWorldPosG.xz * 0.6) * 0.3);
+col = mix(col, col * vec3(0.42, 0.38, 0.32), kib * mud * 0.85);
+float ash = smoothstep(0.7, 0.9, gNoise(vWorldPosG.xz * 0.23 - 3.0));
+col = mix(col, vec3(0.32, 0.31, 0.3), kib * ash * 0.5);
 // Rocky Ridge: cracked bare rock breaking through the soil
 float rd = length(vWorldPosG.xz - uRidge.xy);
 float rocky = smoothstep(uRidge.z, uRidge.z * 0.45, rd) * smoothstep(0.35, 0.6, gNoise(vWorldPosG.xz * 0.05) * 0.6 + 0.4);
@@ -100,7 +105,7 @@ diffuseColor.rgb *= col;
 `,
       );
   };
-  mat.customProgramCacheKey = () => 'ground-v2';
+  mat.customProgramCacheKey = () => 'ground-v3';
   return mat;
 }
 

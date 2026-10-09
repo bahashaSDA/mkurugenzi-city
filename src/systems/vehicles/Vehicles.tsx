@@ -22,7 +22,8 @@ import { emit } from '../../game/events';
 import { drive } from '../driving/state';
 
 export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
-const NPC_URLS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_woman', 'worker', 'auntie'].map((v) => `/models/npc_${v}.glb`);
+// passengers: the same mostly-merch crowd (shares the GLBs the pedestrians already loaded)
+const NPC_URLS = ['fan_hoodie_black', 'fan_lady_black', 'fan_tee_burgundy', 'fan_hoodie_sand', 'mama_mboga', 'student'].map((v) => `/models/npc_${v}.glb`);
 
 // Who drives where (per quality tier). Kenya: left-hand traffic (routes.ts offsets lanes left).
 const FLEET: Record<'low' | 'mid' | 'high', [string, VehicleKind, number][]> = {

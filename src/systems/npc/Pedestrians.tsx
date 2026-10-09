@@ -26,9 +26,16 @@ import { emit } from '../../game/events';
 //   sitters  - on the plastic chairs by the kiosks
 // Only people near the camera are drawn and animated (SPEC 8.6 LOD).
 
-const VARIANTS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_woman', 'worker', 'auntie'];
-const URLS = VARIANTS.map((v) => `/models/npc_${v}.glb`);
-const POOL = { low: 12, mid: 22, high: 34 } as const;
+// ~90% of the crowd wears Abel's own Mkurugenzi range (owner request); the rest are the mtaa's
+// regulars (mama mboga, boda riders, students...). Fewer variants load on lower tiers.
+const FANS = ['fan_hoodie_black', 'fan_lady_black', 'fan_tee_burgundy', 'fan_hoodie_sand', 'fan_lady_burgundy', 'fan_tee_botanical',
+  'fan_suit_coffee', 'fan_lady_grey', 'fan_hoodie_charcoal', 'fan_tee_navy', 'fan_lady_tee', 'fan_suit_ivory'];
+const LOCALS = ['mama_mboga', 'hustler', 'student', 'elder', 'auntie', 'worker', 'office', 'young_woman'];
+const VARIANT_COUNT = { low: [4, 2], mid: [8, 3], high: [12, 4] } as const;
+export const variantsFor = (tier: 'low' | 'mid' | 'high') => [...FANS.slice(0, VARIANT_COUNT[tier][0]), ...LOCALS.slice(0, VARIANT_COUNT[tier][1])];
+const POOL = { low: 14, mid: 26, high: 36 } as const;
+const SHADOW_DIST = 20; // only people close to the camera cast shadows (each one is ~7 draw calls)
+const DETAIL_DIST = 30; // eyes, brows and lashes are a few pixels beyond this
 const ANIMATE_DIST = 70;
 const RESPAWN_DIST = 85; // left this far behind -> reappear near Abel
 const SPAWN_MIN = 8;
@@ -185,7 +192,7 @@ function respawn(a: Agent, w: World, camera: THREE.Camera | null): boolean {
   return false;
 }
 
-function planAgents(count: number, w: World): Agent[] {
+function planAgents(count: number, w: World, nFans: number, nLocals: number): Agent[] {
   const r = rng(91);
   const out: Agent[] = [];
   for (let i = 0; i < count; i++) {
@@ -193,7 +200,8 @@ function planAgents(count: number, w: World): Agent[] {
     const role: Role = k < 5 ? 'walk' : k < 9 ? 'stand' : 'sit';
     const speed = 0.9 + r() * 0.6; // real pedestrian pace: 0.9-1.5 m/s
     const clip = role === 'walk' ? (speed < 1.2 ? 'Walk_Slow_Loop' : 'Walk_Loop') : role === 'sit' ? 'Sitting_Idle_Loop' : STAND_CLIPS[Math.floor(r() * STAND_CLIPS.length)]!;
-    const a: Agent = { role, variant: Math.floor(r() * VARIANTS.length), x: 0, z: 0, rotY: 0, seg: 0, u: 0, lat: 0, anchor: -1, dir: 1, speed, clip, nodded: false };
+    const variant = r() < 0.9 ? Math.floor(r() * nFans) : nFans + Math.floor(r() * nLocals);
+    const a: Agent = { role, variant, x: 0, z: 0, rotY: 0, seg: 0, u: 0, lat: 0, anchor: -1, dir: 1, speed, clip, nodded: false };
     respawn(a, w, null);
     out.push(a);
   }
@@ -246,7 +254,7 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     return { obj, mixer, actions };
   }, [source, tier]);
 
-  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0 });
+  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0, shadow: true, detail: true });
   const name = useMemo(() => NAMES[Math.floor(Math.random() * NAMES.length)]!, []);
   const talk = useMemo(
     () => ({
@@ -312,8 +320,20 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
       }
     }
     const cam = state.camera.position;
-    const far = Math.hypot(s.x - cam.x, s.z - cam.z) > ANIMATE_DIST;
+    const camD = Math.hypot(s.x - cam.x, s.z - cam.z);
+    const far = camD > ANIMATE_DIST;
     g.visible = !far;
+    const wantShadow = camD < SHADOW_DIST && tier !== 'low';
+    const wantDetail = camD < DETAIL_DIST;
+    if (wantShadow !== s.shadow || wantDetail !== s.detail) {
+      s.shadow = wantShadow;
+      s.detail = wantDetail;
+      obj.traverse((o) => {
+        if (!(o as THREE.Mesh).isMesh) return;
+        o.castShadow = wantShadow;
+        if (/eye|brow|lash/i.test(o.name)) o.visible = wantDetail;
+      });
+    }
     if (far && agent.role !== 'walk') return;
     s.t += dt;
     _toPlayer.set(playerPosition.x - s.x, 0, playerPosition.z - s.z);
@@ -403,11 +423,12 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
 export function Pedestrians() {
   const gl = useThree((s) => s.gl);
   const tier = useGame((s) => s.tier);
-  const gltfs = useGLTF(URLS, false, true, (loader) => {
+  const urls = useMemo(() => variantsFor(tier).map((v) => `/models/npc_${v}.glb`), [tier]);
+  const gltfs = useGLTF(urls, false, true, (loader) => {
     loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
   });
   const world = useMemo(() => buildWorld(), []);
-  const agents = useMemo(() => planAgents(POOL[tier], world), [tier, world]);
+  const agents = useMemo(() => planAgents(POOL[tier], world, VARIANT_COUNT[tier][0], VARIANT_COUNT[tier][1]), [tier, world]);
   return (
     <>
       {agents.map((a, i) => (

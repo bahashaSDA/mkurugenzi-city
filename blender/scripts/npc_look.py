@@ -199,3 +199,134 @@ def hi_vis_vest(part):
     mod = vest.modifiers.new("Armature", "ARMATURE")
     mod.object = _armature()
     print(f"[npc] hi-vis vest: {len(me.vertices)} verts")
+
+
+# ----------------------------------------------------------------------------- Mkurugenzi merch
+_CACHE = None
+
+
+def _png(name):
+    """RGBA float array (rows bottom-up, like Blender) of a file painted by tools/paint_merch.py."""
+    import os
+    global _CACHE
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cache"))
+    im = bpy.data.images.load(os.path.join(root, name), check_existing=True)
+    w, h = im.size
+    a = np.empty(w * h * 4, dtype=np.float32)
+    im.pixels.foreach_get(a)
+    return a.reshape(h, w, 4)
+
+
+def _chest_frame(ob, chest_z):
+    """UV centre of the garment's front at chest height, and the 2x2 map from local surface
+    metres (x right as seen from the front, z up) to UV, from the nearest front-facing face."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.transform(ob.matrix_world)
+    bm.faces.ensure_lookup_table()
+    uv = bm.loops.layers.uv.active
+    front = [f for f in bm.faces if f.normal.y < -0.6 and abs(f.calc_center_median().x) < 0.12]
+    if not front:
+        bm.free()
+        return None
+    ymin = min(f.calc_center_median().y for f in front)
+    best = min(front, key=lambda f: (f.calc_center_median().z - chest_z) ** 2 + (f.calc_center_median().x) ** 2 * 4
+               + (f.calc_center_median().y - ymin) ** 2)
+    ls = best.loops[:3]
+    p = [np.array((l.vert.co.x, l.vert.co.z)) for l in ls]
+    t = [np.array(tuple(l[uv].uv)) for l in ls]
+    dP = np.stack([p[1] - p[0], p[2] - p[0]], axis=1)
+    dT = np.stack([t[1] - t[0], t[2] - t[0]], axis=1)
+    J = dT @ np.linalg.inv(dP)  # d(uv) / d(x, z)
+    c = best.calc_center_median()
+    cuv = t[0] + J @ (np.array((c.x, c.z)) - p[0])
+    bm.free()
+    return cuv, J
+
+
+def _stamp(px, art, cuv, J, size, centre_dx=0.0, centre_dz=0.0):
+    """Blend RGBA `art` (bottom-up rows) onto image px around cuv; art spans size metres."""
+    h, w, _ = px.shape
+    Ji = np.linalg.inv(J)
+    corners = [J @ np.array((sx * size / 2 + centre_dx, sz * size / 2 + centre_dz)) for sx in (-1, 1) for sz in (-1, 1)]
+    us = [cuv[0] + c[0] for c in corners]
+    vs = [cuv[1] + c[1] for c in corners]
+    x0, x1 = max(0, int(min(us) * w) - 1), min(w, int(max(us) * w) + 2)
+    y0, y1 = max(0, int(min(vs) * h) - 1), min(h, int(max(vs) * h) + 2)
+    if x1 <= x0 or y1 <= y0:
+        return
+    yy, xx = np.mgrid[y0:y1, x0:x1]
+    du = (xx + 0.5) / w - cuv[0]
+    dv = (yy + 0.5) / h - cuv[1]
+    dx = Ji[0, 0] * du + Ji[0, 1] * dv - centre_dx
+    dz = Ji[1, 0] * du + Ji[1, 1] * dv - centre_dz
+    S = art.shape[0]
+    lx = ((dx / size + 0.5) * S).astype(int)
+    lz = ((dz / size + 0.5) * S).astype(int)  # art rows are bottom-up like z
+    ok = (lx >= 0) & (lx < S) & (lz >= 0) & (lz < S)
+    a = np.zeros_like(du)
+    rgb = np.zeros(du.shape + (3,))
+    a[ok] = art[lz[ok], lx[ok], 3]
+    rgb[ok] = art[lz[ok], lx[ok], :3]
+    region = px[y0:y1, x0:x1, :3]
+    px[y0:y1, x0:x1, :3] = region * (1 - a[..., None]) + rgb * a[..., None]
+
+
+def merch_outfit(part, upper, lower, name, logo="merch_logo_white.png", pattern=None, logo_size=0.16, plain=0.75):
+    """Dress a garment in the Mkurugenzi range: flat fabric colours baked into the texture (upper
+    garment islands vs lower, split at the pelvis), optional all-over print, MK mark on the chest."""
+    ob = _find(part)
+    if not ob:
+        print(f"[npc] no garment {part}")
+        return
+    base = ob.material_slots[0].material
+    tex = next(n for n in base.node_tree.nodes if n.type == "TEX_IMAGE" and n.image and "diffuse" in n.image.name.lower())
+    src = tex.image
+    w, h = src.size
+    px = np.empty(w * h * 4, dtype=np.float32)
+    src.pixels.foreach_get(px)
+    px = px.reshape(h, w, 4)
+    lum = px[..., :3].mean(axis=2)
+    med = np.median(lum[lum > 0.02]) if (lum > 0.02).any() else 0.4
+    # plain merch fabric: keep only gentle folds/seams, wash out the stock print
+    detail = plain + (1 - plain) * np.clip(lum / max(med, 1e-3), 0.4, 1.2)
+    arm = _armature()
+    pelvis_z = (arm.matrix_world @ arm.data.bones["pelvis"].head_local).z
+    frame = _chest_frame(ob, pelvis_z + 0.42)
+    out = []
+    for nm, col, is_upper in ((f"{name}_top", upper, True), (f"{name}_bottom", lower, False)):
+        img = bpy.data.images.new(f"{nm}_dyed", w, h, alpha=True)
+        p = np.empty_like(px)
+        p[..., 3] = 1.0
+        p[..., :3] = detail[..., None] * np.array(col)[None, None, :]
+        if is_upper and pattern:
+            pat = _png(pattern)
+            ph, pw = pat.shape[:2]
+            yy, xx = np.mgrid[0:h, 0:w]
+            tile = pat[(yy * 2) % ph, (xx * 2) % pw, 0]
+            p[..., :3] *= (0.78 + 0.22 * tile)[..., None]
+        if is_upper and logo and frame:
+            _stamp(p, _png(logo), frame[0], frame[1], logo_size, centre_dz=0.02)
+        img.pixels.foreach_set(p.ravel())
+        img.pack()
+        m = base.copy()
+        m.name = nm
+        t = next(n for n in m.node_tree.nodes if n.type == "TEX_IMAGE" and n.image == src)
+        t.image = img
+        out.append(m)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    uv = bm.loops.layers.uv.active
+    island = _uv_islands(bm, uv)
+    zs = {}
+    for f in bm.faces:
+        zs.setdefault(island[f.index], []).append((ob.matrix_world @ f.calc_center_median()).z)
+    ob.data.materials.clear()
+    for m in out:
+        ob.data.materials.append(m)
+    for f in bm.faces:
+        z = sum(zs[island[f.index]]) / len(zs[island[f.index]])
+        f.material_index = 0 if z > pelvis_z - 0.05 else 1
+    bm.to_mesh(ob.data)
+    bm.free()
+    print(f"[npc] merch {part}: {name} (logo {'yes' if frame else 'NO FRONT FACE'})")

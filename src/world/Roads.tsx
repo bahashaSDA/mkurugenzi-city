@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ROADS, type Road } from '../config/roads';
 import { heightAt } from './heights';
 import { kerbTexture } from './proceduralTextures';
@@ -9,6 +10,7 @@ import { useKTX2 } from './useKTX2';
 
 const SEGMENT = 50; // max collider length for long thin features, m
 const STEP = 4; // ribbon sample spacing, m
+const ROAD_UNIT = 1000; // tarmac V coordinate = metres / ROAD_UNIT (shared materials)
 
 function segments(len: number): number[] {
   const n = Math.max(1, Math.ceil(len / SEGMENT));
@@ -70,27 +72,37 @@ export function RoadNetwork() {
     '/textures/asphalt_color.ktx2', '/textures/asphalt_normal.ktx2', '/textures/asphalt_rough.ktx2',
     '/textures/murram_path_color.ktx2', '/textures/murram_path_normal.ktx2', '/textures/murram_path_rough.ktx2',
   ]);
+  // Draw-call discipline: every murram road is one merged mesh; tarmac merges per width (the road
+  // shader needs the width), with V in metres / ROAD_UNIT so one material fits any length.
   const meshes = useMemo(() => {
     const out: { geometry: THREE.BufferGeometry; material: THREE.Material; key: string }[] = [];
     const murramMat = new THREE.MeshStandardMaterial({
       map: mc!, normalMap: mn!, roughnessMap: mr!, roughness: 1, color: new THREE.Color(1.05, 0.8, 0.66),
       polygonOffset: true, polygonOffsetFactor: -1,
     });
+    const murram: THREE.BufferGeometry[] = [];
+    const tarmac = new Map<number, THREE.BufferGeometry[]>();
     for (const road of ROADS) {
       const parts: [number, number][] = road.kind === 'highway' ? [[-5.6, 9], [5.6, 9]] : [[0, road.width]];
       for (const [off, w] of parts) {
         const { geometry, length } = ribbon(road.pts, w, off, road.kind === 'murram' ? 0.04 : 0.025);
+        const u = geometry.getAttribute('uv') as THREE.BufferAttribute;
         if (road.kind === 'murram') {
-          // world-scaled tiling for murram
-          const u = geometry.getAttribute('uv') as THREE.BufferAttribute;
-          for (let i = 0; i < u.count; i++) u.setXY(i, (u.getX(i) * w) / 3, (u.getY(i) * length) / 3);
-          out.push({ geometry, material: murramMat, key: `${road.id}${off}` });
+          for (let i = 0; i < u.count; i++) u.setXY(i, (u.getX(i) * w) / 3, (u.getY(i) * length) / 3); // world-scaled tiling
+          murram.push(geometry);
         } else {
-          const tex = { color: c!.clone(), normal: n!.clone(), rough: r!.clone() };
-          for (const t of Object.values(tex)) t.needsUpdate = true;
-          out.push({ geometry, material: makeRoadMaterial(tex, w, length), key: `${road.id}${off}` });
+          for (let i = 0; i < u.count; i++) u.setY(i, (u.getY(i) * length) / ROAD_UNIT);
+          const list = tarmac.get(w) ?? [];
+          list.push(geometry);
+          tarmac.set(w, list);
         }
       }
+    }
+    out.push({ geometry: mergeGeometries(murram)!, material: murramMat, key: 'murram' });
+    for (const [w, list] of tarmac) {
+      const tex = { color: c!.clone(), normal: n!.clone(), rough: r!.clone() };
+      for (const t of Object.values(tex)) t.needsUpdate = true;
+      out.push({ geometry: mergeGeometries(list)!, material: makeRoadMaterial(tex, w, ROAD_UNIT), key: `tarmac-${w}` });
     }
     return out;
   }, [c, n, r, mc, mn, mr]);

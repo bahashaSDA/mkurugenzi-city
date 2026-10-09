@@ -17,6 +17,8 @@ const CUTOUT = /short0|afro|braid|bob|long0|ponytail|eyebrow|eyelash|beard|_alph
 /** Materials: the exporter marks everything BLEND; only cut-out cards need alpha, and they must
  *  alpha-test (sorting-free, writes depth). Everything else is opaque, so skin and clothes
  *  never turn see-through or sort wrongly. */
+const SKIN = /skin|body|human/i;
+
 export function prepareCharacter(root: THREE.Object3D, shadows: boolean) {
   root.traverse((o) => {
     const m = o as THREE.SkinnedMesh;
@@ -33,6 +35,12 @@ export function prepareCharacter(root: THREE.Object3D, shadows: boolean) {
         mat.side = THREE.DoubleSide;
       } else {
         mat.alphaTest = 0;
+      }
+      if (SKIN.test(mat.name)) {
+        // the face photo already carries its own highlights: keep skin matte, no mirror sheen
+        const std = mat as THREE.MeshStandardMaterial;
+        std.roughness = Math.max(std.roughness ?? 1, 0.7);
+        std.envMapIntensity = 0.45;
       }
       mat.needsUpdate = true;
     }

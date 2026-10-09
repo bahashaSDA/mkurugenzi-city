@@ -293,6 +293,59 @@ def _(name, lod):
     return ob
 
 
+LAUNDRY = [pbr(f"laundry_{i}", color=c, rough=0.9, metal=0.0) for i, c in enumerate(
+    [(0.75, 0.08, 0.06), (0.05, 0.25, 0.6), (0.92, 0.92, 0.88), (0.9, 0.6, 0.05), (0.08, 0.45, 0.2), (0.55, 0.1, 0.45)])]
+LITTER = [pbr("litter_white", color=(0.85, 0.85, 0.82), rough=0.6, metal=0.0), pbr("litter_black", color=(0.03, 0.03, 0.03), rough=0.5, metal=0.0),
+          pbr("litter_blue", color=(0.1, 0.3, 0.65), rough=0.5, metal=0.0), pbr("litter_husk", color=(0.6, 0.5, 0.3), rough=0.9, metal=0.0),
+          pbr("litter_bottle", color=(0.55, 0.75, 0.6), rough=0.15, metal=0.0)]
+
+
+@piece("kib_washline", collider=lambda ob: [], lods=True)
+def _(name, lod):
+    """Washing line across an alley (owner photo): khangas, shirts and trousers drying at 2 m."""
+    random.seed(23)
+    bm = bmesh.new()
+    add_box(bm, (1.7, 0.012, 0.012), (0, 0, 2.05), 0)  # the line, wall to wall
+    x = -0.75
+    while x < 0.7:
+        w = random.uniform(0.25, 0.5)
+        hgt = random.uniform(0.35, 0.8)
+        mi = 1 + random.randrange(len(LAUNDRY))
+        add_box(bm, (w, 0.008, hgt), (x + w / 2, random.uniform(-0.02, 0.02), 2.05 - hgt / 2), mi)
+        if random.random() < 0.4:  # shirt sleeves
+            add_box(bm, (w + 0.24, 0.008, 0.12), (x + w / 2, 0, 1.98), mi)
+        x += w + random.uniform(0.04, 0.12)
+    ob = new_obj(name, bm, [M["steel"]] + LAUNDRY)
+    ob["no_collider"] = True  # walk through the laundry
+    return ob
+
+
+@piece("kib_litter", collider=lambda ob: [], lods=True)
+def _(name, lod):
+    """Rubbish in the alleys: plastic bags, bottles, papers and maize husks trodden into the murram."""
+    random.seed(31 + lod)
+    bm = bmesh.new()
+    for _ in range((14, 8, 4)[lod]):
+        kind = random.random()
+        x, y = random.uniform(-1.0, 1.0), random.uniform(-0.5, 0.5)
+        if kind < 0.45:  # crumpled bag
+            t = bmesh.new()
+            bmesh.ops.create_icosphere(t, subdivisions=1, radius=random.uniform(0.06, 0.12))
+            for v in t.verts:
+                v.co.z *= 0.45
+                v.co *= random.uniform(0.85, 1.15)
+            merge_bm(bm, t, Matrix.Translation((x, y, 0.03)), random.choice([0, 1, 2]))
+        elif kind < 0.65:  # bottle on its side
+            t = bmesh.new()
+            bmesh.ops.create_cone(t, cap_ends=True, segments=8, radius1=0.035, radius2=0.035, depth=0.25)
+            merge_bm(bm, t, Matrix.Translation((x, y, 0.035)) @ Matrix.Rotation(random.uniform(0, 6.28), 4, "Z") @ Matrix.Rotation(math.pi / 2, 4, "X"), 4)
+        else:  # paper / husk
+            add_box(bm, (random.uniform(0.1, 0.3), random.uniform(0.08, 0.2), 0.006), (x, y, 0.005), 0 if kind < 0.85 else 3)
+    ob = new_obj(name, bm, LITTER)
+    ob["no_collider"] = True
+    return ob
+
+
 def _shots(shot, x):
     rx = PIECES["kib_row6"][0].location.x
     shot("kibera_rows.png", (rx - 4, -9, 7), (rx + 2, 2, 1.5))

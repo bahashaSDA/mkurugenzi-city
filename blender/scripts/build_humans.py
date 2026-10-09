@@ -25,7 +25,7 @@ from bl_ext.blender_org.mpfb.services.humanservice import HumanService  # noqa: 
 from retarget import retarget  # noqa: E402
 from mocap import retarget_mocap  # noqa: E402
 from abel_look import apply_abel_look, cull_hidden_body  # noqa: E402
-from npc_look import headwrap, hi_vis_vest, recolour_outfit  # noqa: E402
+from npc_look import headwrap, hi_vis_vest, merch_outfit, recolour_outfit  # noqa: E402
 
 # Per-character dress (Nairobi street wear). Linear colour factors.
 NPC_DRESS = {
@@ -43,6 +43,27 @@ NPC_DRESS = {
                                          "conductor_shirt", "conductor_trousers"),
     # boda boda rider: hi-vis reflective vest over his clothes
     "hustler": lambda: hi_vis_vest("male_casualsuit05"),
+}
+
+BLACK, CHARCOAL, SAND = (0.012, 0.012, 0.014), (0.06, 0.06, 0.065), (0.58, 0.43, 0.26)
+COFFEE, BURGUNDY, NAVY = (0.11, 0.045, 0.021), (0.155, 0.008, 0.018), (0.026, 0.045, 0.10)
+WHITE, IVORY, GREY, DENIM = (0.82, 0.82, 0.8), (0.83, 0.77, 0.64), (0.4, 0.4, 0.41), (0.05, 0.08, 0.16)
+W_LOGO, B_LOGO, BR_LOGO = "merch_logo_white.png", "merch_logo_black.png", "merch_logo_brown.png"
+
+# The crowd wears Abel's own brand (owner request: ~90% in Mkurugenzi merch from mkurugenzi.ke).
+FAN_DRESS = {
+    "fan_hoodie_black": lambda: merch_outfit("male_casualsuit02", BLACK, BLACK, "black_excellence", W_LOGO),
+    "fan_hoodie_sand": lambda: merch_outfit("male_casualsuit02", SAND, DENIM, "desert_sand", BR_LOGO),
+    "fan_tee_burgundy": lambda: merch_outfit("male_casualsuit04", BURGUNDY, DENIM, "burgundy_bliss", W_LOGO),
+    "fan_tee_botanical": lambda: merch_outfit("male_casualsuit06", WHITE, DENIM, "botanical_white", B_LOGO, pattern="merch_botanical.png"),
+    "fan_hoodie_charcoal": lambda: merch_outfit("male_casualsuit02", CHARCOAL, CHARCOAL, "charcoal_grey", W_LOGO),
+    "fan_suit_coffee": lambda: merch_outfit("male_casualsuit02", COFFEE, COFFEE, "coffee_brown", W_LOGO),
+    "fan_suit_ivory": lambda: merch_outfit("male_casualsuit02", IVORY, IVORY, "ivory_essence", BR_LOGO),
+    "fan_tee_navy": lambda: merch_outfit("male_casualsuit04", NAVY, DENIM, "faded_navy", W_LOGO),
+    "fan_lady_black": lambda: merch_outfit("female_sportsuit01", BLACK, BLACK, "ladies_black", W_LOGO, logo_size=0.12),
+    "fan_lady_burgundy": lambda: merch_outfit("female_sportsuit01", BURGUNDY, BURGUNDY, "ladies_burgundy", W_LOGO, logo_size=0.12),
+    "fan_lady_grey": lambda: merch_outfit("female_sportsuit01", GREY, GREY, "ladies_grey", B_LOGO, logo_size=0.12),
+    "fan_lady_tee": lambda: merch_outfit("female_casualsuit01", WHITE, DENIM, "ladies_botanical", B_LOGO, pattern="merch_botanical.png"),
 }
 
 # CMU trials (see mocap.py): (file, clip name, loop search (start fraction, min, max frames @120 Hz))
@@ -123,10 +144,15 @@ CHARACTERS = {
                   skin="middleage_african_male", hair="short01", eyebrows="eyebrow002",
                   clothes=("male_elegantsuit01", "shoes03"),
                   # his face (ref photo): broad and round, full cheeks, wide jaw, short neck
-                  targets=(("head-round", 0.7), ("head-scale-horiz-incr", 0.45), ("head-fat-incr", 0.35),
-                           ("l-cheek-volume-incr", 0.5), ("r-cheek-volume-incr", 0.5), ("chin-width-incr", 0.5),
-                           ("head-scale-vert-decr", 0.2), ("neck-scale-horiz-incr", 0.4),
-                           ("mouth-scale-horiz-incr", 0.3), ("mouth-lowerlip-volume-incr", 0.3))),
+                  # v2 (measured against ref_22: face ~20% narrower and ~8% longer per eye spacing than v1,
+                  # larger almond eyes, warm smile): oval rather than round, smiling mouth corners
+                  targets=(("head-oval", 0.5), ("head-round", 0.15), ("head-scale-horiz-decr", 0.3),
+                           ("head-scale-vert-incr", 0.1), ("head-fat-incr", 0.1),
+                           ("l-cheek-volume-incr", 0.15), ("r-cheek-volume-incr", 0.15), ("chin-height-incr", 0.35),
+                           ("neck-scale-horiz-incr", 0.25), ("l-eye-scale-incr", 0.35), ("r-eye-scale-incr", 0.35),
+                           ("l-eye-trans-out", 0.45), ("r-eye-trans-out", 0.45),
+                           ("mouth-scale-horiz-incr", 0.35), ("mouth-angles-up", 0.6), ("mouth-laugh-lines-in", 0.5),
+                           ("mouth-lowerlip-volume-incr", 0.2))),
     # Street pedestrians: varied ages, builds, hair and clothing (VISUAL_OVERHAUL 19: no clones).
     "mama_mboga": human("mama_mboga", gender=0.0, years=45, weight=0.7, muscle=0.45, height=0.42,
                         skin="middleage_african_female", hair="braid01", clothes=("female_elegantsuit01", "shoes05")),
@@ -146,6 +172,31 @@ CHARACTERS = {
                        skin="young_african_male", hair="short04", clothes=("male_casualsuit01", "shoes01")),
     "auntie": human("auntie", gender=0.0, years=55, weight=0.62, muscle=0.42, height=0.45,
                     skin="old_african_female", hair="bob02", clothes=("female_elegantsuit01", "shoes05")),
+    # ---- Wakurugenzi in merch (varied ages, builds and hair: no clones) ----
+    "fan_hoodie_black": human("fan_hoodie_black", gender=1.0, years=23, weight=0.45, muscle=0.6, height=0.6,
+                              skin="young_african_male", hair="short02", clothes=("male_casualsuit02", "shoes04")),
+    "fan_hoodie_sand": human("fan_hoodie_sand", gender=1.0, years=31, weight=0.55, muscle=0.5, height=0.52,
+                             skin="middleage_african_male", hair="short04", clothes=("male_casualsuit02", "shoes01")),
+    "fan_tee_burgundy": human("fan_tee_burgundy", gender=1.0, years=27, weight=0.5, muscle=0.6, height=0.57,
+                              skin="young_african_male", hair="short03", clothes=("male_casualsuit04", "shoes04")),
+    "fan_tee_botanical": human("fan_tee_botanical", gender=1.0, years=42, weight=0.62, muscle=0.5, height=0.5,
+                               skin="middleage_african_male", hair="short01", clothes=("male_casualsuit06", "shoes02")),
+    "fan_hoodie_charcoal": human("fan_hoodie_charcoal", gender=1.0, years=19, weight=0.38, muscle=0.5, height=0.62,
+                                 skin="young_african_male", hair="short02", clothes=("male_casualsuit02", "shoes04")),
+    "fan_suit_coffee": human("fan_suit_coffee", gender=1.0, years=35, weight=0.6, muscle=0.55, height=0.55,
+                             skin="middleage_african_male", hair="short04", clothes=("male_casualsuit02", "shoes01")),
+    "fan_suit_ivory": human("fan_suit_ivory", gender=1.0, years=52, weight=0.65, muscle=0.45, height=0.48,
+                            skin="old_african_male", hair="short04", clothes=("male_casualsuit02", "shoes03")),
+    "fan_tee_navy": human("fan_tee_navy", gender=1.0, years=29, weight=0.5, muscle=0.55, height=0.5,
+                          skin="young_african_male", hair="short01", clothes=("male_casualsuit04", "shoes01")),
+    "fan_lady_black": human("fan_lady_black", gender=0.0, years=24, weight=0.48, muscle=0.5, height=0.55,
+                            skin="young_african_female", hair="afro01", clothes=("female_sportsuit01", "shoes04")),
+    "fan_lady_burgundy": human("fan_lady_burgundy", gender=0.0, years=33, weight=0.58, muscle=0.45, height=0.48,
+                               skin="middleage_african_female", hair="braid01", clothes=("female_sportsuit01", "shoes06")),
+    "fan_lady_grey": human("fan_lady_grey", gender=0.0, years=21, weight=0.42, muscle=0.5, height=0.52,
+                           skin="young_african_female", hair="short02", clothes=("female_sportsuit01", "shoes04")),
+    "fan_lady_tee": human("fan_lady_tee", gender=0.0, years=45, weight=0.66, muscle=0.42, height=0.45,
+                          skin="middleage_african_female", hair="bob02", clothes=("female_casualsuit01", "shoes05")),
 }
 
 NPC_TRIS = 7000  # per pedestrian (Abel keeps full detail)
@@ -280,6 +331,8 @@ for name, spec in CHARACTERS.items():
         continue
     if "--npcs" in ARGS and name == "abel":
         continue
+    if "--fans" in ARGS and not name.startswith("fan_"):
+        continue
     print(f"[human] building {name}")
     build(spec)
     finish_materials(name)
@@ -288,6 +341,8 @@ for name, spec in CHARACTERS.items():
         apply_abel_look()
     elif name in NPC_DRESS:
         NPC_DRESS[name]()
+    elif name in FAN_DRESS:
+        FAN_DRESS[name]()
     report()
     if UAL_DIR:
         if "--noanim" not in ARGS:

@@ -3,9 +3,10 @@
 Method
   1. Bake the body proxy's world-space POSITION and NORMAL into float images laid out in the skin
      UVs (Cycles emission bake), so every skin texel knows where it sits on the head.
-  2. Fit an affine map (x, z) -> photo pixel from 4 landmarks (both eyes, mouth centre, chin), then
-     sample the photo for every front-facing face texel. The head roll in the photo is absorbed by
-     the affine fit.
+  2. Warp (x, z) -> photo pixel with a thin-plate spline through 22 matched landmarks (eye corners,
+     nose, mouth corners, chin, jaw, face edge, forehead, temples), measured on an orthographic
+     render of the head (offsets from the eye centre, so small rig changes don't break it) and on
+     the photo. The spline also undoes the photo's slight head turn and roll.
   3. Feathered masks: a face oval (in photo space) x front-facing normal. Teeth in the smiling
      photo are repainted as lips (the mesh mouth is closed). The rest of the body skin is
      tone-matched to the photo, and the scalp gets his close buzz cut.
@@ -23,9 +24,21 @@ from mathutils import Vector
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 PHOTO = os.path.join(ROOT, "research", "owner-references", "ref_22.png")
 # landmarks measured on the photo (pixels, origin top-left), see research notes
-PHOTO_LM = {"eye_r": (163, 153), "eye_l": (230, 135), "mouth": (207, 210), "chin": (213, 260)}
+# landmark: (mesh x, mesh z relative to the eye-centre height) metres  ->  photo pixel (x, y)
+# mesh side measured on an orthographic front render of the v2 head (face_probe), wearer's right = -x
+LANDMARKS = {
+    "eye_r": ((-0.0328, -0.002), (163.8, 153.8)), "eye_r_out": ((-0.0448, -0.002), (150.0, 156.0)),
+    "eye_r_in": ((-0.0200, -0.002), (178.8, 152.5)), "eye_l": ((0.0328, -0.002), (230.0, 135.0)),
+    "eye_l_in": ((0.0200, -0.002), (211.3, 138.8)), "eye_l_out": ((0.0456, -0.002), (246.3, 133.8)),
+    "nose": ((0.0, -0.046), (207.5, 178.8)), "ala_r": ((-0.016, -0.0468), (186.3, 183.8)), "ala_l": ((0.016, -0.0468), (223.8, 180.0)),
+    "mouth_r": ((-0.0252, -0.0748), (180.0, 212.5)), "mouth_l": ((0.026, -0.0748), (238.8, 202.5)),
+    "mouth": ((0.0, -0.0728), (208.8, 210.0)), "chin": ((0.0, -0.1228), (217.5, 260.0)),
+    "jaw_r": ((-0.0608, -0.078), (152.5, 210.0)), "jaw_l": ((0.0608, -0.078), (280.0, 195.0)),
+    "edge_r": ((-0.0744, -0.002), (137.5, 152.5)), "edge_l": ((0.0752, -0.002), (276.3, 140.0)),
+    "angle_r": ((-0.0528, -0.1092), (158.8, 237.5)), "angle_l": ((0.0528, -0.1092), (272.5, 230.0)),
+    "forehead": ((0.0, 0.062), (203.0, 70.0)), "temple_r": ((-0.062, 0.048), (145.0, 95.0)), "temple_l": ((0.062, 0.048), (262.5, 85.0)),
+}
 FACE_OVAL = {"cx": 204, "cy": 160, "rx": 66, "ry": 110, "rot_deg": -12}  # his face in the photo
-MOUTH_BOX = (172, 198, 248, 224)  # x0, y0, x1, y1: smile region (teeth -> lips)
 HAIR_RGB = np.array([0.075, 0.055, 0.05])
 
 
@@ -35,14 +48,26 @@ def _load_photo():
     px = np.empty(w * h * 4, dtype=np.float32)
     img.pixels.foreach_get(px)
     px = px.reshape(h, w, 4)[::-1, :, :3].copy()  # Blender rows are bottom-up -> top-down
-    # closed-mouth fix: bright teeth inside the smile box become lip colour
-    x0, y0, x1, y1 = MOUTH_BOX
-    box = px[y0:y1, x0:x1]
-    lum = box.mean(axis=2)
-    lip = np.median(box[(lum > 0.18) & (lum < 0.4)], axis=0) if ((lum > 0.18) & (lum < 0.4)).any() else np.array([0.35, 0.2, 0.18])
-    box[lum > 0.5] = lip * 0.95
-    px[y0:y1, x0:x1] = box
-    return px
+    # closed-mouth fix: only the TEETH inside the smile (an ellipse through the mouth corners, and
+    # whitish = bright + unsaturated) become lip colour; skin highlights on the chin stay skin
+    (x0, y0), (x1, y1) = LANDMARKS["mouth_r"][1], LANDMARKS["mouth_l"][1]
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2 + 1
+    ang = np.arctan2(y1 - y0, x1 - x0)
+    rx, ry = np.hypot(x1 - x0, y1 - y0) / 2 * 0.92, 7.5
+    yy, xx = np.mgrid[0:h, 0:w]
+    du, dv = xx - cx, yy - cy
+    eu = (du * np.cos(ang) + dv * np.sin(ang)) / rx
+    ev = (-du * np.sin(ang) + dv * np.cos(ang)) / ry
+    inside = eu * eu + ev * ev < 1.0
+    lum = px.mean(axis=2)
+    sat = px.max(axis=2) - px.min(axis=2)
+    teeth = inside & (lum > 0.42) & (sat < 0.22)
+    lips = inside & (lum > 0.12) & (lum < 0.38)
+    lip = np.median(px[lips], axis=0) if lips.any() else np.array([0.32, 0.18, 0.16])
+    px[teeth] = lip * 0.9
+    # the studio photo is warm/pink and bright: pull it towards his natural deep brown
+    px = px * np.array([0.9, 0.95, 0.98]) * 0.92
+    return np.clip(px, 0, 1)
 
 
 def _sample(photo, u, v):
@@ -55,6 +80,32 @@ def _sample(photo, u, v):
     a, b = photo[y0, x0], photo[y0, x0 + 1]
     c, d = photo[y0 + 1, x0], photo[y0 + 1, x0 + 1]
     return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy
+
+
+def _tps(src, dst, reg=1e-7):
+    """Thin-plate spline from src (n, 2) to dst (n, 2); returns f(points (m, 2)) -> (m, 2)."""
+    n = len(src)
+
+    def U(r2):
+        return np.where(r2 > 0, 0.5 * r2 * np.log(np.maximum(r2, 1e-300)), 0.0)  # r^2 log r
+
+    K = U(((src[:, None, :] - src[None, :, :]) ** 2).sum(-1)) + reg * np.eye(n)
+    Pm = np.c_[np.ones(n), src]
+    L = np.zeros((n + 3, n + 3))
+    L[:n, :n], L[:n, n:], L[n:, :n] = K, Pm, Pm.T
+    coef = np.linalg.solve(L, np.r_[dst, np.zeros((3, 2))])
+    w, a = coef[:n], coef[n:]
+
+    def f(pts):
+        out = np.c_[np.ones(len(pts)), pts] @ a
+        for i in range(0, len(pts), 20000):  # chunks keep the kernel matrix small
+            chunk = pts[i:i + 20000]
+            out[i:i + 20000] += U(((chunk[:, None, :] - src[None, :, :]) ** 2).sum(-1)) @ w
+        return out
+
+    err = np.abs(f(src) - dst).max()
+    print(f"[face] thin-plate warp through {n} landmarks (max error {err:.2f} px)")
+    return f
 
 
 def _bake_attr(body, img_size, attr):
@@ -104,16 +155,13 @@ def project_face(body, skin_img, eyes_obj, front_y, chin_dz):
     el = sum((v for v in ev if v.x > 0), Vector()) / max(1, sum(1 for v in ev if v.x > 0))
     er = sum((v for v in ev if v.x <= 0), Vector()) / max(1, sum(1 for v in ev if v.x <= 0))
     ez = (el.z + er.z) / 2
-    lm3 = {"eye_r": (er.x, er.z), "eye_l": (el.x, el.z), "mouth": (0.0, ez - 0.079), "chin": (0.0, ez + chin_dz + 0.004)}
-    A = np.array([[x, z, 1.0] for x, z in (lm3[k] for k in PHOTO_LM)])
-    B = np.array([PHOTO_LM[k] for k in PHOTO_LM], dtype=np.float64)
-    M, *_ = np.linalg.lstsq(A, B, rcond=None)  # (3, 2): [x z 1] @ M = [u v]
-    resid = np.abs(A @ M - B).max()
-    print(f"[face] affine fit max landmark error {resid:.1f} px")
+    src = np.array([(x, ez + dz) for (x, dz), _ in LANDMARKS.values()], dtype=np.float64)
+    dst = np.array([p for _, p in LANDMARKS.values()], dtype=np.float64)
+    warp = _tps(src, dst)
 
     P = pos[..., :3][valid]
     N = nrm[..., :3][valid]
-    uv = np.c_[P[:, 0], P[:, 2], np.ones(len(P))] @ M
+    uv = warp(np.c_[P[:, 0], P[:, 2]])
     u, v = uv[:, 0], uv[:, 1]
     # face oval mask in photo space (feathered), x front-facing normals, x in front half of head
     o = FACE_OVAL

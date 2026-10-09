@@ -2,6 +2,8 @@ import { useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { KitInstances } from '../../world/kit/KitInstances';
 import { useKit, wind } from '../../world/kit/useKit';
+import { KiberaDrains } from '../kibera/Drains';
+import { KIBERA_POLE_LINES } from '../kibera/layout';
 import { Cables } from '../../world/Cables';
 import { getHubLayout } from './layout';
 import { useInteractables, type Interactable } from '../../game/interactables';
@@ -84,7 +86,10 @@ export function Hub({ render = true }: { render?: boolean }) {
   const hubPlacements = useMemo(() => placements.filter((p) => hubKit.has(p.piece)), [placements, hubKit]);
   const streetPlacements = useMemo(() => placements.filter((p) => streetKit.has(p.piece)), [placements, streetKit]);
   const marketPlacements = useMemo(() => placements.filter((p) => marketKit.has(p.piece)), [placements, marketKit]);
-  const kiberaPlacements = useMemo(() => placements.filter((p) => kiberaKit.has(p.piece)), [placements, kiberaKit]);
+  // small alley decor (washing lines, rubbish) only matters up close: its own short-range batch
+  const DECOR = /^kib_(washline|litter)$/;
+  const kiberaPlacements = useMemo(() => placements.filter((p) => kiberaKit.has(p.piece) && !DECOR.test(p.piece)), [placements, kiberaKit]);
+  const kiberaDecor = useMemo(() => placements.filter((p) => DECOR.test(p.piece)), [placements]);
   const rockPlacements = useMemo(() => placements.filter((p) => rocksKit.has(p.piece)), [placements, rocksKit]);
   const townPlacements = useMemo(() => placements.filter((p) => townKit.has(p.piece)), [placements, townKit]);
   useEffect(() => {
@@ -97,10 +102,12 @@ export function Hub({ render = true }: { render?: boolean }) {
       <KitInstances kit={streetKit} placements={streetPlacements} render={render} />
       <KitInstances kit={marketKit} placements={marketPlacements} render={render} />
       <KitInstances kit={kiberaKit} placements={kiberaPlacements} render={render} />
+      <KitInstances kit={kiberaKit} placements={kiberaDecor} render={render} reach={0.15} />
       <KitInstances kit={rocksKit} placements={rockPlacements} render={render} />
       {/* outer towns: tall buildings stay visible on the skyline from across the map */}
       <KitInstances kit={townKit} placements={townPlacements} render={render} reach={3} />
-      {render && <Cables placements={placements} />}
+      {render && <Cables placements={placements} lines={KIBERA_POLE_LINES} />}
+      {render && <KiberaDrains />}
       {render && <WindClock />}
     </>
   );

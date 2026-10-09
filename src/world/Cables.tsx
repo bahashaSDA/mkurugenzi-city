@@ -56,11 +56,13 @@ function wire(pos: number[], idx: number[], a: THREE.Vector3, b: THREE.Vector3, 
   }
 }
 
-export function Cables({ placements }: { placements: Placement[] }) {
+/** `lines`: extra pole runs in order (Kibera lanes), wired pole to pole whatever their direction. */
+export function Cables({ placements, lines: extraLines = [] }: { placements: Placement[]; lines?: Placement[][] }) {
   const geometry = useMemo(() => {
     const r = rng(17);
-    const poles = placements.filter((p) => p.piece === 'power_pole');
-    const roofs = placements.filter((p) => p.piece.startsWith('shop_'));
+    const inRuns = new Set(extraLines.flat());
+    const poles = placements.filter((p) => p.piece === 'power_pole' && !inRuns.has(p));
+    const roofs = placements.filter((p) => p.piece.startsWith('shop_') || p.piece.startsWith('kib_row'));
     // group poles into lines by x
     const lines = new Map<number, Placement[]>();
     for (const p of poles) {
@@ -72,30 +74,39 @@ export function Cables({ placements }: { placements: Placement[] }) {
     const pos: number[] = [];
     const idx: number[] = [];
     const v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
-    for (const list of lines.values()) {
-      list.sort((a, b) => a.z - b.z);
+    const runs = [...[...lines.values()].map((l) => l.sort((a, b) => a.z - b.z)), ...extraLines];
+    for (const list of runs) {
       for (let i = 0; i < list.length - 1; i++) {
         const a = list[i]!;
         const b = list[i + 1]!;
-        const span = Math.abs(b.z - a.z);
+        const span = Math.hypot(b.x - a.x, b.z - a.z);
         if (span > 60) continue;
-        for (const ox of INSULATOR_X) wire(pos, idx, v(a.x + ox, CROSSARM_Y, a.z), v(b.x + ox, CROSSARM_Y, b.z), span * 0.022);
+        const ay = a.y ?? 0;
+        const by = b.y ?? 0;
+        // crossarm across the line: offset the insulators sideways to the span
+        const sx = (b.z - a.z) / span;
+        const sz = -(b.x - a.x) / span;
+        for (const ox of INSULATOR_X) wire(pos, idx, v(a.x + ox * sx, ay + CROSSARM_Y, a.z + ox * sz), v(b.x + ox * sx, by + CROSSARM_Y, b.z + ox * sz), span * 0.022);
         // telecom / tap-off lines: lower, slacker, untidy
         const extra = 2 + Math.floor(r() * 3);
         for (let k = 0; k < extra; k++) {
-          const ya = 6.4 + r() * 1.4;
-          const yb = 6.4 + r() * 1.4;
+          const ya = ay + 6.4 + r() * 1.4;
+          const yb = by + 6.4 + r() * 1.4;
           wire(pos, idx, v(a.x + (r() - 0.5) * 0.3, ya, a.z), v(b.x + (r() - 0.5) * 0.3, yb, b.z), span * (0.035 + r() * 0.05));
         }
       }
       // service drops to the nearest roofs (shops within 14 m along the street)
       for (const p of list) {
         const near = roofs.filter((s) => Math.abs(s.z - p.z) < 14 && Math.abs(s.x - p.x) < 12);
-        for (let k = 0; k < Math.min(near.length, 2 + Math.floor(r() * 3)); k++) {
+        const py = p.y ?? 0;
+        // Kibera: a tangle of illegal connections to the rooftops
+        const n = near.length && near[0]!.piece.startsWith('kib') ? 4 + Math.floor(r() * 5) : 2 + Math.floor(r() * 3);
+        for (let k = 0; k < Math.min(near.length, n); k++) {
           const s = near[Math.floor(r() * near.length)]!;
-          const fx = s.x + Math.sin(s.rotY) * 4.3; // facade line (unit is 9 m deep)
-          const target = v(fx, 3.6 + r() * 2.2, s.z + (r() - 0.5) * 3.5);
-          wire(pos, idx, v(p.x, CROSSARM_Y - 0.5 - r() * 1.6, p.z), target, 0.25 + r() * 0.35);
+          const kib = s.piece.startsWith('kib');
+          const fx = kib ? s.x + (r() - 0.5) * 2.5 : s.x + Math.sin(s.rotY) * 4.3; // facade line (unit is 9 m deep)
+          const target = v(fx, (s.y ?? 0) + (kib ? 2.5 + r() * 0.3 : 3.6 + r() * 2.2), s.z + (r() - 0.5) * (kib ? 7 : 3.5));
+          wire(pos, idx, v(p.x, py + CROSSARM_Y - 0.5 - r() * 1.6, p.z), target, 0.25 + r() * 0.35);
         }
       }
     }
@@ -105,7 +116,7 @@ export function Cables({ placements }: { placements: Placement[] }) {
     g.computeVertexNormals();
     g.computeBoundingSphere();
     return g;
-  }, [placements]);
+  }, [placements, extraLines]);
 
   return (
     <mesh geometry={geometry} frustumCulled={false}>

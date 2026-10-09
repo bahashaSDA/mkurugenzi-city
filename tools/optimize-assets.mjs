@@ -26,6 +26,7 @@ const MB = 1024 * 1024;
 // Budgets by filename prefix (SPEC 5.3).
 const budgetFor = (name) => {
   if (name.startsWith('abel')) return { bytes: 2.5 * MB, tex: 2048 };
+  if (name.startsWith('npc_fan_')) return { bytes: 0.65 * MB, tex: 1024 }; // merch prints (botanical) compress less
   if (name.startsWith('npc_')) return { bytes: 0.6 * MB, tex: 1024 };
   return { bytes: 4 * MB, tex: 1024 }; // district chunks and kits
 };

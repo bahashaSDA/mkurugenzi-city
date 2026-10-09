@@ -18,6 +18,8 @@ export const KIBERA_HOMES: { x: number; z: number; rotY: number }[] = [];
 export const KIBERA_HALLS: { x: number; z: number; rotY: number }[] = [];
 /** Alley centre lines between row pairs (pedestrian walk segments): [x, z0, z1]. */
 export const KIBERA_ALLEYS: [number, number, number][] = [];
+/** Power lines along Kibera's lanes (poles in order), wired by Cables. */
+export const KIBERA_POLE_LINES: Placement[][] = [];
 
 function rng(seed: number) {
   let s = seed >>> 0;
@@ -67,7 +69,10 @@ export function buildKiberaLayout(seed = 2026): Placement[] {
           z += 1.5; // creep up to the lane instead of leaving a row-length gap
           continue;
         }
-        if (r() > 0.03) {
+        if (r() < 0.05) {
+          // a tree grows in the gap (avocado/mango trees rise above the roofs in the photo)
+          out.push({ piece: r() < 0.5 ? 'tree_street' : 'tree_jacaranda', x, z: zc, rotY: r() * 6.28, y: heightAt(x, zc) - 0.1 });
+        } else if (r() > 0.03) {
           const rotY = (side < 0 ? FACE_WEST : FACE_EAST) + (r() - 0.5) * 0.05;
           if (r() < 0.035) {
             // an enterable home in the gap (door onto the alley)
@@ -82,6 +87,35 @@ export function buildKiberaLayout(seed = 2026): Placement[] {
         z += len + 0.25 + r() * 0.7; // squeezed: barely a gap between rows
       }
     }
+  }
+  // alley life: washing lines across the alleys, rubbish underfoot
+  for (const [ax, z0, z1] of KIBERA_ALLEYS) {
+    for (let z = z0 + 3; z < z1 - 3; z += 3 + r() * 7) {
+      const y = heightAt(ax, z);
+      if (r() < 0.55) out.push({ piece: 'kib_washline', x: ax, z, rotY: Math.PI / 2 + (r() - 0.5) * 0.3, y: y - 0.05 });
+      if (r() < 0.5) out.push({ piece: 'kib_litter', x: ax + (r() - 0.5) * 0.4, z: z + 1.5, rotY: r() * 6.28, y: y + 0.01 });
+    }
+  }
+  // power lines along the murram lanes, with a tangle of drops onto the roofs
+  KIBERA_POLE_LINES.length = 0;
+  for (const rd of ROADS) {
+    if (rd.kind !== 'murram' || !rd.id.startsWith('kibera')) continue;
+    const line: Placement[] = [];
+    for (let i = 0; i < rd.pts.length - 1; i++) {
+      const [ax, az] = rd.pts[i]!;
+      const [bx, bz] = rd.pts[i + 1]!;
+      const len = Math.hypot(bx - ax, bz - az);
+      for (let s = i === 0 ? 4 : 0; s < len; s += 32) {
+        const t = s / len;
+        const x = ax + (bx - ax) * t + ((bz - az) / len) * (rd.width / 2 + 0.8);
+        const z = az + (bz - az) * t - ((bx - ax) / len) * (rd.width / 2 + 0.8);
+        const p = { piece: 'power_pole', x, z, rotY: Math.atan2(bx - ax, bz - az) + Math.PI / 2, y: heightAt(x, z) - 0.1 };
+        line.push(p);
+        out.push(p);
+        if (r() < 0.6) out.push({ piece: 'kib_litter', x: x + (r() - 0.5) * 2, z: z + (r() - 0.5) * 2, rotY: r() * 6.28, y: heightAt(x, z) + 0.01 });
+      }
+    }
+    KIBERA_POLE_LINES.push(line);
   }
   // video halls on the main lane (watch Abel's episodes)
   for (const [x, z] of HALLS) {
