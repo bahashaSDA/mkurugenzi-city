@@ -397,7 +397,7 @@ function TheatreBuilding() {
         <Audience tier={tier} />
       </Suspense>
       {video && seated && (
-        <Html transform position={[0, TH.screen.y, TH.screen.z + 0.02]} scale={TH.screen.w / 32} zIndexRange={[5, 0]}>
+        <Html transform position={[0, TH.screen.y, TH.screen.z + 0.02]} scale={(TH.screen.w / 32) * 1.5} zIndexRange={[5, 0]}>
           <iframe
             width={1280}
             height={720}

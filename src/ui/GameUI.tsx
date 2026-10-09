@@ -9,6 +9,7 @@ import { BigMap, MissionHud, Minimap } from './MapUI';
 import { useInterior } from '../systems/interiors/rooms';
 import { CinematicUI, MissionBanner } from './CinematicUI';
 import { useCutscene } from '../game/cutscene';
+import { useTheatre } from '../game/theatre';
 
 /** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
@@ -24,6 +25,7 @@ export function GameUI() {
   const [bag, setBag] = useState(false);
   const fading = useInterior((s) => s.fading);
   const cinematic = useCutscene((s) => s.active);
+  const watching = useTheatre((s) => s.seated);
 
   useEffect(() => onKeyPress('KeyI', () => setBag((b) => !b)), []);
   useEffect(() => {
@@ -43,7 +45,7 @@ export function GameUI() {
   const def = shop ? SHOPS[shop] : null;
 
   return (
-    <div className={cinematic ? "game-ui in-cutscene" : "game-ui"}>
+    <div className={cinematic || watching ? "game-ui in-cutscene" : "game-ui"}>
       <div className="wallet">
         <div className="wallet-points">
           KSh <b>{money.toLocaleString()}</b>
