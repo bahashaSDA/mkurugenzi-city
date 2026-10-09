@@ -8,11 +8,12 @@ import { useEconomy } from './economy';
 import { updateNearest, usePrompt } from './interactables';
 import { checkMission } from './missions';
 import { useHealth } from './health';
+import { useCutscene } from './cutscene';
 
 /** Per-frame game rules: interaction prompt, E to use, discovery rewards, walking points,
  *  hunger, and the eat/drink animation hand-off to Abel. */
 function use(key: 'KeyE' | 'KeyF') {
-  if (useEconomy.getState().shop) return;
+  if (useEconomy.getState().shop || useCutscene.getState().active) return;
   const cur = usePrompt.getState().current;
   if (cur && (cur.key ?? 'KeyE') === key) cur.use();
 }

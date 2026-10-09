@@ -32,6 +32,13 @@ export const TEXTURES = {
   Tiles074: 'ceramic floor tiles (interiors)',
   Ground054: 'beach sand (Mkurugenzi Beach, runtime ground)',
   Ground093C: 'coastal sand with shells and debris (tide line)',
+  Tiles143: 'limestone block cladding (Grand Theatre facade)',
+  Concrete046: 'smooth grey concrete (Grand Theatre side walls)',
+  Carpet015: 'red carpet (theatre aisles and lobby)',
+  Fabric016: 'red wool weave (theatre seats, curtains)',
+  Wood051: 'dark elegant wood (auditorium wall panels)',
+  Terrazzo005: 'terrazzo floor (theatre lobby)',
+  WoodFloor064: 'dark parquet planks (theatre stage)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';

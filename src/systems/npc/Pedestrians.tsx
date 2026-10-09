@@ -16,6 +16,10 @@ import { register } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
 import { useMissions } from '../../game/missions';
 import { emit } from '../../game/events';
+import { addCombatant, fightBrain, removeCombatant, type Combatant } from '../combat/combat';
+
+/** One-shot clips (fights): play once and hold the last pose. */
+export const ONE_SHOT = new Set(['Yes', 'Knockdown', 'GetUp', 'Punch_R', 'Punch_L', 'Punch_Cross', 'Kick']);
 
 // Street life (VISUAL_OVERHAUL 19 / SPEC 8.6): MPFB2 pedestrians with retargeted CC0 clips.
 // A GTA-style ambient crowd that follows Abel: a fixed pool of people, each one respawning out of
@@ -245,17 +249,20 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     for (const clip of prepareClips(source.animations.map((c) => c.clone()))) {
       const name = clip.name;
       const a = mixer.clipAction(clip);
-      if (name === 'Yes') {
+      if (ONE_SHOT.has(name)) {
         a.setLoop(THREE.LoopOnce, 1);
-        a.clampWhenFinished = false;
+        a.clampWhenFinished = name !== 'Yes';
       }
       actions.set(name, a);
     }
     return { obj, mixer, actions };
   }, [source, tier]);
 
-  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0, shadow: true, detail: true });
+  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0, shadow: true, detail: true, fighting: false, clipUntil: 0 });
   const name = useMemo(() => NAMES[Math.floor(Math.random() * NAMES.length)]!, []);
+  // fights: every pedestrian can be hit, fight back, run, fall and get up
+  const fighter = useMemo<Combatant>(() => addCombatant({ x: agent.x, z: agent.z, tag: 'street', hp: 55 + Math.random() * 40, name }), [agent, name]);
+  useEffect(() => () => removeCombatant(fighter.id), [fighter]);
   const talk = useMemo(
     () => ({
       id: `npc-${Math.random().toString(36).slice(2)}`, x: 1e9, z: 1e9, radius: 0, label: 'Talk', key: 'KeyE' as const, priority: 1,
@@ -278,12 +285,12 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     return register(talk);
   }, [talk, agent.role]);
 
-  const play = (name: string, fade = 0.3) => {
+  const play = (name: string, fade = 0.3, restart = false) => {
     const s = st.current;
-    if (s.cur === name || !actions.has(name)) return;
+    if ((s.cur === name && !restart) || !actions.has(name)) return;
     const next = actions.get(name)!;
     next.reset().fadeIn(fade).play();
-    actions.get(s.cur)?.fadeOut(fade);
+    if (s.cur !== name) actions.get(s.cur)?.fadeOut(fade);
     s.cur = name;
   };
 
@@ -310,8 +317,9 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
         budget.frame = frame;
         budget.n = 0;
       }
-      if (budget.n < 2 && respawn(agent, world, state.camera)) {
+      if (budget.n < 2 && fighter.state !== 'down' && respawn(agent, world, state.camera)) {
         budget.n++;
+        Object.assign(fighter, { state: 'calm', hp: fighter.maxHp, knockedOut: false, clip: '', pendingHit: 0 });
         s.x = agent.x;
         s.z = agent.z;
         s.rotY = agent.rotY;
@@ -334,8 +342,49 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
         if (/eye|brow|lash/i.test(o.name)) o.visible = wantDetail;
       });
     }
-    if (far && agent.role !== 'walk') return;
+    if (far && agent.role !== 'walk' && fighter.state === 'calm') return;
     s.t += dt;
+    // ---- fights: the fight brain drives this person while they fight, flee, lie hurt or get up
+    fighter.x = s.x;
+    fighter.z = s.z;
+    fighter.rotY = s.rotY;
+    const brain = fightBrain(fighter, dt);
+    if (brain) {
+      s.fighting = true;
+      talk.radius = 0;
+      s.x += brain.vx * dt;
+      s.z += brain.vz * dt;
+      fighter.x = s.x;
+      fighter.z = s.z;
+      if (brain.face !== null) {
+        let d = brain.face - s.rotY;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        s.rotY += d * Math.min(1, dt * 8);
+      }
+      play(brain.clip, ONE_SHOT.has(brain.clip) ? 0.08 : 0.2, ONE_SHOT.has(brain.clip) && fighter.clipUntil !== s.clipUntil);
+      s.clipUntil = fighter.clipUntil;
+      const act = actions.get(brain.clip);
+      if (act) act.timeScale = brain.rate;
+      const y = heightAt(s.x, s.z);
+      g.position.set(s.x, y, s.z);
+      g.rotation.y = s.rotY;
+      const since = performance.now() - fighter.hitAt;
+      g.rotation.x = since < 300 ? -Math.sin((since / 300) * Math.PI) * 0.18 : 0; // flinch
+      body.current?.setNextKinematicTranslation({ x: s.x, y: y + (fighter.state === 'down' ? -5 : 0.9), z: s.z });
+      mixer.update(dt);
+      return;
+    }
+    if (s.fighting) {
+      // back to normal life where they ended up: stand there until they respawn out of sight
+      s.fighting = false;
+      g.rotation.x = 0;
+      agent.role = 'stand';
+      agent.anchor = -1;
+      agent.rotY = s.rotY;
+      agent.clip = 'Idle_Loop';
+      play('Idle_Loop', 0.3);
+      talk.radius = 1.9;
+    }
     _toPlayer.set(playerPosition.x - s.x, 0, playerPosition.z - s.z);
     const pd = _toPlayer.length();
     talk.x = s.x;

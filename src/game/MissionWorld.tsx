@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { heightAt } from '../world/heights';
 import { register } from './interactables';
 import { availableMissions, currentStep, useMissionAction, useMissions } from './missions';
+import { MissionSpawns } from './MissionSpawns';
 
 // GTA-style mission markers: a tall glowing beam (visible from far) and a pulsing ring on the
 // ground at each mission giver, and at the current objective while a mission is running.
@@ -53,6 +54,7 @@ export function MissionWorld() {
       {markers.map((m) => (
         <Beacon key={m.key} marker={m} />
       ))}
+      <MissionSpawns />
     </>
   );
 }

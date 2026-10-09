@@ -93,10 +93,13 @@ function planParking(): Parked[] {
   return out;
 }
 
+/** Carjacking: the traffic system parks the jacked car and asks Driving to put Abel in it. */
+export const enterRequest = { id: -1 };
+
 export const useParking = create<{
   cars: Parked[];
   take: (id: number) => Parked | undefined;
-  park: (p: Omit<Parked, 'id'>) => void;
+  park: (p: Omit<Parked, 'id'>) => number;
 }>((set, get) => ({
   cars: planParking(),
   take: (id) => {
@@ -104,5 +107,9 @@ export const useParking = create<{
     if (c) set({ cars: get().cars.filter((p) => p.id !== id) });
     return c;
   },
-  park: (p) => set({ cars: [...get().cars, { ...p, id: 1000 + Math.floor(Math.random() * 1e6) }] }),
+  park: (p) => {
+    const id = 1000 + Math.floor(Math.random() * 1e6);
+    set({ cars: [...get().cars, { ...p, id }] });
+    return id;
+  },
 }));

@@ -8,6 +8,7 @@ import { playerPosition } from '../systems/player/playerState';
 import { dayOfYear, sunDirection } from './sun';
 import { advanceClock, clock, daylight, lightsOn } from './clock';
 import { glowMaterials, nightWindowUniforms } from './kit/useKit';
+import { indoor, screenLight } from '../game/theatre';
 
 // Lighting through a full GTA-style day (world/clock.ts: 48 real minutes per day).
 //  * Real Nairobi sun path (sun.ts); a cool moon takes over the same shadow-casting light at night.
@@ -138,6 +139,9 @@ export function Environment() {
 
   useFrame((state, dt) => {
     advanceClock(Math.min(dt, 0.25));
+    // indoors (the Grand Theatre): sky light fades like eyes adjusting, warm house light instead
+    indoor.value += (indoor.target - indoor.value) * Math.min(1, dt * 2.5);
+    const inside = indoor.value;
     const h = clock.hours;
     const day = daylight(h);
     const night = lightsOn(h);
@@ -176,7 +180,7 @@ export function Environment() {
       const elev = Math.max(0, _sun.y);
       // sun: fades in over the first ~8 degrees; the moon is a fifth of a sunny day at most
       const sunI = 2.6 * Math.min(1, elev / 0.14);
-      l.intensity = sunUp ? sunI : 0.32 * night;
+      l.intensity = (sunUp ? sunI : 0.32 * night) * (1 - inside * 0.92);
       l.color.copy(_sunCol);
       const texel = (budget.shadowDistance * 2) / budget.shadowMapSize;
       const sx = Math.round(playerPosition.x / texel) * texel;
@@ -185,9 +189,12 @@ export function Environment() {
       l.position.set(sx + _light.x * 150, Math.max(8, _light.y * 150), sz + _light.z * 150);
       l.target.updateMatrixWorld();
     }
-    if (hemi.current) hemi.current.intensity = 0.06 + 0.22 * night;
-    scene.environmentIntensity = 0.12 + 0.75 * day;
-    gl.toneMappingExposure = 1.05 + 0.4 * night;
+    if (hemi.current) {
+      hemi.current.intensity = (0.06 + 0.22 * night) * (1 - inside) + inside * 0.55;
+      hemi.current.color.set(inside > 0.5 ? '#ffd9a8' : '#5a6f9e');
+    }
+    scene.environmentIntensity = (0.12 + 0.75 * day) * (1 - inside * 0.8);
+    gl.toneMappingExposure = 1.05 + 0.4 * Math.max(night, inside * 0.8);
 
     for (const m of glowMaterials) m.emissiveIntensity = m.userData.baseGlow * (1 + 1.6 * night);
     nightWindowUniforms.uNight.value = night;
@@ -219,6 +226,8 @@ export function Environment() {
       </EnvMap>
       <hemisphereLight ref={hemi} args={['#5a6f9e', '#2a2016', 0.1]} />
       <directionalLight ref={light} castShadow intensity={2.4} color="#ffdcae" />
+      <primitive object={screenLight} />
+      <primitive object={screenLight.target} />
     </>
   );
 }

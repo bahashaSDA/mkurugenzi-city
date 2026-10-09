@@ -29,6 +29,7 @@ from kitlib import M, PIECES, ROOT  # noqa: E402
 
 GEN = os.path.join(ROOT, "blender", "cache")
 subprocess.run(["python", os.path.join(ROOT, "tools", "paint_facades.py"), GEN], check=True)
+subprocess.run(["python", os.path.join(ROOT, "tools", "paint_facades_photo.py"), GEN], check=True)  # photographic upper floors, glass, houses (owner: no cartoon buildings)
 
 
 def image_mat(name, file, rough=0.8, metal=0.0, glow=False):

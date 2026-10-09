@@ -28,6 +28,11 @@ export const LANDMARKS: Record<string, { x: number; z: number }> = {};
 
 const road = (id: string) => ROADS.find((r) => r.id === id)!;
 
+/** Plots kept free for hand-built landmarks: the Grand Theatre (districts/theatre). [x0, z0, x1, z1] */
+export const RESERVED: [number, number, number, number][] = [[-206, -1032, -134, -948]];
+const reserved = (x: number, z: number, half: number) =>
+  RESERVED.some(([x0, z0, x1, z1]) => x + half > x0 && x - half < x1 && z + half > z0 && z - half < z1);
+
 /** Line one side of a road segment with buildings, fronts facing the road. */
 function lineStreet(
   out: Placement[],
@@ -58,7 +63,7 @@ function lineStreet(
       const x = ax + dx * c + nx * off;
       const z = az + dz * c + nz * off;
       // keep clear of every other road (junctions, cross streets)
-      const clear = ROADS.every((o) => o === rd || distToRoad(o, x, z) > o.width / 2 + Math.max(w, d) / 2 + 2);
+      const clear = ROADS.every((o) => o === rd || distToRoad(o, x, z) > o.width / 2 + Math.max(w, d) / 2 + 2) && !reserved(x, z, Math.max(w, d) / 2);
       if (clear) {
         out.push({ piece, x, z, rotY, y: heightAt(x, z) });
         if (piece.startsWith('house_')) TOWN_HOMES.push({ x, z, rotY, piece });
@@ -80,7 +85,7 @@ function trees(out: Placement[], rd: Road, every: number, offset: number, seed: 
       for (const side of [-1, 1]) {
         const x = ax + dx * s + dz * side * (rd.width / 2 + offset);
         const z = az + dz * s - dx * side * (rd.width / 2 + offset);
-        if (ROADS.some((o) => o !== rd && distToRoad(o, x, z) < o.width / 2 + 4)) continue;
+        if (ROADS.some((o) => o !== rd && distToRoad(o, x, z) < o.width / 2 + 4) || reserved(x, z, 3)) continue;
         out.push({ piece: r() < 0.55 ? 'tree_jacaranda' : 'tree_street', x, z, rotY: r() * 6.28, y: heightAt(x, z) });
       }
     }

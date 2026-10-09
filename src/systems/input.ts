@@ -12,6 +12,7 @@ export const input = {
   touchMoveX: 0,
   touchMoveY: 0,
   touchSprint: false,
+  guard: false, // fights: holding the guard (right mouse / G)
 };
 
 const keys = new Set<string>();
@@ -54,7 +55,9 @@ function recompute() {
   input.sprint = keys.has('ShiftLeft') || keys.has('ShiftRight');
   input.jump = keys.has('Space');
   input.interact = keys.has('KeyE');
+  input.guard = keys.has('KeyG') || mouseGuard;
 }
+let mouseGuard = false;
 
 export function attachInput(canvas: HTMLElement): () => void {
   const down = (e: KeyboardEvent) => {
@@ -85,6 +88,21 @@ export function attachInput(canvas: HTMLElement): () => void {
     }
   };
   const ctx = (e: Event) => e.preventDefault();
+  // fights (systems/combat): left click punches, right button holds the guard, when the mouse is captured
+  const mouseDown = (e: MouseEvent) => {
+    if (document.pointerLockElement !== canvas) return;
+    if (e.button === 0) pressListeners.get('Mouse0')?.forEach((fn) => fn());
+    if (e.button === 2) {
+      mouseGuard = true;
+      recompute();
+    }
+  };
+  const mouseUp = (e: MouseEvent) => {
+    if (e.button === 2) {
+      mouseGuard = false;
+      recompute();
+    }
+  };
 
   window.addEventListener('keydown', down);
   window.addEventListener('keyup', up);
@@ -92,7 +110,11 @@ export function attachInput(canvas: HTMLElement): () => void {
   window.addEventListener('mousemove', mouseMove);
   canvas.addEventListener('click', click);
   canvas.addEventListener('contextmenu', ctx);
+  window.addEventListener('mousedown', mouseDown);
+  window.addEventListener('mouseup', mouseUp);
   return () => {
+    window.removeEventListener('mousedown', mouseDown);
+    window.removeEventListener('mouseup', mouseUp);
     window.removeEventListener('keydown', down);
     window.removeEventListener('keyup', up);
     window.removeEventListener('blur', blur);

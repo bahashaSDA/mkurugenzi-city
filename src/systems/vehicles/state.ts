@@ -21,6 +21,7 @@ export interface VehicleState {
   sound: SoundSystem | null;
   hail: number; // route distance where someone waved it down (-1: none)
   waited: number; // seconds spent holding at a stop for Abel
+  jackedUntil?: number; // carjacked: off the road until then (performance.now ms)
 }
 
 /** Collider handles of all vehicles (the riding camera ignores them). */

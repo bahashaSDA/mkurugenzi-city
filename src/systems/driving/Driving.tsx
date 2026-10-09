@@ -12,7 +12,7 @@ import { input, onKeyPress } from '../input';
 import { playerAnim } from '../player/AbelModel';
 import { ride } from '../vehicles/state';
 import { useVehicleKit } from '../vehicles/vehicleKit';
-import { CAR_DIMS, carKind, drive, useParking } from './state';
+import { CAR_DIMS, carKind, drive, enterRequest, useParking } from './state';
 
 // GTA-style driving: parked cars on the road shoulders (instanced, solid), F at the driver's door
 // to get in. The driven car is a Rapier raycast vehicle (suspension, grip, rear-wheel drive):
@@ -35,30 +35,37 @@ export function Driving() {
   const cars = useParking((s) => s.cars);
   const [driving, setDriving] = useState<{ piece: string; x: number; y: number; z: number; rotY: number } | null>(null);
 
+  const enter = (id: number) => {
+    if (drive.active || ride.vehicle >= 0) return;
+    const taken = useParking.getState().take(id);
+    if (!taken) return;
+    drive.active = true;
+    drive.piece = taken.piece;
+    drive.enteredAt = performance.now();
+    emit({ type: 'drive', piece: taken.piece });
+    playerAnim.riding = true;
+    playerAnim.rideClip = 'Driving_Loop';
+    setDriving({ piece: taken.piece, x: taken.x, y: taken.y ?? 0, z: taken.z, rotY: taken.rotY });
+    useEconomy.getState().toast('W/S drive and brake · A/D steer · Space handbrake · H horn · F get out');
+  };
+
   // F at the driver's door (right side) of any parked car
   useEffect(() => {
     const offs = cars.map((c) => {
       const d = CAR_DIMS[carKind(c.piece)]!;
       const [x, z] = local(c.x, c.z, c.rotY, -(d.W / 2 + 0.7), d.seat[2]);
-      return register({
-        id: `car-${c.id}`, x, z, radius: 2.0, key: 'KeyF', label: 'Get in and drive',
-        use: () => {
-          if (drive.active || ride.vehicle >= 0) return;
-          const taken = useParking.getState().take(c.id);
-          if (!taken) return;
-          drive.active = true;
-          drive.piece = taken.piece;
-          drive.enteredAt = performance.now();
-          emit({ type: 'drive', piece: taken.piece });
-          playerAnim.riding = true;
-          playerAnim.rideClip = 'Driving_Loop';
-          setDriving({ piece: taken.piece, x: taken.x, y: taken.y ?? 0, z: taken.z, rotY: taken.rotY });
-          useEconomy.getState().toast('W/S drive and brake · A/D steer · Space handbrake · H horn · F get out');
-        },
-      });
+      return register({ id: `car-${c.id}`, x, z, radius: 2.0, key: 'KeyF', label: 'Get in and drive', use: () => enter(c.id) });
     });
     return () => offs.forEach((f) => f());
   }, [cars]);
+
+  // carjacking: the traffic system parked the car where it stopped; jump straight in
+  useFrame(() => {
+    if (enterRequest.id < 0) return;
+    const id = enterRequest.id;
+    enterRequest.id = -1;
+    enter(id);
+  });
 
   return (
     <>

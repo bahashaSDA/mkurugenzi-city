@@ -15,6 +15,9 @@ import { benchmark } from '../../perf/Benchmark';
 import { SEA_Y, coastWeight } from '../../config/coast';
 import { oceanTime, waveHeight } from '../../world/Ocean';
 import { useHealth } from '../../game/health';
+import { useCutscene } from '../../game/cutscene';
+import { seat } from '../../game/theatre';
+import { splash } from '../audio/stingers';
 
 // Tuning (SPEC 8.1). Relaxed exploration speeds, no stamina.
 const WALK = 2.2;
@@ -86,6 +89,7 @@ export function Player() {
     surface: 0,
     tilt: 0,
     wastedPhase: 0, // 0 alive, 1 lying, 2 woken at the hospital
+    seated: false,
   });
 
   const controller = useMemo<KinematicCharacterController>(() => {
@@ -125,7 +129,8 @@ export function Player() {
     // --- Move intent (camera-relative) ---
     // movement is frozen while a shop/menu is open, while eating, and while riding a vehicle
     const wasted = useHealth.getState().wasted;
-    const locked = inputLock.ui || performance.now() < playerAnim.actionUntil || playerAnim.riding || !!wasted || playerAnim.down;
+    const cutscene = useCutscene.getState().active;
+    const locked = inputLock.ui || cutscene || performance.now() < playerAnim.actionUntil || playerAnim.riding || !!wasted || playerAnim.down;
     const mx = locked ? 0 : THREE.MathUtils.clamp(input.moveX + input.touchMoveX + pad.x, -1, 1);
     const my = locked ? 0 : THREE.MathUtils.clamp(input.moveY + input.touchMoveY + pad.y, -1, 1);
     const mag = Math.min(1, Math.hypot(mx, my));
@@ -145,6 +150,12 @@ export function Player() {
     }
     _move.multiplyScalar(s.speed * dt);
 
+    // fights: soft lock-on turns Abel toward his opponent while he swings
+    if (performance.now() < playerAnim.faceUntil) {
+      let d = playerAnim.faceTo - s.facing;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      s.facing += d * Math.min(1, dt * 14);
+    }
     // GTA-style eating: step back from the counter (turn away from it) so you can watch him eat
     const eating = playerAnim.action === 'Consume' && performance.now() < playerAnim.actionUntil && !playerAnim.riding;
     if (eating && !s.eating) s.eatFacing = s.facing + Math.PI;
@@ -162,7 +173,10 @@ export function Player() {
       const swim = ride.vehicle < 0 && !drive.active && depth > SWIM_DEPTH && coastWeight(playerPosition.x, playerPosition.z) > 0.5;
       if (swim !== s.swimming) {
         s.swimming = swim;
-        if (swim) s.vy = Math.max(s.vy, -2); // splash in, don't plunge to the seabed
+        if (swim) {
+          s.vy = Math.max(s.vy, -2); // splash in, don't plunge to the seabed
+          splash();
+        }
       }
       if (swim) s.surface = waveHeight(playerPosition.x, playerPosition.z, oceanTime.value, depth);
     }
@@ -209,8 +223,27 @@ export function Player() {
     } else if (s.wastedPhase === 2 && performance.now() > playerAnim.combatUntil) {
       s.wastedPhase = 0;
     }
-    // --- riding a matatu/nganya: follow the seat, no character controller ---
-    if (ride.vehicle >= 0) {
+    // --- sitting in the Grand Theatre: fixed in the seat; standing up puts him in the aisle ---
+    if (seat.active) {
+      const by = seat.y + CAPSULE_HALF + CAPSULE_R + 0.02;
+      rb.setNextKinematicTranslation({ x: seat.x, y: by, z: seat.z });
+      playerPosition.set(seat.x, by, seat.z);
+      s.facing = seat.facing;
+      s.vy = 0;
+      s.seated = true;
+      playerAnim.riding = true;
+      playerAnim.rideClip = 'Sitting_Idle_Loop';
+      playerAnim.speed = 0;
+      playerAnim.grounded = true;
+      jumped = true;
+    } else if (s.seated) {
+      s.seated = false;
+      playerAnim.riding = false;
+      jumped = true;
+      rb.setTranslation({ x: seat.exitX, y: seat.exitY, z: seat.exitZ }, true);
+      playerPosition.set(seat.exitX, seat.exitY, seat.exitZ);
+    } else if (ride.vehicle >= 0) {
+      // --- riding a matatu/nganya: follow the seat, no character controller ---
       const heading = rideWorld(_ride);
       const by = _ride.y + CAPSULE_HALF + CAPSULE_R + 0.02;
       rb.setNextKinematicTranslation({ x: _ride.x, y: by, z: _ride.z });
@@ -309,7 +342,13 @@ export function Player() {
     playerView.lookZ = -Math.cos(s.yaw);
 
     // --- Camera ---
-    if (benchmark.running) return; // the benchmark flies its own fixed path
+    if (benchmark.running || cutscene) return; // the benchmark / a cutscene flies its own camera
+    if (seat.active) {
+      // in the theatre: a seat-height view over Abel's shoulder, onto the big screen
+      camera.position.set(seat.camX, seat.camY, seat.camZ);
+      camera.lookAt(seat.lookX, seat.lookY, seat.lookZ);
+      return;
+    }
     if (FIXED_CAM) {
       // ?cam=x,y,z,tx,ty,tz : locked camera for visual regression screenshots
       camera.position.set(FIXED_CAM[0]!, FIXED_CAM[1]!, FIXED_CAM[2]!);

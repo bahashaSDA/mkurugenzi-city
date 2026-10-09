@@ -7,6 +7,8 @@ import { useGame } from '../app/store';
 import { drive } from '../systems/driving/state';
 import { BigMap, MissionHud, Minimap } from './MapUI';
 import { useInterior } from '../systems/interiors/rooms';
+import { CinematicUI, MissionBanner } from './CinematicUI';
+import { useCutscene } from '../game/cutscene';
 
 /** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
@@ -21,6 +23,7 @@ export function GameUI() {
   const video = useEconomy((s) => s.video);
   const [bag, setBag] = useState(false);
   const fading = useInterior((s) => s.fading);
+  const cinematic = useCutscene((s) => s.active);
 
   useEffect(() => onKeyPress('KeyI', () => setBag((b) => !b)), []);
   useEffect(() => {
@@ -40,7 +43,7 @@ export function GameUI() {
   const def = shop ? SHOPS[shop] : null;
 
   return (
-    <div className="game-ui">
+    <div className={cinematic ? "game-ui in-cutscene" : "game-ui"}>
       <div className="wallet">
         <div className="wallet-points">
           KSh <b>{money.toLocaleString()}</b>
@@ -59,6 +62,8 @@ export function GameUI() {
       <div className="fade" style={{ opacity: fading ? 1 : 0 }} />
       <Minimap />
       <MissionHud />
+      <MissionBanner />
+      <CinematicUI />
       <BigMap />
 
       {prompt && !shop && (

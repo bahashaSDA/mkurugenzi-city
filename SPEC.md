@@ -475,7 +475,8 @@ The player controls **Abel Mutua himself**, exploring his own city the way you c
 - This is the "wow" view of the whole city, especially at night.
 
 ### 8.6 NPCs and traffic
-- Pedestrians walk on the navmesh between points of interest, wait at crossings, chat in groups, and react (step aside, wave) when the player bumps them. No violence or damage systems at all.
+- Pedestrians walk on the navmesh between points of interest, wait at crossings, chat in groups, and react (step aside, wave) when the player bumps them.
+- **Amended by the owner (session 8, 2026-10-09):** GTA-style fighting is in, with injuries but **no weapons of any kind**: fists and kicks only, knock-downs, people lying hurt, getting up and limping away; Abel has health and can be WASTED (wakes at a hospital, pays the bill). Car-jacking is allowed (Abel pulls the driver out; the driver runs or fights). No blood, no deaths on the street, no guns, knives or police violence.
 - Vehicle traffic: matatus, boda bodas, private cars and a fictional bus follow road splines with simple lane logic, stop at lights and slow down for the player. **All traffic drives on the LEFT** with right-hand drive vehicles, as in real Kenya. Matatus stop at stages and bus stops to load passengers, and boda bodas filter between cars like they do in real traffic.
 - Performance LOD: full animation under 40 m, reduced update rate at 40 to 100 m, impostor sprites at 100 to 200 m, culled beyond.
 - Max 60 active NPCs and 25 vehicles on low tier; 150 and 50 on high tier.

@@ -37,6 +37,9 @@ const SHOTS = {
   beach_road: '1432,3.2,40,1700,0,10&spawn=1430,30',
   beach_shore: '1560,2.4,-20,1660,0,30&spawn=1555,-30',
   sea_aerial: '1300,90,-300,1700,0,200',
+  theatre_front: '-138,2.2,-946,-170,9,-972&camrel&spawn=-160,-946',
+  theatre_hall: '-170,6.5,-985,-170,6,-1023&camrel&spawn=-140,-930',
+  theatre_lobby: '-160,2.0,-968,-188,2,-972&camrel&spawn=-140,-930',
 };
 const only = process.argv[3] ? new RegExp(process.argv[3]) : null;
 
@@ -46,7 +49,7 @@ for (const [name, cam] of Object.entries(SHOTS)) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.log(name, 'pageerror', e.message));
   await page.goto(`http://localhost:4173/?tier=${process.env.TIER ?? 'mid'}&time=${process.env.TIME ?? '16.75'}&freeze&cam=${cam}`);
-  await page.getByRole('button', { name: 'Tap to enter' }).click({ timeout: 300000 });
+  await page.getByRole('button', { name: 'Tap to enter' }).click({ timeout: 600000 });
   await page.waitForTimeout(15000); // software GL is slow; let LODs and shadows settle
   await page.evaluate(() => document.querySelectorAll('.hud, .perf-overlay').forEach((e) => e.remove()));
   await page.screenshot({ path: `${out}/${name}.png`, timeout: 400000 });

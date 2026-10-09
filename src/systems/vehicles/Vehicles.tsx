@@ -19,7 +19,10 @@ import { SPECS, type VehicleKind, type VehicleSpec } from './specs';
 import { ride, vehicleColliders, vehicles, type VehicleState } from './state';
 import { Stages } from './Stages';
 import { emit } from '../../game/events';
-import { drive } from '../driving/state';
+import { drive, enterRequest, useParking } from '../driving/state';
+import { useStreetSpawns } from '../combat/combat';
+
+const JACK_LINES = ['Driver: "Wewe! Hiyo ni gari yangu!"', 'Driver: "Mkurugenzi?! Ata wewe?!"', 'Driver: "Polepole! Nitashuka mwenyewe!"'];
 
 
 // passengers: the same mostly-merch crowd (shares the GLBs the pedestrians already loaded)
@@ -153,6 +156,35 @@ export function Vehicles() {
     return () => offs.forEach((f) => f());
   }, [doors]);
 
+  // --- carjacking (GTA style, no weapons): F at the driver's door of a slow or stopped car ---
+  const jacks = useMemo(
+    () =>
+      fleet.map((v) => {
+        const it: Interactable = {
+          id: `jack-${v.id}`, x: 1e9, z: 1e9, radius: 0, key: 'KeyF', label: 'Pull the driver out',
+          use: () => {
+            if (drive.active || ride.vehicle >= 0 || v.v > 6) return;
+            const spec = SPECS[v.kind];
+            const id = useParking.getState().park({ piece: v.piece, x: v.x, z: v.z, y: v.y, rotY: v.heading });
+            v.jackedUntil = performance.now() + 90000;
+            // the driver lands on the road beside the door: most run, some want a fight
+            const c = Math.cos(v.heading);
+            const sn = Math.sin(v.heading);
+            const ox = -(spec.width / 2 + 1.6);
+            useStreetSpawns.getState().add(v.x + ox * c, v.z - ox * sn, Math.random() < 0.3 ? 'fight' : 'flee');
+            useEconomy.getState().toast(JACK_LINES[Math.floor(Math.random() * JACK_LINES.length)]!);
+            enterRequest.id = id;
+          },
+        };
+        return it;
+      }),
+    [fleet],
+  );
+  useEffect(() => {
+    const offs = jacks.map(register);
+    return () => offs.forEach((f) => f());
+  }, [jacks]);
+
   // F also gets you off at a stop
   useEffect(
     () =>
@@ -185,9 +217,20 @@ export function Vehicles() {
     const dt = Math.min(rawDt, 0.1);
     const st0 = st.current;
     // ---------- driving ----------
+    const nowMs = performance.now();
     for (const v of fleet) {
       const spec = SPECS[v.kind];
       const rs = routes[v.route]!;
+      if (v.jackedUntil) {
+        if (nowMs < v.jackedUntil) {
+          bodies.current[v.id]?.setNextKinematicTranslation({ x: v.x, y: -200, z: v.z });
+          jacks[v.id]!.radius = 0;
+          doors[v.id]!.radius = 0;
+          continue;
+        }
+        v.jackedUntil = 0;
+        v.s = (v.s + rs.length / 2) % rs.length; // back in traffic, somewhere else
+      }
       sampleAt(rs, v.s, _a);
       let target = _a.hw ? HIGHWAY_SPEED : spec.townSpeed;
       // stops: slow down, dwell, pick the stage name for the conductor
@@ -275,11 +318,18 @@ export function Vehicles() {
       it.x = v.x + dx * c + dz * sn;
       it.z = v.z - dx * sn + dz * c;
       it.radius = spec.fare && v.stopped && ride.vehicle < 0 ? 3.2 : 0;
+      // driver's door (Kenya: right-hand drive, local -X) for carjacking private cars
+      const jk = jacks[v.id]!;
+      const jx = -(spec.width / 2 + 0.6);
+      jk.x = v.x + jx * c + 0.4 * sn;
+      jk.z = v.z - jx * sn + 0.4 * c;
+      jk.radius = v.kind === 'car' && v.v < 6 && !drive.active && ride.vehicle < 0 ? 2.2 : 0;
     }
 
     // ---------- rendering (LOD by camera distance) ----------
     for (const b of batches) b.mesh.count = 0;
     for (const v of fleet) {
+      if (v.jackedUntil) continue;
       const d = Math.hypot(v.x - camera.position.x, v.z - camera.position.z);
       const lod = ride.vehicle === v.id || d < 25 ? 0 : d < 90 ? 1 : d < 420 ? 2 : -1;
       if (lod < 0) continue;

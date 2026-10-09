@@ -25,6 +25,9 @@ export const playerAnim = {
   guard: false,
   down: false, // knocked out / WASTED: lying, then GetUp
   limp: false, // low health
+  faceTo: 0, // fights: turn toward the opponent until faceUntil
+  faceUntil: 0,
+  hitAt: 0, // last time Abel was hit (flinch)
 };
 
 const FADE = 0.25;
@@ -55,6 +58,7 @@ export function AbelModel() {
 
   // food and drink props in Abel's hands (GTA-style: you see what he is eating)
   const props = useMemo(() => makeProps(gltf.scene), [gltf]);
+  const spine = useMemo(() => gltf.scene.getObjectByName('spine_03') ?? gltf.scene.getObjectByName('spine_02'), [gltf]);
 
   const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10, combatUntil: 0 });
 
@@ -113,6 +117,9 @@ export function AbelModel() {
       else a.timeScale = native ? THREE.MathUtils.clamp(speed / native, 0.6, 1.8) : 1;
     }
     mixer.update(dt);
+    // flinch when hit: a quick lean back of the upper spine on top of whatever clip is playing
+    const since = performance.now() - playerAnim.hitAt;
+    if (since < 320 && spine) spine.rotation.x -= Math.sin((since / 320) * Math.PI) * 0.35;
     const eating = s.current === 'Consume';
     for (const [k, o] of props) o.visible = eating && (playerAnim.prop === k || (k === 'fork' && playerAnim.prop === 'plate'));
   });

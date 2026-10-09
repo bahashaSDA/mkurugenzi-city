@@ -72,6 +72,7 @@ export const SHOPS: Record<string, ShopDef> = {
   hoteli: { id: 'hoteli', title: 'Chai Moto Hoteli', greeting: 'Kaa chini, chai iko moto.', items: ['chai', 'mandazi', 'chapati', 'beans', 'githeri', 'pilau'] },
   chips: { id: 'chips', title: 'Chipo Express kibanda', greeting: 'Chips moto moto!', items: ['chips', 'chips_masala', 'smokie', 'mutura', 'soda'] },
   butchery: { id: 'butchery', title: 'Nyama Bora Butchery', greeting: 'Nyama choma iko tayari.', items: ['nyama', 'soda'] },
+  beach: { id: 'beach', title: 'Makuti Beach Kiosk', greeting: 'Karibu pwani! Soda iko baridi kabisa.', items: ['soda', 'water', 'juice', 'chai', 'chips', 'crisps'] },
   boutique: { id: 'boutique', title: 'Utafraaaia Boutique', greeting: 'Wakurugenzi! Merch mpya iko.', items: ['cap', 'tee', 'tee_plain', 'hoodie', 'quarterzip', 'jacket', 'sweatsuit', 'tote', 'socks'] },
 };
 

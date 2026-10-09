@@ -6,9 +6,15 @@ import { MARKET } from '../districts/hub/layout';
 import { ROUTES } from '../systems/vehicles/routes';
 import { playerPosition, playerView } from '../systems/player/playerState';
 import { drive } from '../systems/driving/state';
-import { availableMissions, currentStep, useMissions } from '../game/missions';
+import { availableMissions, currentStep, timeLeft, useMissions } from '../game/missions';
+import { useCutscene } from '../game/cutscene';
 import { inputLock, onKeyPress } from '../systems/input';
 import { WORLD_HALF } from '../config/world';
+import { shoreX } from '../config/coast';
+import { THEATRE } from '../game/places';
+import { HOSPITALS } from '../game/health';
+import { missionScratch } from '../game/missionData';
+import { combatants } from '../systems/combat/combat';
 
 // GTA-style radar (bottom-left, rotates with the camera) and full map (M) with a click-to-set
 // waypoint. Both draw the same vector map: roads by type, towns, Kibera, the market, the ridge,
@@ -46,6 +52,13 @@ function drawWorld(g: CanvasRenderingContext2D, xf: Xf, full: boolean) {
   };
   g.fillStyle = '#26301f';
   g.fillRect(-4000, -4000, 8000, 8000);
+  // the sea off Mkurugenzi Beach, and the sand
+  const coast: [number, number][] = [];
+  for (let z = -2600; z <= 2600; z += 100) coast.push([shoreX(z) - 140, z]);
+  poly([...coast, [8000, 2600], [8000, -2600]], '#d8c79a');
+  const water: [number, number][] = [];
+  for (let z = -2600; z <= 2600; z += 100) water.push([shoreX(z), z]);
+  poly([...water, [8000, 2600], [8000, -2600]], '#2a6f8f');
   circle(FIRE_HILL.x, FIRE_HILL.z, FIRE_HILL.r, '#2f3a26');
   circle(RIDGE.x, RIDGE.z, RIDGE.r, '#46463f');
   rect(KIBERA.x0, KIBERA.z0, KIBERA.x1, KIBERA.z1, '#5c4030');
@@ -93,18 +106,40 @@ function drawWorld(g: CanvasRenderingContext2D, xf: Xf, full: boolean) {
 interface Blip {
   x: number;
   z: number;
-  kind: 'mission' | 'objective' | 'waypoint';
+  kind: 'mission' | 'objective' | 'waypoint' | 'enemy';
 }
 
 function blips(): Blip[] {
   const out: Blip[] = [];
   const s = useMissions.getState();
   if (s.active) {
-    const at = currentStep()?.step.at?.();
-    if (at) out.push({ x: at.x, z: at.z, kind: 'objective' });
+    const cur = currentStep();
+    const at = cur?.step.at?.();
+    if (at && cur?.step.spawn?.kind !== 'chase') out.push({ x: at.x, z: at.z, kind: 'objective' });
+    // the getaway car, and opponents still standing (red, GTA style)
+    if (cur?.step.spawn?.kind === 'chase') out.push({ ...missionScratch.chaseEnd, kind: 'enemy' });
+    for (const c of combatants.values()) if (c.tag === 'mission' && c.state !== 'down') out.push({ x: c.x, z: c.z, kind: 'enemy' });
   } else for (const m of availableMissions()) out.push({ ...m.start(), kind: 'mission' });
   if (s.waypoint) out.push({ ...s.waypoint, kind: 'waypoint' });
   return out;
+}
+
+/** Fixed places worth finding: the Grand Theatre and the hospitals (GTA-style icons). */
+function drawLandmarks(g: CanvasRenderingContext2D, xf: Xf) {
+  const icon = (x: number, z: number, bg: string, fg: string, ch: string) => {
+    const [sx, sy] = project(xf, x, z);
+    g.beginPath();
+    g.arc(sx, sy, 7, 0, Math.PI * 2);
+    g.fillStyle = bg;
+    g.fill();
+    g.fillStyle = fg;
+    g.font = 'bold 10px system-ui, sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText(ch, sx, sy + 0.5);
+  };
+  icon(THEATRE.x, THEATRE.z, '#8a1420', '#ffd23c', 'T');
+  for (const h of HOSPITALS) icon(h.x, h.z, '#ffffff', '#c3261f', '+');
 }
 
 function drawBlip(g: CanvasRenderingContext2D, b: Blip, sx: number, sy: number) {
@@ -120,6 +155,14 @@ function drawBlip(g: CanvasRenderingContext2D, b: Blip, sx: number, sy: number) 
     g.textAlign = 'center';
     g.textBaseline = 'middle';
     g.fillText('M', 0, 0.5);
+  } else if (b.kind === 'enemy') {
+    g.beginPath();
+    g.arc(0, 0, 4.5, 0, Math.PI * 2);
+    g.fillStyle = '#e0302a';
+    g.strokeStyle = '#141414';
+    g.lineWidth = 1.5;
+    g.fill();
+    g.stroke();
   } else if (b.kind === 'objective') {
     g.beginPath();
     g.arc(0, 0, 6, 0, Math.PI * 2);
@@ -174,6 +217,7 @@ export function Minimap() {
       g.save();
       g.clearRect(0, 0, W, H);
       drawWorld(g, xf, false);
+      drawLandmarks(g, xf);
       // blips clamp to the radar edge when far away (GTA)
       for (const b of blips()) {
         let [sx, sy] = project(xf, b.x, b.z);
@@ -233,6 +277,7 @@ export function BigMap() {
     xfRef.current = xf;
     g.setTransform(1, 0, 0, 1, 0, 0);
     drawWorld(g, xf, true);
+    drawLandmarks(g, xf);
     for (const b of blips()) {
       const [sx, sy] = project(xf, b.x, b.z);
       drawBlip(g, b, sx, sy);
@@ -270,33 +315,44 @@ export function BigMap() {
   );
 }
 
-/** Mission objective box (top right) and subtitles for whoever is talking (bottom). */
+/** GTA-style objective line (bottom centre, {highlights} in yellow), timer and counter (top right),
+ *  subtitles for whoever is talking. Hidden during cutscenes. */
 export function MissionHud() {
   const active = useMissions((s) => s.active);
-  const step = useMissions((s) => s.step);
   const counter = useMissions((s) => s.counter);
   const dialogue = useMissions((s) => s.dialogue);
+  const shownAt = useMissions((s) => s.objectiveShownAt);
+  const cinematic = useCutscene((s) => s.active);
   const [, tick] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => tick((t) => t + 1), 500);
+    const id = setInterval(() => tick((t) => t + 1), 250);
     return () => clearInterval(id);
   }, []);
   const cur = active ? currentStep() : null;
-  const left = cur?.mission.timeLimit ? Math.max(0, cur.mission.timeLimit - (performance.now() - useMissions.getState().startedAt) / 1000) : null;
+  const left = timeLeft();
   const talking = dialogue && performance.now() < dialogue.until ? dialogue : null;
+  if (cinematic) return null;
+  // the objective line shows for a while when it changes (and stays while there is no subtitle)
+  const showObjective = cur && (performance.now() - shownAt < 9000 || !talking);
   return (
     <>
-      {cur && (
+      {cur && (left !== null || cur.step.count) && (
         <div className="mission-box">
-          <small>Mission · {cur.mission.title}</small>
-          <b>{cur.step.text}</b>
-          {cur.mission.id === 'casting' && step === 1 && <span>{counter}/3 invited</span>}
           {left !== null && (
-            <span className={left < 60 ? 'urgent' : ''}>
+            <span className={`mission-timer${left < 20 ? ' urgent' : ''}`}>
               {Math.floor(left / 60)}:{String(Math.floor(left % 60)).padStart(2, '0')}
             </span>
           )}
-          <span className="mission-hint">KSh {cur.mission.reward.toLocaleString()} on completion</span>
+          {cur.step.count ? (
+            <span className="mission-count">
+              {cur.step.counterLabel?.toUpperCase()} {counter}/{cur.step.count}
+            </span>
+          ) : null}
+        </div>
+      )}
+      {showObjective && cur && (
+        <div className="objective" key={shownAt}>
+          {highlight(cur.step.text)}
         </div>
       )}
       {talking && (
@@ -305,5 +361,18 @@ export function MissionHud() {
         </div>
       )}
     </>
+  );
+}
+
+/** "Go to the {Grand Theatre}." -> text with the braced words in GTA yellow. */
+export function highlight(text: string) {
+  return text.split(/(\{[^}]+\})/g).map((part, i) =>
+    part.startsWith('{') ? (
+      <em key={i} className="hl">
+        {part.slice(1, -1)}
+      </em>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
   );
 }

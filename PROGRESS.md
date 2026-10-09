@@ -1,6 +1,60 @@
 # PROGRESS
 
-_Last updated: 2026-10-08 (session 5)_
+_Last updated: 2026-10-09 (session 8)_
+
+## Session 8: realism, the coast, 200 missions, the Grand Theatre, fights (owner feedback round 3)
+Owner asked: real (not cartoon) cars and buildings from Sketchfab; health and GTA swimming; a sea after the
+beach; a GTA day/night clock with great ambience at every hour; a new splash over Abel videos; ~200 missions all
+about Mkurugenzi (count hidden, harder but fair, KSh pay) with GTA-style cinematic briefings; a big, expensive
+theatre with an audience and episodes on a 3D screen; fighting with injuries but no weapons (SPEC 8.6 amended).
+
+**Done**
+- Real vehicles (`blender/scripts/build_real_kit.py`, `tools/merge-kit.mjs`): the owner's Sketchfab Kenyan nganya
+  (CC BY), VW Crafter matatu and VW Golf are decimated per part (painted panels get 3x the budget), hidden interior
+  stripped, baked into one colour/roughness/metal atlas + glass + a sharp livery material; LODs drop small parts;
+  colour variants share geometry. `real_vehicles_kit.glb` 5.2 MB (streams after the splash). Original airbrushed
+  liveries (`tools/paint_real_liveries.py`). They replace every procedural matatu, nganya, bus and car.
+- `tools/sketchfab-models.json` + `tools/sketchfab-fetch.mjs`: 30 curated free models (Hiace, Kenyan Ma3 minibus,
+  Kenyan bus, Probox, Corolla, Land Cruiser, pickup, boda, walk-up flats, offices, towers, petrol station, cinema
+  interior, acacia, jacaranda, palms, street lamps). Licence re-checked before download (CC BY / CC0 only).
+  **Blocked on the owner's Sketchfab API token** (downloads need an account; search does not).
+- Day/night (`world/clock.ts`, `Environment.tsx`): GTA V pace (1 game minute = 2 s, 48-minute day), real Nairobi
+  sun path, moon, stars, night-blue sky, dusk/dawn colour keys for sky, fog and sun, IBL re-rendered every half
+  hour, exposure adaptation; sodium/LED street lamps with halos and light pools (`StreetLights.tsx`); facade
+  windows light up at night; signs and LEDs brighten; HUD clock. `?time=21.5&freeze` for tests.
+- Coast (`config/coast.ts`): world 4 km; coast road, sand beach (ambientCG sand), curving shore, swimmable shelf,
+  drop-off. `Ocean.tsx`: PBR sea with Gerstner swell + shoaling, depth colour, swash foam, whitecaps, ripples.
+- Swimming (front crawl / treading water, body pitch, wave-height float), health (GTA bar under the radar, regen to
+  50, food heals, fall damage, WASTED -> nearest hospital, KSh 500 bill, limp below 30).
+- Mocap clips added without a full character rebuild (`blender/scripts/add_clips.py`, new `mocap.py` options):
+  swim, boxing guard, jab/hook/cross, kick, knockdown, lying hurt, get up, limp (CMU). Pedestrians got the fight set.
+- Fights (`systems/combat`): punch combos (LMB/R), kick (Q), guard (RMB/G), soft lock-on; pedestrians fight back or
+  flee, bystanders scatter, knock-downs, lying hurt, getting up and limping away; mission opponents (red markers);
+  car-jacking (F at the driver door of slow traffic: the driver runs or fights).
+- Missions v2 (`game/missionData.ts`, `missions.ts`, `cutscene.ts`): 200 missions in 14 chapters of Abel's public
+  story (privacy rules kept: no family, invented characters). Objectives: go, drive (timed), deliver, matatu, talk,
+  watch, eat, scout, races, chases, fights, collect, swim to a buoy, golden-hour shots (time skip). Difficulty and
+  pay ramp (KSh 400 -> ~8,400; finales x2; first 50 pay ~KSh 70,000). Only the next 3 givers are shown. Letterboxed
+  briefings (orbit, over-the-shoulder, aerial fly-to-objective, reveal), yellow-highlighted objective line, timers,
+  counters, MISSION PASSED/FAILED (E to retry), synthesised stingers.
+- Grand Theatre (`districts/theatre`): 60 x 64 m in the CBD, limestone facade, glowing marquee, glass lobby, canopy,
+  fly tower, ticket booth (KSh 50,000), corridors, 22 raked rows / 1,584 seats, proscenium, drapes, screen. Full
+  house of baked seated crowd (skinned pose -> static, meshoptimizer-simplified, instanced: ~12 draw calls for ~700
+  people). Sit in Row J and the episode plays on the 3D screen (YouTube embed); the sky light dims indoors.
+- Splash v2: muted Mkurugenzi episode background (small 360p player scaled up, poster first; skipped on data-saver,
+  2G/3G and automation), big time-based counter, cycling words, letter-by-letter title, curtain wipe.
+- Buildings: photographic facade tiles (`tools/paint_facades_photo.py`: real brick/plaster/concrete with glass
+  panes, curtains and dust) replace the illustrated upper floors, glass towers and houses in `town_kit.glb`.
+- Map/radar: sea and beach, theatre and hospital icons; new discoverable areas.
+
+**Honest gaps**
+- Only 3 real vehicle models until the Sketchfab token arrives; buildings are still the procedural kit with better
+  facades (real Sketchfab buildings are queued). Beach has no palms, kiosks or umbrellas yet; one mission step asks
+  for a drink at "the beach kiosk", which has no shop yet.
+- Sketchfab Standard licence (Crafter, Golf): fine inside the game, raw files must not be redistributed (gitignored).
+- Software-GL tests take ~4 minutes to compile shaders; real-device performance with the ocean, theatre audience
+  and new vehicles is not measured yet (`?benchmark`).
+- The splash design is my interpretation: the owner's reference GIF did not come through (only its <img> tag).
 
 ## Session 7: GTA-style city life (owner feedback round 2)
 Owner asked: fix boarding; eating view; enter any house; all GTA functions (fighting, stealing cars...),

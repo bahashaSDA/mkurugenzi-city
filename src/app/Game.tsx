@@ -18,6 +18,7 @@ import { Terrain } from '../world/Terrain';
 import { RoadNetwork } from '../world/Roads';
 import { PostFX } from '../world/PostFX';
 import { StreetLights } from '../world/StreetLights';
+import { VehicleLights } from '../systems/vehicles/VehicleLights';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
 import { Hub } from '../districts/hub/Hub';
 import { Pedestrians } from '../systems/npc/Pedestrians';
@@ -31,9 +32,19 @@ import { Hud } from '../ui/Hud';
 import { GameUI } from '../ui/GameUI';
 import { HealthUI } from '../ui/HealthUI';
 import { Ocean } from '../world/Ocean';
+import { CutsceneCamera } from '../game/CutsceneCamera';
+import { CombatDirector, StreetBrawlers } from '../systems/combat/CombatDirector';
+import { Theatre } from '../districts/theatre/Theatre';
+import { BeachWhenNear } from '../districts/beach/Beach';
 import { GameLogic } from '../game/GameLogic';
 import { isAvailable, loadContent } from '../content/episodes';
 import { TouchControls } from '../ui/TouchControls';
+import { useCutscene } from '../game/cutscene';
+import { useHealth } from '../game/health';
+import { seat, useTheatre } from '../game/theatre';
+import { combatants, playerAttack } from '../systems/combat/combat';
+import { playerAnim } from '../systems/player/AbelModel';
+import { clock } from '../world/clock';
 
 const params = new URLSearchParams(location.search);
 const showPerf = import.meta.env.DEV || params.has('perf');
@@ -42,7 +53,10 @@ const showPerf = import.meta.env.DEV || params.has('perf');
 const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
-  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking, useMissions };
+  (window as unknown as { __mk: object }).__mk = {
+    playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking, useMissions,
+    useCutscene, useHealth, useTheatre, seat, combatants, playerAttack, playerAnim, clock,
+  };
 }
 
 /** ?debug: expose the live scene/renderer for profiling from tests and the console. */
@@ -110,6 +124,13 @@ export default function Game({ onReady }: { onReady: () => void }) {
               <Driving />
             </Suspense>
             <MissionWorld />
+            {!minimal && <Theatre />}
+            {!minimal && <BeachWhenNear />}
+            {!minimal && (
+              <Suspense fallback={null}>
+                <StreetBrawlers />
+              </Suspense>
+            )}
             {!minimal && (
               <Suspense fallback={null}>
                 <Interiors />
@@ -117,9 +138,12 @@ export default function Game({ onReady }: { onReady: () => void }) {
             )}
           </Physics>
           {!minimal && <StreetLights />}
+          {!minimal && <VehicleLights />}
           <Ocean />
           <WorldStreamer />
           <GameLogic />
+          <CutsceneCamera />
+          <CombatDirector />
           <PerfMonitor />
           <PostFX />
           {benchmark.enabled && phase === 'playing' && !bench && <Benchmark onDone={setBench} />}

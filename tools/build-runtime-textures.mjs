@@ -16,7 +16,8 @@ const OUT = 'public/textures';
 mkdirSync(OUT, { recursive: true });
 
 // runtime name -> ambientCG source id
-const SETS = { murram: 'Ground109', murram_path: 'Ground102', asphalt: 'Asphalt031', rock: 'Rock030', sand: 'Ground054' };
+const SETS = { murram: 'Ground109', murram_path: 'Ground102', asphalt: 'Asphalt031', rock: 'Rock030', sand: 'Ground054',
+  th_stone: 'Tiles143', th_concrete: 'Concrete046', th_carpet: 'Carpet015', th_fabric: 'Fabric016', th_wood: 'Wood051', th_terrazzo: 'Terrazzo005', th_stage: 'WoodFloor064', paving: 'PavingStones070' };
 
 const MAPS = [
   // [suffix in source, output map, args]

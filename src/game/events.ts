@@ -7,7 +7,12 @@ export type GameEvent =
   | { type: 'board'; vehicle: number }
   | { type: 'alight'; x: number; z: number }
   | { type: 'drive'; piece: string }
-  | { type: 'use'; id: string }; // mission objects: scout spots, pick-ups, drop-offs
+  | { type: 'use'; id: string } // mission objects: scout spots, pick-ups, drop-offs
+  | { type: 'knockout'; npc: number; tag: string } // fights: an opponent went down ('mission' or 'street')
+  | { type: 'collect'; tag: string } // mission pickups
+  | { type: 'theatre'; video: string } // watched an episode in the Grand Theatre
+  | { type: 'missionPassed'; id: string }
+  | { type: 'missionFailed'; id: string };
 
 type Listener = (e: GameEvent) => void;
 const listeners = new Set<Listener>();
