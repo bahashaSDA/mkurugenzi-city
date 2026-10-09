@@ -29,6 +29,8 @@ import { playerPosition } from '../systems/player/playerState';
 import { Benchmark, benchmark, type BenchmarkResult } from '../perf/Benchmark';
 import { Hud } from '../ui/Hud';
 import { GameUI } from '../ui/GameUI';
+import { HealthUI } from '../ui/HealthUI';
+import { Ocean } from '../world/Ocean';
 import { GameLogic } from '../game/GameLogic';
 import { isAvailable, loadContent } from '../content/episodes';
 import { TouchControls } from '../ui/TouchControls';
@@ -115,6 +117,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
             )}
           </Physics>
           {!minimal && <StreetLights />}
+          <Ocean />
           <WorldStreamer />
           <GameLogic />
           <PerfMonitor />
@@ -126,6 +129,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
       </Canvas>
       {phase === 'playing' && <Hud />}
       {phase === 'playing' && <GameUI />}
+      {phase === 'playing' && <HealthUI />}
       {phase === 'playing' && isTouch && <TouchControls />}
       {showPerf && <PerfOverlay />}
       {bench && (

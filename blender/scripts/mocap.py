@@ -75,8 +75,14 @@ def find_loop(src, act, start_frac, min_len, max_len):
     return s, best_e, best
 
 
-def retarget_mocap(src, tgt, out_name, loop=(0.35, 90, 170), out_step=4):
-    """Bake one looping clip from an imported CMU BVH armature onto tgt. Returns (action, m/s)."""
+def retarget_mocap(src, tgt, out_name, loop=(0.35, 90, 170), out_step=4, frames=None, oneshot=False,
+                   abs_height=False, face=None):
+    """Bake one looping clip from an imported CMU BVH armature onto tgt. Returns (action, m/s).
+
+    frames=(s0, s1) uses a fixed range instead of the loop search; oneshot=True drops the closing
+    loop key; abs_height=<frame where the subject stands upright> keeps the hips' real height above
+    the floor (lying, kneeling, getting up) instead of measuring it from the first frame; face=(bone, frame) aims the clip
+    so that bone (a punching hand, a kicking foot) points forward at that frame."""
     scene = bpy.context.scene
     act = src.animation_data.action
     f0 = int(round(act.frame_range[0]))
@@ -109,16 +115,26 @@ def retarget_mocap(src, tgt, out_name, loop=(0.35, 90, 170), out_step=4):
     leg_ratio = _leg_length(tgt, "thigh_l", "calf_l") / leg_src
     t_pelvis_rest = tgt.matrix_world @ tgt.data.bones["pelvis"].head_local
 
-    s0, s1, err = find_loop(src, act, *loop)
+    if abs_height:  # a frame where the subject stands upright in this take: hips there = rest height
+        scene.frame_set(abs_height)
+        t_pose_hips_z = _pw(src, "Hips")[0].translation.z
+    s0, s1, err = (frames[0], frames[1], 0.0) if frames else find_loop(src, act, *loop)
     scene.frame_set(s0)
     p0 = _pw(src, "Hips")[0].translation.copy()
+    if abs_height:
+        p0.z = t_pose_hips_z
     scene.frame_set(s1)
     p1 = _pw(src, "Hips")[0].translation.copy()
     travel = p1 - p0
     travel.z = 0
     duration = (s1 - s0) / SRC_FPS
     speed = travel.length * leg_ratio / duration
-    if speed > 0.3:
+    if face:
+        scene.frame_set(face[1])
+        heading = _pw(src, face[0])[0].translation - _pw(src, "Hips")[0].translation
+        heading.z = 0
+        heading.normalize()
+    elif speed > 0.3:
         heading = travel.normalized()
     else:  # standing: average hip facing over the cycle
         acc = Vector()
@@ -143,6 +159,8 @@ def retarget_mocap(src, tgt, out_name, loop=(0.35, 90, 170), out_step=4):
     for i, f in enumerate(frames + [None]):  # final key repeats the first: seamless loop
         frame_out = 1 + (i * out_step) / SRC_FPS * fps
         if f is None:
+            if oneshot:
+                break
             for name, (q, loc) in first.items():
                 pb = tgt.pose.bones[name]
                 pb.rotation_quaternion = q

@@ -34,6 +34,9 @@ const SHOTS = {
   east_town: '1100,2.4,-200,1100,4,40&camrel&spawn=1104,-200',
   sw_town: '-1050,2.4,620,-1050,3,850&camrel&spawn=-1046,620',
   fire_hill: '330,4,1170,340,1,1215&camrel&spawn=335,1180',
+  beach_road: '1432,3.2,40,1700,0,10&spawn=1430,30',
+  beach_shore: '1560,2.4,-20,1660,0,30&spawn=1555,-30',
+  sea_aerial: '1300,90,-300,1700,0,200',
 };
 const only = process.argv[3] ? new RegExp(process.argv[3]) : null;
 

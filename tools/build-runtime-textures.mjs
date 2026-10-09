@@ -16,7 +16,7 @@ const OUT = 'public/textures';
 mkdirSync(OUT, { recursive: true });
 
 // runtime name -> ambientCG source id
-const SETS = { murram: 'Ground109', murram_path: 'Ground102', asphalt: 'Asphalt031', rock: 'Rock030' };
+const SETS = { murram: 'Ground109', murram_path: 'Ground102', asphalt: 'Asphalt031', rock: 'Rock030', sand: 'Ground054' };
 
 const MAPS = [
   // [suffix in source, output map, args]
@@ -26,7 +26,9 @@ const MAPS = [
 ];
 
 let total = 0;
+const ONLY = process.argv[2] ? new RegExp(process.argv[2]) : null;
 for (const [name, id] of Object.entries(SETS)) {
+  if (ONLY && !ONLY.test(name)) continue;
   for (const [suffix, map, args] of MAPS) {
     const src = path.join(SRC, id, `${id}_1K-JPG_${suffix}.jpg`);
     if (!existsSync(src)) throw new Error(`missing ${src}: run node tools/fetch-textures.mjs`);

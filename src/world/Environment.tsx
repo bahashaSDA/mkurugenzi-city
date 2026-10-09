@@ -68,7 +68,7 @@ export function Environment() {
   const envDay = daylight(envH);
 
   useEffect(() => {
-    scene.fog = new THREE.Fog('#cfc7b8', 70, tier === 'low' ? 380 : 650);
+    scene.fog = new THREE.Fog('#cfc7b8', 140, tier === 'low' ? 600 : tier === 'mid' ? 1000 : 1400);
     return () => {
       scene.fog = null;
     };

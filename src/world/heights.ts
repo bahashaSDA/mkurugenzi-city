@@ -1,4 +1,5 @@
 import { distToRoad, ROADS, TOWNS } from '../config/roads';
+import { coastProfile, coastWeight, seaward } from '../config/coast';
 
 // World height field (metres). Pure and deterministic: terrain mesh, physics heightfield and every
 // layout that places things on the ground all call the same function.
@@ -57,8 +58,10 @@ function macro(x: number, z: number) {
   let h = west * (20 + 3 * Math.sin(z * 0.012));
   const fd = Math.hypot(x - FIRE_HILL.x, z - FIRE_HILL.z);
   h += FIRE_HILL.h * smooth(FIRE_HILL.r, 0, fd) ** 1.6; // the southern hills (Storyteller's Fire on top)
-  h += smooth(EDGE0, EDGE1, Math.max(Math.abs(x), Math.abs(z))) * 40; // map edge rises into hills (SPEC 9)
-  return h;
+  const coast = coastWeight(x, z);
+  // map edge rises into hills (SPEC 9) on the north, south and west; the east is the sea
+  h += smooth(EDGE0, EDGE1, Math.max(-x, Math.abs(z))) * 40 * (1 - coast);
+  return h + (coastProfile(seaward(x, z)) - h) * coast;
 }
 
 /** Pull h towards each town's level inside (and just around) its area. */
@@ -97,5 +100,12 @@ export function heightAt(x: number, z: number): number {
     }
   }
   if (TEST_PAD) h *= 1 - smooth(70, 45, Math.max(Math.abs(x + 600), Math.abs(z - 600)));
+  // the beach and seabed are smooth sand: no hill noise or town levelling out there
+  const coast = coastWeight(x, z);
+  if (coast > 0) {
+    const d = seaward(x, z);
+    const sand = coastProfile(d) + (d < 0 ? 0.12 * Math.sin(x * 0.9 + z * 0.35) * Math.min(1, -d / 30) : 0.18 * Math.sin(x * 0.45) * Math.sin(z * 0.31));
+    h += (sand - h) * coast * (PAVED.some((r) => distToRoad(r, x, z) < r.width / 2 + 2) ? 0 : 1);
+  }
   return h;
 }

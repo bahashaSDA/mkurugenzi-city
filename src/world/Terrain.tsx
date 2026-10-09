@@ -12,13 +12,13 @@ import { useGame } from '../app/store';
 // Collider rule (session 1): never use huge primitive colliders. Rapier lost precision on a
 // 1.6 km cuboid and the character sank ~17 cm. The ground is a heightfield; long walls are
 // split into short segments.
-const HF_SUBDIV = 400; // physics heightfield: 8 m grid over 3.2 km
-const VIS_SUBDIV = { low: 200, mid: 300, high: 400 } as const; // visual mesh by tier (16 / 10.7 / 8 m)
+const HF_SUBDIV = 500; // physics heightfield: 8 m grid over 4 km
+const VIS_SUBDIV = { low: 250, mid: 375, high: 500 } as const; // visual mesh by tier (16 / 10.7 / 8 m)
 const WALL_SEG = 200;
 
 export function Terrain() {
   const tier = useGame((s) => s.tier);
-  const [bc, bn, br, pc, pn, pr, rc, rn, rr] = useKTX2([
+  const [bc, bn, br, pc, pn, pr, rc, rn, rr, sc] = useKTX2([
     '/textures/murram_color.ktx2',
     '/textures/murram_normal.ktx2',
     '/textures/murram_rough.ktx2',
@@ -28,6 +28,7 @@ export function Terrain() {
     '/textures/rock_color.ktx2',
     '/textures/rock_normal.ktx2',
     '/textures/rock_rough.ktx2',
+    '/textures/sand_color.ktx2',
   ]);
   const { geometry, material } = useMemo(() => {
     const mask = buildGroundMask(getHubLayout());
@@ -40,9 +41,9 @@ export function Terrain() {
     return {
       geometry,
       material: makeGroundMaterial({ color: bc!, normal: bn!, rough: br! }, { color: pc!, normal: pn!, rough: pr! }, mask,
-        { color: rc!, normal: rn!, rough: rr! }),
+        { color: rc!, normal: rn!, rough: rr! }, sc),
     };
-  }, [bc, bn, br, pc, pn, pr, rc, rn, rr, tier]);
+  }, [bc, bn, br, pc, pn, pr, rc, rn, rr, sc, tier]);
   // Rapier heightfield order (verified in a unit test): index = i * (n + 1) + j, i along X, j along Z
   const heights = useMemo(() => {
     const n = HF_SUBDIV;

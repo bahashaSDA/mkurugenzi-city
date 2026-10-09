@@ -18,6 +18,13 @@ export const ABEL_URL = '/models/abel.glb';
 export const playerAnim = {
   speed: 0, grounded: true, vy: 0, idleTime: 0, action: '', actionUntil: 0, riding: false, rideClip: '',
   prop: '' as Prop, // held while eating/drinking
+  swimming: false,
+  /** fights (systems/combat): current one-shot attack/reaction clip and its end time */
+  combat: '' as string,
+  combatUntil: 0,
+  guard: false,
+  down: false, // knocked out / WASTED: lying, then GetUp
+  limp: false, // low health
 };
 
 const FADE = 0.25;
@@ -49,7 +56,7 @@ export function AbelModel() {
   // food and drink props in Abel's hands (GTA-style: you see what he is eating)
   const props = useMemo(() => makeProps(gltf.scene), [gltf]);
 
-  const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10 });
+  const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10, combatUntil: 0 });
 
   useEffect(() => {
     const idle = actions.get('Idle_Loop');
@@ -64,13 +71,17 @@ export function AbelModel() {
     const s = st.current;
     const { speed, grounded, vy } = playerAnim;
     let want: string;
-    if (playerAnim.riding) want = playerAnim.rideClip || 'Sitting_Idle_Loop';
+    if (playerAnim.down) want = performance.now() < playerAnim.combatUntil ? playerAnim.combat || 'Knockdown' : 'Down_Loop';
+    else if (playerAnim.combat && performance.now() < playerAnim.combatUntil) want = playerAnim.combat;
+    else if (playerAnim.swimming) want = 'Swim_Loop';
+    else if (playerAnim.riding) want = playerAnim.rideClip || 'Sitting_Idle_Loop';
     else if (playerAnim.action && performance.now() < playerAnim.actionUntil) want = playerAnim.action;
     else if (!grounded && vy > 1.5) want = 'Jump_Start';
     else if (!grounded) want = 'Jump_Loop';
     else if (speed > 5.0) want = 'Sprint_Loop';
     else if (speed > 2.6) want = 'Jog_Fwd_Loop';
-    else if (speed > 0.25) want = 'Walk_Loop';
+    else if (speed > 0.25) want = playerAnim.limp && speed < 2.6 ? 'Limp_Loop' : 'Walk_Loop';
+    else if (playerAnim.guard) want = 'Fight_Idle_Loop';
     else {
       // Personality when idle (SPEC 8.1): after 10 s, fold arms / check phone / talk to himself.
       playerAnim.idleTime += dt;
@@ -84,16 +95,23 @@ export function AbelModel() {
       playerAnim.idleTime = 0;
       s.idleSwitchAt = 10;
     }
-    if (want !== s.current && actions.has(want)) {
+    // a new attack restarts even if the same clip is still playing (combos)
+    const restart = want === s.current && playerAnim.combatUntil !== s.combatUntil && want === playerAnim.combat;
+    if ((want !== s.current || restart) && actions.has(want)) {
       const next = actions.get(want)!;
       const prev = actions.get(s.current);
-      next.reset().setEffectiveWeight(1).fadeIn(want.startsWith('Jump') ? 0.12 : FADE).play();
-      prev?.fadeOut(want.startsWith('Jump') ? 0.12 : FADE);
+      const fast = want.startsWith('Jump') || want.startsWith('Punch') || want === 'Kick';
+      next.reset().setEffectiveWeight(1).fadeIn(fast ? 0.08 : FADE).play();
+      if (prev !== next) prev?.fadeOut(fast ? 0.08 : FADE);
       s.current = want;
+      s.combatUntil = playerAnim.combatUntil;
     }
     const native = NATIVE_SPEED[s.current];
     const a = actions.get(s.current);
-    if (a) a.timeScale = native ? THREE.MathUtils.clamp(speed / native, 0.6, 1.8) : 1;
+    if (a) {
+      if (s.current === 'Swim_Loop') a.timeScale = THREE.MathUtils.clamp(speed / 1.6, 0.35, 1.6); // slow sculling when treading water
+      else a.timeScale = native ? THREE.MathUtils.clamp(speed / native, 0.6, 1.8) : 1;
+    }
     mixer.update(dt);
     const eating = s.current === 'Consume';
     for (const [k, o] of props) o.visible = eating && (playerAnim.prop === k || (k === 'fork' && playerAnim.prop === 'plate'));

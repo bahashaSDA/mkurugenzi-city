@@ -7,6 +7,7 @@ import { AREAS } from '../config/areas';
 import { useEconomy } from './economy';
 import { updateNearest, usePrompt } from './interactables';
 import { checkMission } from './missions';
+import { useHealth } from './health';
 
 /** Per-frame game rules: interaction prompt, E to use, discovery rewards, walking points,
  *  hunger, and the eat/drink animation hand-off to Abel. */
@@ -42,6 +43,8 @@ export function GameLogic() {
     }
     if (s.t < 0.15) return;
     eco.tick(s.t);
+    useHealth.getState().tick(s.t);
+    playerAnim.limp = useHealth.getState().hp < 30;
     s.t = 0;
     updateNearest();
     checkMission(null);

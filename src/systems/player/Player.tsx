@@ -12,6 +12,9 @@ import { AbelModel, playerAnim } from './AbelModel';
 import { ride, rideWorld, vehicleColliders } from '../vehicles/state';
 import { drive } from '../driving/state';
 import { benchmark } from '../../perf/Benchmark';
+import { SEA_Y, coastWeight } from '../../config/coast';
+import { oceanTime, waveHeight } from '../../world/Ocean';
+import { useHealth } from '../../game/health';
 
 // Tuning (SPEC 8.1). Relaxed exploration speeds, no stamina.
 const WALK = 2.2;
@@ -26,6 +29,13 @@ const CAPSULE_R = 0.3; // total height ~1.7 m + offset
 const EYE_HEIGHT = 1.62;
 const LOOK_SENS = 0.0025;
 const RECENTER_DELAY = 2000;
+// Swimming (GTA-style): deeper than this, Abel floats and swims a front crawl
+const SWIM_DEPTH = 1.25;
+const SWIM = 1.6;
+const SWIM_FAST = 2.6;
+// Falls: landing faster than this hurts (about a 5 m drop), damage per m/s beyond it
+const FALL_SAFE_VY = 12.5;
+const FALL_DAMAGE = 7;
 
 const FIXED_CAM = (() => {
   const q = new URLSearchParams(location.search);
@@ -50,6 +60,8 @@ const _q = new THREE.Quaternion();
 const _up = new THREE.Vector3(0, 1, 0);
 const _ride = new THREE.Vector3();
 const _zero = { x: 0, y: 0, z: 0 };
+const _qTilt = new THREE.Quaternion();
+const _xAxis = new THREE.Vector3(1, 0, 0);
 
 export function Player() {
   const body = useRef<RapierRigidBody>(null);
@@ -70,6 +82,10 @@ export function Player() {
     speed: 0,
     eating: false,
     eatFacing: 0,
+    swimming: false,
+    surface: 0,
+    tilt: 0,
+    wastedPhase: 0, // 0 alive, 1 lying, 2 woken at the hospital
   });
 
   const controller = useMemo<KinematicCharacterController>(() => {
@@ -108,12 +124,13 @@ export function Player() {
 
     // --- Move intent (camera-relative) ---
     // movement is frozen while a shop/menu is open, while eating, and while riding a vehicle
-    const locked = inputLock.ui || performance.now() < playerAnim.actionUntil || playerAnim.riding;
+    const wasted = useHealth.getState().wasted;
+    const locked = inputLock.ui || performance.now() < playerAnim.actionUntil || playerAnim.riding || !!wasted || playerAnim.down;
     const mx = locked ? 0 : THREE.MathUtils.clamp(input.moveX + input.touchMoveX + pad.x, -1, 1);
     const my = locked ? 0 : THREE.MathUtils.clamp(input.moveY + input.touchMoveY + pad.y, -1, 1);
     const mag = Math.min(1, Math.hypot(mx, my));
     const sprinting = input.sprint || input.touchSprint || pad.sprint;
-    const targetSpeed = mag < 0.01 ? 0 : sprinting ? SPRINT : mag > 0.6 ? RUN : WALK;
+    const targetSpeed = mag < 0.01 ? 0 : s.swimming ? (sprinting ? SWIM_FAST : SWIM) : sprinting ? SPRINT : mag > 0.6 ? RUN : WALK;
     s.speed = THREE.MathUtils.damp(s.speed, targetSpeed, 10, dt);
 
     _fwd.set(-Math.sin(s.yaw), 0, -Math.cos(s.yaw));
@@ -138,16 +155,60 @@ export function Player() {
       s.facing += d * Math.min(1, dt * 4);
     }
 
+    // --- Water: float at the wave surface, no gravity, no jumping ---
+    {
+      const ground = heightAt(playerPosition.x, playerPosition.z);
+      const depth = SEA_Y - ground;
+      const swim = ride.vehicle < 0 && !drive.active && depth > SWIM_DEPTH && coastWeight(playerPosition.x, playerPosition.z) > 0.5;
+      if (swim !== s.swimming) {
+        s.swimming = swim;
+        if (swim) s.vy = Math.max(s.vy, -2); // splash in, don't plunge to the seabed
+      }
+      if (swim) s.surface = waveHeight(playerPosition.x, playerPosition.z, oceanTime.value, depth);
+    }
+    playerAnim.swimming = s.swimming;
+
     // --- Gravity / jump ---
-    if (s.grounded && s.vy <= 0) {
+    const wasGrounded = s.grounded;
+    const fallVy = s.vy;
+    if (s.swimming) {
+      // capsule centre a little under the surface: head and shoulders out of the water
+      s.vy = THREE.MathUtils.clamp((s.surface - 0.5 - playerPosition.y) * 4, -3, 3);
+    } else if (s.grounded && s.vy <= 0) {
       s.vy = -1;
-      if (input.jump || pad.jump) s.vy = JUMP_V;
+      if ((input.jump || pad.jump) && !locked) s.vy = JUMP_V;
     } else {
       s.vy += GRAVITY * dt;
     }
     _move.y = s.vy * dt;
 
     let jumped = false;
+    // --- WASTED: fall, lie still while the screen fades, wake up at the nearest hospital ---
+    if (wasted) {
+      const t = performance.now() - wasted.at;
+      if (s.wastedPhase === 0) {
+        s.wastedPhase = 1;
+        playerAnim.down = true;
+        playerAnim.combat = s.swimming ? '' : 'Knockdown';
+        playerAnim.combatUntil = performance.now() + 800;
+      }
+      if (t > 5200 && s.wastedPhase === 1) {
+        s.wastedPhase = 2;
+        const h = wasted.hospital;
+        const y = heightAt(h.x, h.z) + CAPSULE_HALF + CAPSULE_R + 0.3;
+        teleport.pending = true;
+        teleport.x = h.x;
+        teleport.y = y;
+        teleport.z = h.z;
+        teleport.facing = 0;
+        playerAnim.down = false;
+        playerAnim.combat = 'GetUp';
+        playerAnim.combatUntil = performance.now() + 3000;
+        useHealth.getState().respawned();
+      }
+    } else if (s.wastedPhase === 2 && performance.now() > playerAnim.combatUntil) {
+      s.wastedPhase = 0;
+    }
     // --- riding a matatu/nganya: follow the seat, no character controller ---
     if (ride.vehicle >= 0) {
       const heading = rideWorld(_ride);
@@ -199,6 +260,10 @@ export function Player() {
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = riding ? _zero : controller.computedMovement();
     s.grounded = riding || controller.computedGrounded();
+    // fall damage on a hard landing (not in water, not when teleported)
+    if (!riding && !s.swimming && s.grounded && !wasGrounded && -fallVy > FALL_SAFE_VY) {
+      useHealth.getState().damage((-fallVy - FALL_SAFE_VY) * FALL_DAMAGE, 'You fell too far');
+    }
     // actual ground speed (not the input): animations follow what the body really does
     playerAnim.speed = Math.hypot(m.x, m.z) / dt;
     playerAnim.grounded = s.grounded;
@@ -218,8 +283,24 @@ export function Player() {
     if (ny < heightAt(nx, nz) - 80) rb.setNextKinematicTranslation({ x: SPAWN[0], y: SPAWN[1], z: SPAWN[2] });
 
     if (visual.current) {
+      // swimming: pitch flat into a front crawl when moving, nearly upright when treading water;
+      // keep the hips just under the surface whatever the tilt
+      const wantTilt = s.swimming ? (playerAnim.speed > 0.4 ? 1.3 : 0.2) : 0;
+      s.tilt = THREE.MathUtils.damp(s.tilt, wantTilt, 4, dt);
       _q.setFromAxisAngle(_up, s.facing);
-      visual.current.quaternion.copy(_q);
+      _qTilt.setFromAxisAngle(_xAxis, s.tilt);
+      visual.current.quaternion.copy(_q).multiply(_qTilt);
+      if (s.swimming || s.tilt > 0.01) {
+        const hipsY = (s.swimming ? s.surface - 0.12 : ny - 0.85 + 1.0) - ny;
+        const k = Math.min(1, s.tilt / 1.3);
+        visual.current.position.set(
+          -Math.sin(s.facing) * Math.sin(s.tilt),
+          THREE.MathUtils.lerp(-(CAPSULE_HALF + CAPSULE_R), hipsY - Math.cos(s.tilt), s.swimming ? 1 : k),
+          -Math.cos(s.facing) * Math.sin(s.tilt),
+        );
+      } else {
+        visual.current.position.set(0, -(CAPSULE_HALF + CAPSULE_R), 0);
+      }
       visual.current.visible = cameraMode === 'third';
     }
 
@@ -270,6 +351,7 @@ export function Player() {
 
     // Over-the-shoulder pivot
     if (drive.active) _target.set(drive.x, drive.y + 1.9, drive.z);
+    else if (s.swimming) _target.set(nx, s.surface + 0.7, nz).addScaledVector(_right, 0.3);
     else _target.set(nx, ny + (s.eating ? 0.55 : 0.65), nz).addScaledVector(_right, s.eating ? 0 : 0.45);
     _dir.set(
       Math.sin(s.yaw) * Math.cos(s.pitch),

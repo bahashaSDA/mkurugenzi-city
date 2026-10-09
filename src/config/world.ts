@@ -1,6 +1,6 @@
 import { heightAt } from '../world/heights';
 // World layout (SPEC section 6). Metres; (0,0) = spawn; -Z = north.
-export const WORLD_SIZE = 3200; // 3.2 km: the outer towns sit 1-1.5 km from the mtaa
+export const WORLD_SIZE = 4000; // 4 km: outer towns 1-1.5 km from the mtaa, the sea off the east coast
 export const WORLD_HALF = WORLD_SIZE / 2;
 export const CELL_SIZE = 200;
 

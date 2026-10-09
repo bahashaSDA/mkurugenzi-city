@@ -30,6 +30,8 @@ export const TEXTURES = {
   PavingStones070: 'concrete pavers (CBD pavements, plazas)',
   Concrete034: 'clean cast concrete (office blocks, towers)',
   Tiles074: 'ceramic floor tiles (interiors)',
+  Ground054: 'beach sand (Mkurugenzi Beach, runtime ground)',
+  Ground093C: 'coastal sand with shells and debris (tide line)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';

@@ -142,6 +142,8 @@ export const useEconomy = create<EconomyState>((set, get) => ({
       action: { clip: 'Consume', until: performance.now() + propFor(itemId).ms, prop: propFor(itemId).prop },
     }));
     get().toast(item.kind === 'drink' ? `Drank ${item.name}` : `Ate ${item.name}`, 'info');
+    // food heals like GTA snacks: a proper meal more than a soda
+    void import('./health').then(({ useHealth }) => useHealth.getState().heal(Math.max(5, Math.round(item.fullness * 0.6))));
     emit({ type: 'consume', item: itemId });
     save(get());
     return true;

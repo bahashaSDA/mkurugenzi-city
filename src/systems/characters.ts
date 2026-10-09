@@ -9,6 +9,7 @@ export const NATIVE_SPEED: Record<string, number> = {
   Walk_Loop: 1.33, // CMU 35_01 walk
   Jog_Fwd_Loop: 3.04, // CMU 16_35 jog
   Sprint_Loop: 3.75, // CMU 09_01 run
+  Limp_Loop: 0.76, // CMU 77_19 limping, hurt right leg
 };
 
 // Cut-out cards (hair, brows, lashes, beard, wrap prints): alpha-test, never alpha-blend.

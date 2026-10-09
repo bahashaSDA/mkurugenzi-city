@@ -14,7 +14,7 @@ export interface Road {
 export const ROADS: Road[] = [
   // The avenue with the shopping street (kerbs drawn by Roads.tsx), now running the full length
   { id: 'avenue', kind: 'tarmac', width: 8, pts: [[14, 330], [14, -300]] },
-  { id: 'expressway', kind: 'highway', width: 20, pts: [[-1560, -312], [-1100, -312], [-300, -312], [300, -312], [1100, -312], [1560, -312]] },
+  { id: 'expressway', kind: 'highway', width: 20, pts: [[-1560, -312], [-1100, -312], [-300, -312], [300, -312], [1100, -312], [1430, -312]] },
   { id: 'kibera-road', kind: 'tarmac', width: 7, pts: [[-145, 330], [-145, -300]] },
   { id: 'stage-road', kind: 'tarmac', width: 7, pts: [[-145, 150], [-40, 150], [10, 150]] },
   { id: 'north-street', kind: 'tarmac', width: 7, pts: [[-145, -150], [10, -150]] },
@@ -37,8 +37,11 @@ export const ROADS: Road[] = [
   { id: 'arena-road', kind: 'tarmac', width: 9, pts: [[290, -1050], [1100, -1050], [1100, -322]] },
   // Phil-It Studios town (east)
   { id: 'east-link', kind: 'tarmac', width: 8, pts: [[1100, -302], [1100, 260]] },
-  { id: 'east-st', kind: 'tarmac', width: 7, pts: [[900, -60], [1400, -60]] },
-  { id: 'east-st-2', kind: 'tarmac', width: 7, pts: [[900, 120], [1400, 120]] },
+  { id: 'east-st', kind: 'tarmac', width: 7, pts: [[900, -60], [1436, -60]] },
+  { id: 'east-st-2', kind: 'tarmac', width: 7, pts: [[900, 120], [1436, 120]] },
+  // Mkurugenzi Beach: the coast road along the top of the sand (palms, beach kiosks, the sea beyond)
+  { id: 'beach-road', kind: 'tarmac', width: 8, pts: [[1440, -1350], [1440, -600], [1440, 0], [1440, 600], [1440, 1350]] },
+  { id: 'arena-beach', kind: 'tarmac', width: 8, pts: [[1100, -1050], [1436, -1050]] },
   // Utafraaaia estate (north-west): leafy streets of walled homes
   { id: 'estate-road', kind: 'tarmac', width: 7, pts: [[-1100, -322], [-1100, -1300]] },
   ...[-650, -800, -950, -1100, -1250].map((z, i) => ({ id: `estate-st-${i}`, kind: 'tarmac' as const, width: 6, pts: [[-1400, z], [-800, z]] as [number, number][] })),

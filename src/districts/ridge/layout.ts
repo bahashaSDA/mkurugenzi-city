@@ -1,3 +1,4 @@
+import { coastWeight } from '../../config/coast';
 import type { Placement } from '../../world/kit/KitInstances';
 import { heightAt, RIDGE } from '../../world/heights';
 import { nearRoad } from '../../config/roads';
@@ -21,7 +22,7 @@ export function buildRidgeLayout(seed = 9): Placement[] {
   };
   const out: Placement[] = [];
   const put = (piece: string, x: number, z: number, scale: number) => {
-    if (Math.abs(x) > 1560 || Math.abs(z) > 1560 || nearRoad(x, z, 2 + RADIUS[piece]! * scale)) return;
+    if (Math.abs(x) > 1560 || Math.abs(z) > 1560 || coastWeight(x, z) > 0.02 || nearRoad(x, z, 2 + RADIUS[piece]! * scale)) return;
     out.push({ piece, x, z, rotY: r() * Math.PI * 2, scale, y: seat(x, z, RADIUS[piece]! * scale * 0.8) - 0.12 * scale });
   };
   for (let c = 0; c < 70; c++) {

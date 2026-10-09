@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { MASK_SIZE_M } from './groundMask';
 import { RIDGE } from '../heights';
+import { SHORE_GLSL } from './shoreGlsl';
 
 // PBR surface materials for ground and roads, extended with small shader patches.
 // Colours are measured from Nairobi reference photos (research/visual-references/PALETTES.md):
@@ -28,10 +29,15 @@ function prep(t: SurfaceTextures, srgb = true) {
  * Anti-tiling: colour is sampled at two scales/rotations and mixed by macro noise.
  * The plane's UVs must be world metres / TILE_M (see groundGeometry).
  */
-export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures, mask: THREE.Texture, rock: SurfaceTextures) {
+export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures, mask: THREE.Texture, rock: SurfaceTextures, sand?: THREE.Texture) {
   prep(base);
   prep(path);
   prep(rock);
+  if (sand) {
+    sand.wrapS = sand.wrapT = THREE.RepeatWrapping;
+    sand.anisotropy = 8;
+    sand.colorSpace = THREE.SRGBColorSpace;
+  }
   const mat = new THREE.MeshStandardMaterial({
     map: base.color,
     normalMap: base.normal,
@@ -46,6 +52,7 @@ export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures,
     shader.uniforms.uMaskSize = { value: MASK_SIZE_M };
     shader.uniforms.uRockMap = { value: rock.color };
     shader.uniforms.uRidge = { value: new THREE.Vector3(RIDGE.x, RIDGE.z, RIDGE.r) };
+    shader.uniforms.uSandMap = { value: sand ?? base.color };
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vWorldPosG;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWorldPosG = (modelMatrix * vec4(transformed, 1.0)).xyz;');
@@ -59,6 +66,8 @@ uniform sampler2D uMask;
 uniform float uMaskSize;
 uniform sampler2D uRockMap;
 uniform vec3 uRidge;
+uniform sampler2D uSandMap;
+${SHORE_GLSL}
 float gHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float gNoise(vec2 p) {
   vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
@@ -101,11 +110,25 @@ float rd = length(vWorldPosG.xz - uRidge.xy);
 float rocky = smoothstep(uRidge.z, uRidge.z * 0.45, rd) * smoothstep(0.35, 0.6, gNoise(vWorldPosG.xz * 0.05) * 0.6 + 0.4);
 vec3 rockCol = texture2D(uRockMap, guv * 0.6).rgb * vec3(1.05, 0.98, 0.9);
 col = mix(col, rockCol, clamp(rocky * 1.4, 0.0, 1.0));
+// Mkurugenzi Beach: pale coral sand, darker wet sand at the waterline, a tide line, seabed below
+float sd = vWorldPosG.x - shoreX(vWorldPosG.z);
+float beach = smoothstep(-175.0, -140.0, sd);
+if (beach > 0.0) {
+  vec3 sandA = texture2D(uSandMap, guv * 0.8).rgb;
+  vec3 sandB = texture2D(uSandMap, rot * guv * 0.29 + 0.31).rgb;
+  vec3 sandCol = mix(sandA, sandB, smoothstep(0.3, 0.7, gNoise(vWorldPosG.xz * 0.02))) * vec3(1.18, 1.1, 0.98);
+  float wet = smoothstep(-14.0, -2.0, sd);
+  sandCol = mix(sandCol, sandCol * vec3(0.62, 0.6, 0.56), wet);
+  float tide = smoothstep(1.2, 0.0, abs(sd + 16.0 + 3.0 * sin(vWorldPosG.z * 0.05))) * smoothstep(0.4, 0.7, gNoise(vWorldPosG.xz * 0.4));
+  sandCol = mix(sandCol, vec3(0.32, 0.28, 0.22), tide * 0.5);
+  sandCol = mix(sandCol, sandCol * vec3(0.55, 0.68, 0.66), smoothstep(0.0, 25.0, sd)); // under water
+  col = mix(col, sandCol, beach);
+}
 diffuseColor.rgb *= col;
 `,
       );
   };
-  mat.customProgramCacheKey = () => 'ground-v3';
+  mat.customProgramCacheKey = () => 'ground-v4';
   return mat;
 }
 
