@@ -14,7 +14,7 @@ export interface Road {
 export const ROADS: Road[] = [
   // The avenue with the shopping street (kerbs drawn by Roads.tsx), now running the full length
   { id: 'avenue', kind: 'tarmac', width: 8, pts: [[14, 330], [14, -300]] },
-  { id: 'expressway', kind: 'highway', width: 20, pts: [[-760, -312], [-300, -312], [300, -312], [760, -312]] },
+  { id: 'expressway', kind: 'highway', width: 20, pts: [[-1560, -312], [-1100, -312], [-300, -312], [300, -312], [1100, -312], [1560, -312]] },
   { id: 'kibera-road', kind: 'tarmac', width: 7, pts: [[-145, 330], [-145, -300]] },
   { id: 'stage-road', kind: 'tarmac', width: 7, pts: [[-145, 150], [-40, 150], [10, 150]] },
   { id: 'north-street', kind: 'tarmac', width: 7, pts: [[-145, -150], [10, -150]] },
@@ -26,6 +26,46 @@ export const ROADS: Road[] = [
   { id: 'kibera-rail', kind: 'murram', width: 5, pts: [[-147, -90], [-250, -110], [-350, -80], [-470, -100]] },
   { id: 'kibera-cut', kind: 'murram', width: 3.5, pts: [[-300, 30], [-290, -40], [-300, -95]] },
   { id: 'market-cut', kind: 'murram', width: 3.5, pts: [[-12, 40], [-40, 46], [-90, 60], [-145, 64]] },
+
+  // ---- outer towns (SPEC 6 districts, pushed out towards the map edges so they feel far) ----
+  // CBD: Mkurugenzi Avenue north from the expressway, a grid of streets round Mkurugenzi Tower
+  { id: 'cbd-avenue', kind: 'tarmac', width: 12, pts: [[14, -322], [14, -1460]] },
+  ...[-850, -950, -1050, -1150, -1250, -1350].map((z, i) => ({ id: `cbd-st-${i}`, kind: 'tarmac' as const, width: 9, pts: [[-260, z], [290, z]] as [number, number][] })),
+  { id: 'cbd-west', kind: 'tarmac', width: 9, pts: [[-260, -800], [-260, -1400]] },
+  { id: 'cbd-east', kind: 'tarmac', width: 9, pts: [[290, -800], [290, -1400]] },
+  // Wakurugenzi Arena (north-east), linked to the CBD and the expressway
+  { id: 'arena-road', kind: 'tarmac', width: 9, pts: [[290, -1050], [1100, -1050], [1100, -322]] },
+  // Phil-It Studios town (east)
+  { id: 'east-link', kind: 'tarmac', width: 8, pts: [[1100, -302], [1100, 260]] },
+  { id: 'east-st', kind: 'tarmac', width: 7, pts: [[900, -60], [1400, -60]] },
+  { id: 'east-st-2', kind: 'tarmac', width: 7, pts: [[900, 120], [1400, 120]] },
+  // Utafraaaia estate (north-west): leafy streets of walled homes
+  { id: 'estate-road', kind: 'tarmac', width: 7, pts: [[-1100, -322], [-1100, -1300]] },
+  ...[-650, -800, -950, -1100, -1250].map((z, i) => ({ id: `estate-st-${i}`, kind: 'tarmac' as const, width: 6, pts: [[-1400, z], [-800, z]] as [number, number][] })),
+  // Freddie's School town (south-west), reached past Kibera
+  { id: 'sw-road', kind: 'tarmac', width: 7, pts: [[-145, 330], [-500, 520], [-850, 700], [-1450, 700]] },
+  { id: 'sw-st', kind: 'tarmac', width: 7, pts: [[-1050, 560], [-1050, 1000]] },
+  { id: 'sw-st-2', kind: 'tarmac', width: 6, pts: [[-1250, 850], [-850, 850]] },
+  // Storyteller's Fire on the southern hills
+  { id: 'hill-road', kind: 'tarmac', width: 7, pts: [[300, 330], [300, 700], [360, 980]] },
+  { id: 'fire-track', kind: 'murram', width: 4.5, pts: [[360, 980], [330, 1080], [380, 1150], [340, 1210]] },
+];
+
+/** Towns: level ground, a name for the HUD and map, and the area that counts as "in town". */
+export interface Town {
+  id: string;
+  name: string;
+  x: number;
+  z: number;
+  rx: number; // half-size of the levelled area
+  rz: number;
+}
+export const TOWNS: Town[] = [
+  { id: 'cbd', name: 'CBD: Mkurugenzi Tower', x: 15, z: -1100, rx: 330, rz: 340 },
+  { id: 'arena', name: 'Wakurugenzi Arena', x: 1100, z: -1100, rx: 140, rz: 120 },
+  { id: 'east', name: 'Phil-It Studios Town', x: 1150, z: 30, rx: 290, rz: 220 },
+  { id: 'estate', name: 'Utafraaaia Estate', x: -1100, z: -950, rx: 330, rz: 360 },
+  { id: 'sw', name: "Freddie's School Town", x: -1050, z: 780, rx: 260, rz: 260 },
 ];
 
 /** Distance from (x, z) to a polyline, and the segment direction there. */

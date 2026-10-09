@@ -42,6 +42,11 @@ export const ITEMS: Record<string, Item> = {
   mutura: { id: 'mutura', name: 'Mutura', price: 50, kind: 'snack', fullness: 12, desc: 'Grilled on the jiko.' },
   // butchery
   nyama: { id: 'nyama', name: 'Nyama choma (1/4 kg)', price: 350, kind: 'food', fullness: 50, desc: 'Roasted goat with kachumbari.' },
+  // home food (free, inside homes)
+  home_ugali: { id: 'home_ugali', name: 'Ugali na sukuma', price: 0, kind: 'food', fullness: 40, desc: 'Cooked at home.' },
+  home_chapati: { id: 'home_chapati', name: 'Chapati na stew', price: 0, kind: 'food', fullness: 40, desc: 'Cooked at home.' },
+  home_chai: { id: 'home_chai', name: 'Chai ya thermos', price: 0, kind: 'drink', fullness: 6, desc: 'Still warm.' },
+  home_juice: { id: 'home_juice', name: 'Cold juice', price: 0, kind: 'drink', fullness: 6, desc: 'From the fridge.' },
   // Utafraaaia boutique: the Mkurugenzi range (mkurugenzi.ke, Oct 2026)
   cap: { id: 'cap', name: 'Aero Cap (brown & beige)', price: 1500, kind: 'merch', fullness: 0, desc: 'Signature script, EST. 2020.' },
   tee: { id: 'tee', name: 'Botanical T-shirt', price: 1800, kind: 'merch', fullness: 0, desc: 'White botanical print, MK chest logo.' },

@@ -27,6 +27,13 @@ const SHOTS = {
   kibera_lane: '-200,9,14,-240,6,10&spawn=-215,12',
   rocky_ridge: '170,22,430,300,8,440',
   expressway: '40,8,-280,10,1,-340',
+  cbd_avenue: '22,2.2,-780,14,22,-1100&camrel&spawn=20,-790',
+  cbd_aerial: '380,170,-640,14,20,-1100&camrel',
+  estate_street: '-960,2.4,-655,-1100,2,-640&camrel&spawn=-960,-660',
+  arena_view: '1100,6,-960,1185,8,-1140&camrel&spawn=1100,-970',
+  east_town: '1100,2.4,-200,1100,4,40&camrel&spawn=1104,-200',
+  sw_town: '-1050,2.4,620,-1050,3,850&camrel&spawn=-1046,620',
+  fire_hill: '330,4,1170,340,1,1215&camrel&spawn=335,1180',
 };
 const only = process.argv[3] ? new RegExp(process.argv[3]) : null;
 

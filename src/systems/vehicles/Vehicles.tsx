@@ -18,6 +18,7 @@ import { nearestOnRoute, routeSamples, type RouteSample } from './routes';
 import { SPECS, type VehicleKind, type VehicleSpec } from './specs';
 import { ride, vehicleColliders, vehicles, type VehicleState } from './state';
 import { Stages } from './Stages';
+import { emit } from '../../game/events';
 import { drive } from '../driving/state';
 
 export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
@@ -25,9 +26,12 @@ const NPC_URLS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_
 
 // Who drives where (per quality tier). Kenya: left-hand traffic (routes.ts offsets lanes left).
 const FLEET: Record<'low' | 'mid' | 'high', [string, VehicleKind, number][]> = {
-  low: [['A', 'matatu', 2], ['A', 'nganya', 1], ['B', 'nganya', 1], ['B', 'bus', 1], ['X', 'car', 3]],
-  mid: [['A', 'matatu', 3], ['A', 'nganya', 1], ['A', 'car', 2], ['B', 'nganya', 2], ['B', 'bus', 1], ['B', 'car', 2], ['X', 'car', 5]],
-  high: [['A', 'matatu', 4], ['A', 'nganya', 2], ['A', 'car', 3], ['B', 'nganya', 2], ['B', 'bus', 1], ['B', 'matatu', 1], ['B', 'car', 3], ['X', 'car', 8]],
+  low: [['A', 'matatu', 2], ['A', 'nganya', 1], ['B', 'nganya', 1], ['B', 'bus', 1], ['C', 'matatu', 2], ['D', 'matatu', 1], ['E', 'matatu', 1], ['F', 'nganya', 1], ['X', 'car', 4]],
+  mid: [['A', 'matatu', 3], ['A', 'nganya', 1], ['A', 'car', 2], ['B', 'nganya', 2], ['B', 'bus', 1], ['B', 'car', 2], ['C', 'matatu', 2], ['C', 'nganya', 1], ['C', 'car', 3],
+    ['D', 'matatu', 2], ['D', 'car', 2], ['E', 'matatu', 2], ['E', 'nganya', 1], ['F', 'nganya', 2], ['F', 'bus', 1], ['F', 'car', 2], ['X', 'car', 8]],
+  high: [['A', 'matatu', 4], ['A', 'nganya', 2], ['A', 'car', 3], ['B', 'nganya', 2], ['B', 'bus', 1], ['B', 'matatu', 1], ['B', 'car', 3], ['C', 'matatu', 3], ['C', 'nganya', 2],
+    ['C', 'car', 5], ['D', 'matatu', 2], ['D', 'bus', 1], ['D', 'car', 3], ['E', 'matatu', 2], ['E', 'nganya', 1], ['E', 'car', 2], ['F', 'nganya', 2], ['F', 'bus', 1],
+    ['F', 'matatu', 1], ['F', 'car', 3], ['X', 'car', 12]],
 };
 const HIGHWAY_SPEED = 18;
 const SAFE_GAP = 9;
@@ -217,14 +221,17 @@ export function Vehicles() {
         }
       }
       // gap keeping behind any vehicle ahead in the same lane, and stop for Abel on the road
-      for (const o of fleet) {
-        if (o === v || o.route !== v.route) continue;
-        let d = o.s - v.s;
-        if (d < 0) d += rs.length;
-        if (d < 40) target = Math.min(target, Math.max(0, (d - SAFE_GAP) * 0.8));
-      }
+      // any vehicle ahead in the same lane, whatever its route (routes share the avenue and expressway)
       const fx = Math.sin(_a.h);
       const fz = Math.cos(_a.h);
+      for (const o of fleet) {
+        if (o === v) continue;
+        const ox = o.x - _a.x;
+        const oz = o.z - _a.z;
+        const ahead = ox * fx + oz * fz;
+        if (ahead <= 0 || ahead > 40 || Math.abs(ox * fz - oz * fx) > 1.6 || Math.cos(o.heading - _a.h) < 0.5) continue;
+        target = Math.min(target, Math.max(0, (ahead - SAFE_GAP) * 0.8));
+      }
       const px = playerPosition.x - _a.x;
       const pz = playerPosition.z - _a.z;
       const ahead = px * fx + pz * fz;
@@ -418,6 +425,7 @@ function board(v: VehicleState) {
   }
   ride.vehicle = v.id;
   ride.boardedAt = performance.now();
+  emit({ type: 'board', vehicle: v.id });
   playerAnim.riding = true;
 }
 
@@ -432,6 +440,7 @@ function alight(v: VehicleState) {
   ride.vehicle = -1;
   playerAnim.riding = false;
   ride.justAlighted = true;
+  emit({ type: 'alight', x: ride.exit.x, z: ride.exit.z });
   useEconomy.getState().toast('Conductor: "Shukisha! Asante boss."');
 }
 

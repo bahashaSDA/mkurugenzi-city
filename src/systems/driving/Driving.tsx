@@ -7,6 +7,7 @@ import { useKit, type Kit } from '../../world/kit/useKit';
 import { KitInstances } from '../../world/kit/KitInstances';
 import { register } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
+import { emit } from '../../game/events';
 import { input, onKeyPress } from '../input';
 import { playerAnim } from '../player/AbelModel';
 import { ride } from '../vehicles/state';
@@ -48,6 +49,7 @@ export function Driving() {
           drive.active = true;
           drive.piece = taken.piece;
           drive.enteredAt = performance.now();
+          emit({ type: 'drive', piece: taken.piece });
           playerAnim.riding = true;
           playerAnim.rideClip = 'Driving_Loop';
           setDriving({ piece: taken.piece, x: taken.x, y: taken.y ?? 0, z: taken.z, rotY: taken.rotY });

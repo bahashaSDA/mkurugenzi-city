@@ -6,6 +6,7 @@ import { playerPosition } from '../systems/player/playerState';
 import { AREAS } from '../config/areas';
 import { useEconomy } from './economy';
 import { updateNearest, usePrompt } from './interactables';
+import { checkMission } from './missions';
 
 /** Per-frame game rules: interaction prompt, E to use, discovery rewards, walking points,
  *  hunger, and the eat/drink animation hand-off to Abel. */
@@ -43,6 +44,7 @@ export function GameLogic() {
     eco.tick(s.t);
     s.t = 0;
     updateNearest();
+    checkMission(null);
     const d = Math.hypot(playerPosition.x - s.lx, playerPosition.z - s.lz);
     if (d > 0.05 && d < 10 && !playerAnim.riding) eco.walked(d);
     s.lx = playerPosition.x;

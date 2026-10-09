@@ -1,6 +1,6 @@
 import { heightAt } from '../world/heights';
 // World layout (SPEC section 6). Metres; (0,0) = spawn; -Z = north.
-export const WORLD_SIZE = 1600;
+export const WORLD_SIZE = 3200; // 3.2 km: the outer towns sit 1-1.5 km from the mtaa
 export const WORLD_HALF = WORLD_SIZE / 2;
 export const CELL_SIZE = 200;
 
@@ -15,12 +15,12 @@ export interface DistrictDef {
 export const DISTRICTS: DistrictDef[] = [
   { id: 'hub', name: 'Mtaa wa Mkurugenzi', center: [0, 0], radius: 180, phase: 1 },
   { id: 'stage', name: 'Matatu Stage', center: [0, 120], radius: 60, phase: 1 },
-  { id: 'school', name: "Freddie's School", center: [-500, 0], radius: 160, phase: 2 },
-  { id: 'backlot', name: 'Phil-It Studios Backlot', center: [500, 0], radius: 160, phase: 2 },
-  { id: 'cbd', name: 'CBD: Mkurugenzi Tower', center: [0, -500], radius: 220, phase: 2 },
-  { id: 'utafraaaia', name: 'Utafraaaia House', center: [-600, -550], radius: 120, phase: 3 },
-  { id: 'arena', name: 'Wakurugenzi Arena', center: [600, -600], radius: 200, phase: 3 },
-  { id: 'fire', name: "Storyteller's Fire", center: [250, 650], radius: 150, phase: 3 },
+  { id: 'school', name: "Freddie's School", center: [-1050, 780], radius: 260, phase: 2 },
+  { id: 'backlot', name: 'Phil-It Studios Backlot', center: [1150, 30], radius: 290, phase: 2 },
+  { id: 'cbd', name: 'CBD: Mkurugenzi Tower', center: [15, -1100], radius: 340, phase: 2 },
+  { id: 'utafraaaia', name: 'Utafraaaia House', center: [-1100, -950], radius: 340, phase: 3 },
+  { id: 'arena', name: 'Wakurugenzi Arena', center: [1100, -1100], radius: 140, phase: 3 },
+  { id: 'fire', name: "Storyteller's Fire", center: [340, 1210], radius: 150, phase: 3 },
 ];
 
 // Dev aid: ?spawn=x,z starts the player elsewhere (used by tests and level design).

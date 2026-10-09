@@ -25,6 +25,11 @@ export const TEXTURES = {
   Bark007: 'light rough bark (street trees)',
   Foliage003: 'grass/weed atlas with opacity (roadside weeds)',
   Rock030: 'grey cliff rock: Rocky Ridge ground and boulders (owner ref: grey cracked rocky ground)',
+  RoofingTiles006: 'red clay roof tiles (suburban houses, Utafraaaia estate)',
+  Bricks059: 'cut stone blocks (Nairobi stone buildings, walls)',
+  PavingStones070: 'concrete pavers (CBD pavements, plazas)',
+  Concrete034: 'clean cast concrete (office blocks, towers)',
+  Tiles074: 'ceramic floor tiles (interiors)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';

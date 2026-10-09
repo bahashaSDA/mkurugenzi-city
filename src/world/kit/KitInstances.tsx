@@ -47,7 +47,8 @@ const _camPos = new THREE.Vector3();
  * second (no per-frame allocation). Also creates one fixed rigid body holding a simple
  * collider per placement (SPEC 9: boxes/hulls only).
  */
-export function KitInstances({ kit, placements, render = true }: { kit: Kit; placements: Placement[]; render?: boolean }) {
+/** `reach` scales the LOD and cull distances (town buildings and towers stay on the skyline). */
+export function KitInstances({ kit, placements, render = true, reach = 1 }: { kit: Kit; placements: Placement[]; render?: boolean; reach?: number }) {
   const group = useRef<THREE.Group>(null);
   const tier = useGame((s) => s.tier);
 
@@ -122,9 +123,9 @@ export function KitInstances({ kit, placements, render = true }: { kit: Kit; pla
     s.t = 0;
     s.x = _camPos.x;
     s.z = _camPos.z;
-    const cull = CULL_DIST[tier];
-    const d0 = LOD_DIST[tier][0] ** 2;
-    const d1 = LOD_DIST[tier][1] ** 2;
+    const cull = CULL_DIST[tier] * reach;
+    const d0 = (LOD_DIST[tier][0] * reach) ** 2;
+    const d1 = (LOD_DIST[tier][1] * reach) ** 2;
     const dc = cull * cull;
 
     for (const [piece, { matrices, xz }] of byPiece) {

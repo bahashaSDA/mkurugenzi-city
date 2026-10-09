@@ -108,7 +108,7 @@ button, select { font: inherit; }
 .wallet small { color: #cfc8bb; font-size: 11px; }
 .wallet-bag { margin-top: 4px; min-height: 34px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; background: transparent; color: var(--paper); }
 .area-name {
-  position: absolute; top: calc(70px + var(--safe-t)); right: calc(14px + var(--safe-r)); font-family: var(--display); font-size: 22px;
+  position: absolute; bottom: calc(110px + var(--safe-b)); right: calc(24px + var(--safe-r)); font-family: var(--display); font-size: 22px;
   color: var(--paper); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7); letter-spacing: 0.06em;
 }
 .prompt {
@@ -165,3 +165,34 @@ button, select { font: inherit; }
   font-size: 16px;
   opacity: 0.8;
 }
+
+/* ---------- Radar, map, missions ---------- */
+.minimap {
+  position: absolute; left: calc(16px + var(--safe-l)); bottom: calc(16px + var(--safe-b)); width: 240px; height: 150px;
+  border-radius: 10px; border: 3px solid rgba(10, 10, 12, 0.85); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); background: #26301f;
+}
+@media (pointer: coarse) { .minimap { left: auto; right: calc(12px + var(--safe-r)); bottom: auto; top: calc(110px + var(--safe-t)); width: 160px; height: 100px; } }
+.bigmap { position: absolute; inset: 0; background: rgba(8, 10, 8, 0.92); pointer-events: auto; display: grid; grid-template-rows: 1fr auto; z-index: 30; }
+.bigmap canvas { width: 100%; height: 100%; cursor: crosshair; }
+.bigmap-legend { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; justify-content: center; padding: 10px 16px; color: var(--paper); font-size: 13px; }
+.bigmap-legend i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; vertical-align: -2px; border-radius: 50%; font-style: normal; font-size: 10px; text-align: center; line-height: 14px; }
+.bigmap-legend .lg-m { background: #ffc72c; color: #141414; font-weight: 700; }
+.bigmap-legend .lg-o { background: #ffd23c; border: 2px solid #141414; }
+.bigmap-legend .lg-w { background: #c86bff; border-radius: 2px; transform: rotate(45deg); }
+.bigmap-legend .lg-s { background: #ffc72c; border-radius: 1px; width: 8px; height: 8px; }
+.bigmap-legend button { min-height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.25); background: transparent; color: var(--paper); }
+.mission-box {
+  position: absolute; top: calc(60px + var(--safe-t)); right: calc(14px + var(--safe-r)); width: min(320px, 70vw); padding: 10px 14px;
+  background: rgba(14, 14, 16, 0.7); border-left: 4px solid var(--matatu-yellow); border-radius: 6px; display: grid; gap: 4px; color: var(--paper);
+}
+.mission-box small { color: var(--matatu-yellow); text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; }
+.mission-box b { font-size: 15px; font-weight: 600; }
+.mission-box .urgent { color: #ff6b4a; font-weight: 700; }
+.mission-box .mission-hint { color: #bdb6a8; font-size: 12px; }
+.subtitle {
+  position: absolute; bottom: calc(150px + var(--safe-b)); left: 50%; transform: translateX(-50%); max-width: min(720px, calc(100vw - 32px));
+  padding: 8px 14px; background: rgba(0, 0, 0, 0.6); border-radius: 6px; color: #fff; font-size: 16px; text-align: center; text-shadow: 0 1px 2px #000;
+}
+.subtitle b { color: var(--matatu-yellow); }
+
+.fade { position: absolute; inset: 0; background: #000; pointer-events: none; transition: opacity 0.28s; z-index: 25; }

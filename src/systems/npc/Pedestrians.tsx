@@ -12,6 +12,10 @@ import { getHubLayout, KERB_E, KERB_W, MARKET } from '../../districts/hub/layout
 import { KIBERA_ALLEYS, ROOM_D, ROOM_W } from '../../districts/kibera/layout';
 import { ROADS } from '../../config/roads';
 import { heightAt } from '../../world/heights';
+import { register } from '../../game/interactables';
+import { useEconomy } from '../../game/economy';
+import { useMissions } from '../../game/missions';
+import { emit } from '../../game/events';
 
 // Street life (VISUAL_OVERHAUL 19 / SPEC 8.6): MPFB2 pedestrians with retargeted CC0 clips.
 // A GTA-style ambient crowd that follows Abel: a fixed pool of people, each one respawning out of
@@ -201,6 +205,26 @@ const budget = { frame: -1, n: 0 };
 
 const _toPlayer = new THREE.Vector3();
 
+// Talking to people (E): a name and a line, Sheng/Swahili as you'd hear it in the mtaa.
+const NAMES = ['Wanjiru', 'Otieno', 'Kevo', 'Akinyi', 'Mzee Kamau', 'Shiko', 'Brayo', 'Mama Atieno', 'Njeri', 'Baraka', 'Wambui', 'Juma'];
+const LINES = [
+  'Mkurugenzi! Ile story ya jana ilinibamba sana!',
+  'Makosa Ni Yangu ilinifanya nilie, si uongo.',
+  'Utafraaaia! Hiyo sasa ni slogan yangu.',
+  'Leo mat zimejaa. Ukienda stage, panda ile nganya ya Route 46.',
+  'Boss, unajua video hall ya Kibera inaonyesha stories zako kila jioni?',
+  'Niko na story pia. Siku moja nitakuambia, utaitengeneza movie.',
+  'Chipo Express wako na chips masala moto. Jaribu!',
+  'Untying Kantai bado iko kwa kichwa yangu, aki.',
+  'Wakurugenzi tuko pamoja!',
+  'Sasa Mkurugenzi! Uko poa? Mambo ya podcast?',
+  'Usinunue soda kwa kiosk ya mwisho, iko warm. Haha!',
+  'Hiyo flat cap ni fire, boss. Iko wapi yangu?',
+  'Nimeona ile hoodie ya Black Excellence. Lazima ninunue!',
+  'Ukipita Rocky Ridge jioni, sunset huko ni kama movie.',
+];
+const CASTING = ['Audition? Mimi? Sawa, nitakuja!', 'Wueh! Nitakuwa kwa movie ya Mkurugenzi? Niko ready!', 'Sema siku na saa, nitafika na rafiki yangu.'];
+
 function Person({ agent, world, source }: { agent: Agent; world: World; source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] } }) {
   const tier = useGame((s) => s.tier);
   const body = useRef<RapierRigidBody>(null);
@@ -222,7 +246,29 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     return { obj, mixer, actions };
   }, [source, tier]);
 
-  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10 });
+  const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0 });
+  const name = useMemo(() => NAMES[Math.floor(Math.random() * NAMES.length)]!, []);
+  const talk = useMemo(
+    () => ({
+      id: `npc-${Math.random().toString(36).slice(2)}`, x: 1e9, z: 1e9, radius: 0, label: 'Talk', key: 'KeyE' as const,
+      use: () => {
+        const s = st.current;
+        s.talkUntil = s.t + 5;
+        const area = useEconomy.getState().area.toLowerCase();
+        const casting = useMissions.getState().active === 'casting' && area.includes('market');
+        const pool = casting ? CASTING : LINES;
+        useMissions.getState().say(name, pool[Math.floor(Math.random() * pool.length)]!, 4500);
+        emit({ type: 'talk', npc: 0, area });
+        talk.radius = 0; // one chat per person per encounter
+        setTimeout(() => (talk.radius = 1.9), 20000);
+      },
+    }),
+    [name],
+  );
+  useEffect(() => {
+    talk.radius = agent.role === 'sit' ? 0 : 1.9;
+    return register(talk);
+  }, [talk, agent.role]);
 
   const play = (name: string, fade = 0.3) => {
     const s = st.current;
@@ -272,6 +318,23 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     s.t += dt;
     _toPlayer.set(playerPosition.x - s.x, 0, playerPosition.z - s.z);
     const pd = _toPlayer.length();
+    talk.x = s.x;
+    talk.z = s.z;
+    (talk as { y?: number }).y = playerPosition.y > -20 + heightAt(s.x, s.z) ? undefined : -1e6; // not through an interior floor
+    if (s.t < s.talkUntil) {
+      // chatting with Abel: stop, face him, talk with the hands
+      play('Idle_Talking_Loop', 0.25);
+      let d = Math.atan2(_toPlayer.x, _toPlayer.z) - s.rotY;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      s.rotY += d * Math.min(1, dt * 4);
+      const y = heightAt(s.x, s.z);
+      g.position.set(s.x, y, s.z);
+      g.rotation.y = s.rotY;
+      body.current?.setNextKinematicTranslation({ x: s.x, y: y + 0.9, z: s.z });
+      mixer.update(dt);
+      return;
+    }
+    if (s.cur === 'Idle_Talking_Loop' && agent.clip !== 'Idle_Talking_Loop') play(agent.role === 'walk' ? agent.clip : agent.clip, 0.3);
 
     if (agent.role === 'walk') {
       const [ax, az, bx, bz] = world.segs[agent.seg]!;

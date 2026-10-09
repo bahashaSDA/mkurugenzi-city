@@ -2,6 +2,7 @@ import type { Placement } from '../../world/kit/KitInstances';
 import { nearRoad } from '../../config/roads';
 import { buildKiberaLayout } from '../kibera/layout';
 import { buildRidgeLayout } from '../ridge/layout';
+import { buildTownsLayout } from '../towns/layout';
 
 // Mtaa wa Mkurugenzi layout v2 ("vertical slice"): density at street level first.
 //   * Central avenue (tarmac, x = 14, kerbs at x = 10 / 18) lined on BOTH sides by a continuous
@@ -45,7 +46,7 @@ function rng(seed: number) {
 let cached: Placement[] | null = null;
 /** The hub layout, built once and shared (terrain mask, kit instances, cables, tests). */
 export function getHubLayout(): Placement[] {
-  return (cached ??= [...buildHubLayout(), ...buildMarketLayout(), ...buildKiberaLayout(), ...buildRidgeLayout()]);
+  return (cached ??= [...buildHubLayout(), ...buildMarketLayout(), ...buildKiberaLayout(), ...buildRidgeLayout(), ...buildTownsLayout()]);
 }
 
 export function buildHubLayout(seed = 254): Placement[] {

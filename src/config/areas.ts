@@ -14,5 +14,11 @@ export const AREAS: Area[] = [
   { name: 'Kibera', x: -300, z: 0, r: 190, reward: 500 },
   { name: 'Rocky Ridge', x: 300, z: 440, r: 150, reward: 400 },
   { name: 'Mkurugenzi Expressway', x: 14, z: -312, r: 40, reward: 200 },
+  { name: 'CBD: Mkurugenzi Tower', x: 15, z: -1100, r: 330, reward: 800 },
+  { name: 'Wakurugenzi Arena', x: 1185, z: -1140, r: 110, reward: 600 },
+  { name: 'Phil-It Studios Town', x: 1150, z: 30, r: 290, reward: 600 },
+  { name: 'Utafraaaia Estate', x: -1100, z: -950, r: 360, reward: 600 },
+  { name: "Freddie's School Town", x: -1050, z: 780, r: 260, reward: 600 },
+  { name: "Storyteller's Fire", x: 340, z: 1215, r: 60, reward: 1000 },
   { name: 'Mtaa wa Mkurugenzi', x: 0, z: 0, r: 160, reward: 100 },
 ];

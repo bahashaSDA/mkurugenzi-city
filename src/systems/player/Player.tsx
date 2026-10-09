@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import { input, inputLock, onCameraToggle, pad, pollGamepad } from '../input';
 import { useGame } from '../../app/store';
 import { SPAWN } from '../../config/world';
-import { playerPosition } from './playerState';
+import { heightAt } from '../../world/heights';
+import { playerPosition, playerView, teleport } from './playerState';
 import { AbelModel, playerAnim } from './AbelModel';
 import { ride, rideWorld, vehicleColliders } from '../vehicles/state';
 import { drive } from '../driving/state';
@@ -27,8 +28,15 @@ const LOOK_SENS = 0.0025;
 const RECENTER_DELAY = 2000;
 
 const FIXED_CAM = (() => {
-  const v = new URLSearchParams(location.search).get('cam')?.split(',').map(Number);
-  return v && v.length === 6 && v.every(Number.isFinite) ? v : null;
+  const q = new URLSearchParams(location.search);
+  const v = q.get('cam')?.split(',').map(Number);
+  if (!v || v.length !== 6 || !v.every(Number.isFinite)) return null;
+  if (q.has('camrel')) {
+    // ?camrel: heights are above the ground under each point (towns sit on hills/plateaus)
+    v[1]! += heightAt(v[0]!, v[2]!);
+    v[4]! += heightAt(v[3]!, v[5]!);
+  }
+  return v;
 })();
 
 // Scratch objects: allocated once, reused every frame (SPEC 10.9).
@@ -139,6 +147,7 @@ export function Player() {
     }
     _move.y = s.vy * dt;
 
+    let jumped = false;
     // --- riding a matatu/nganya: follow the seat, no character controller ---
     if (ride.vehicle >= 0) {
       const heading = rideWorld(_ride);
@@ -149,6 +158,16 @@ export function Player() {
       s.vy = 0;
       playerAnim.speed = 0;
       playerAnim.grounded = true;
+    } else if (teleport.pending) {
+      teleport.pending = false;
+      jumped = true;
+      // setTranslation, not setNext...: a kinematic move is swept by CCD and would stop at the
+      // underside of the terrain when coming up out of an interior
+      rb.setTranslation({ x: teleport.x, y: teleport.y, z: teleport.z }, true);
+      playerPosition.set(teleport.x, teleport.y, teleport.z);
+      s.facing = teleport.facing;
+      s.yaw = teleport.facing + Math.PI; // camera behind Abel
+      s.vy = 0;
     } else if (drive.active) {
       // driving: Abel sits at the wheel; his capsule is switched off so it can't shove the car
       // no collision groups at all (membership 0): it can't shove the car it sits in
@@ -163,16 +182,19 @@ export function Player() {
       s.vy = 0;
     } else if (drive.justExited) {
       drive.justExited = false;
+      jumped = true;
       col.setCollisionGroups(0xffffffff);
       col.setSolverGroups(0xffffffff);
-      rb.setNextKinematicTranslation({ x: drive.exit.x, y: drive.exit.y + 0.3, z: drive.exit.z });
+      rb.setTranslation({ x: drive.exit.x, y: drive.exit.y + 0.3, z: drive.exit.z }, true);
       playerPosition.copy(drive.exit);
     } else if (ride.justAlighted) {
       ride.justAlighted = false;
-      rb.setNextKinematicTranslation({ x: ride.exit.x, y: ride.exit.y + 0.3, z: ride.exit.z });
+      jumped = true;
+      rb.setTranslation({ x: ride.exit.x, y: ride.exit.y + 0.3, z: ride.exit.z }, true);
       playerPosition.copy(ride.exit);
     }
-    const riding = ride.vehicle >= 0 || drive.active;
+    // a teleport this frame (interior door, getting out of a car/matatu) must not be overwritten below
+    const riding = ride.vehicle >= 0 || drive.active || jumped;
     if (riding) _move.set(0, 0, 0);
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = riding ? _zero : controller.computedMovement();
@@ -192,13 +214,18 @@ export function Player() {
     }
 
     // Fell out of the world: respawn.
-    if (ny < -30) rb.setNextKinematicTranslation({ x: SPAWN[0], y: SPAWN[1], z: SPAWN[2] });
+    // (interiors sit 60 m under their door, so measure from the terrain)
+    if (ny < heightAt(nx, nz) - 80) rb.setNextKinematicTranslation({ x: SPAWN[0], y: SPAWN[1], z: SPAWN[2] });
 
     if (visual.current) {
       _q.setFromAxisAngle(_up, s.facing);
       visual.current.quaternion.copy(_q);
       visual.current.visible = cameraMode === 'third';
     }
+
+    playerView.facing = s.facing;
+    playerView.lookX = -Math.sin(s.yaw);
+    playerView.lookZ = -Math.cos(s.yaw);
 
     // --- Camera ---
     if (benchmark.running) return; // the benchmark flies its own fixed path

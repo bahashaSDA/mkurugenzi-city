@@ -11,7 +11,7 @@ import { heightAt } from './heights';
 // Collider rule (session 1): never use huge primitive colliders. Rapier lost precision on a
 // 1.6 km cuboid and the character sank ~17 cm. The ground is a heightfield; long walls are
 // split into short segments.
-const HF_SUBDIV = 256; // 6.25 m grid shared by the visual mesh and the physics heightfield
+const HF_SUBDIV = 400; // 8 m grid over 3.2 km, shared by the visual mesh and the physics heightfield
 const WALL_SEG = 200;
 
 export function Terrain() {

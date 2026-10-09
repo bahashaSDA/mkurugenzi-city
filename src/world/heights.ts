@@ -1,4 +1,4 @@
-import { distToRoad, ROADS } from '../config/roads';
+import { distToRoad, ROADS, TOWNS } from '../config/roads';
 
 // World height field (metres). Pure and deterministic: terrain mesh, physics heightfield and every
 // layout that places things on the ground all call the same function.
@@ -47,25 +47,54 @@ const TRACKS = ROADS.filter((r) => r.kind === 'murram');
 // ?testcourse: the collision course at (-600, 600) needs flat ground (it sits on the Kibera hill)
 const TEST_PAD = typeof location !== 'undefined' && new URLSearchParams(location.search).has('testcourse');
 
-export function heightAt(x: number, z: number): number {
-  let h = 0;
-  // Kibera hillside: rises westward from the Kibera Road, with gentle folds
+export const FIRE_HILL = { x: 340, z: 1210, r: 330, h: 42 };
+const EDGE0 = 1440;
+const EDGE1 = 1590;
+
+/** Smooth large-scale landform (no small noise): what roads and towns are graded onto. */
+function macro(x: number, z: number) {
   const west = smooth(-150, -470, x);
-  h += west * (20 + 3 * Math.sin(z * 0.012)) + west * (fbm(x * 0.01, z * 0.01) - 0.5) * 6;
+  let h = west * (20 + 3 * Math.sin(z * 0.012));
+  const fd = Math.hypot(x - FIRE_HILL.x, z - FIRE_HILL.z);
+  h += FIRE_HILL.h * smooth(FIRE_HILL.r, 0, fd) ** 1.6; // the southern hills (Storyteller's Fire on top)
+  h += smooth(EDGE0, EDGE1, Math.max(Math.abs(x), Math.abs(z))) * 40; // map edge rises into hills (SPEC 9)
+  return h;
+}
+
+/** Pull h towards each town's level inside (and just around) its area. */
+function townLevel(x: number, z: number, h: number) {
+  for (const t of TOWNS) {
+    const k = smooth(1, 0, Math.max((Math.abs(x - t.x) - t.rx) / 60, (Math.abs(z - t.z) - t.rz) / 60, 0));
+    if (k > 0) h += (macro(t.x, t.z) - h) * k;
+  }
+  return h;
+}
+
+export function heightAt(x: number, z: number): number {
+  let h = macro(x, z);
+  // Kibera hillside folds
+  const west = smooth(-150, -470, x);
+  h += west * (fbm(x * 0.01, z * 0.01) - 0.5) * 6;
   // Rocky ridge: rugged peaks
   const rd = Math.hypot(x - RIDGE.x, z - RIDGE.z);
   let ridge = smooth(RIDGE.r, RIDGE.r * 0.25, rd);
   // keep the murram track over the ridge walkable: no crags right under it
   if (ridge > 0) for (const r of TRACKS) ridge *= 1 - smooth(r.width / 2 + 10, r.width / 2 + 1.5, distToRoad(r, x, z));
   h += ridge * (14 * fbm(x * 0.02, z * 0.02) + 6 * Math.abs(fbm(x * 0.07 + 9, z * 0.07) - 0.5) * 2);
-  // map edges rise into hills (natural boundary, SPEC 9)
-  const edge = Math.max(Math.abs(x), Math.abs(z));
-  h += smooth(700, 790, edge) * 28;
-  // grade paved roads flat
+  // gentle rolling countryside between the towns
+  const far = smooth(500, 900, Math.hypot(x, z));
+  h += far * (fbm(x * 0.006 + 3, z * 0.006 - 7) - 0.5) * 14;
+  // towns sit on level ground
+  h = townLevel(x, z, h);
+  // grade paved roads onto the smooth landform (levelled through towns, so no trenches)
+  let base = NaN;
   for (const r of PAVED) {
     const d = distToRoad(r, x, z);
     const k = smooth(r.width / 2 + 8, r.width / 2 + 1, d);
-    if (k > 0) h *= 1 - k;
+    if (k > 0) {
+      if (Number.isNaN(base)) base = townLevel(x, z, macro(x, z));
+      h += (base - h) * k;
+    }
   }
   if (TEST_PAD) h *= 1 - smooth(70, 45, Math.max(Math.abs(x + 600), Math.abs(z - 600)));
   return h;

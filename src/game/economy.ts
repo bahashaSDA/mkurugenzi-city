@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { ITEMS } from './catalog';
+import { emit } from './events';
 
 // Money wallet (Kenyan shillings, KSh), inventory, fullness and discoveries. Persisted per browser (localStorage, wrapped
 // in try/catch: private windows and blocked storage must never break the game).
@@ -91,6 +92,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
     set({ video: id ? { id, title } : null });
     if (id) {
       document.exitPointerLock?.();
+      emit({ type: 'watch', video: id });
       if (!get().watched.includes(id)) {
         set((s) => ({ watched: [...s.watched, id] }));
         get().earn(100, 'Watched a Mkurugenzi story');
@@ -122,6 +124,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
   buy: (itemId, eatNow) => {
     const item = ITEMS[itemId];
     if (!item || !get().spend(item.price, item.name)) return false;
+    emit({ type: 'buy', item: itemId });
     if (eatNow && item.fullness > 0) return get().consume(itemId) || true;
     set((s) => ({ inventory: { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + (eatNow ? 0 : 1) } }));
     save(get());
@@ -139,6 +142,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
       action: { clip: 'Consume', until: performance.now() + propFor(itemId).ms, prop: propFor(itemId).prop },
     }));
     get().toast(item.kind === 'drink' ? `Drank ${item.name}` : `Ate ${item.name}`, 'info');
+    emit({ type: 'consume', item: itemId });
     save(get());
     return true;
   },

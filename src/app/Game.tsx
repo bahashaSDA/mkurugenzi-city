@@ -4,9 +4,12 @@ import { Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { ride, vehicles } from '../systems/vehicles/state';
 import { Driving } from '../systems/driving/Driving';
+import { MissionWorld } from '../game/MissionWorld';
+import { Interiors } from '../systems/interiors/Interiors';
 import { drive, useParking } from '../systems/driving/state';
 import { usePrompt } from '../game/interactables';
 import { useEconomy } from '../game/economy';
+import { useMissions } from '../game/missions';
 import { useGame } from './store';
 import { Environment } from '../world/Environment';
 import { StreamedCell, WorldStreamer } from '../world/streaming';
@@ -36,7 +39,7 @@ const showPerf = import.meta.env.DEV || params.has('perf');
 const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
-  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking };
+  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking, useMissions };
 }
 
 /** ?debug: expose the live scene/renderer for profiling from tests and the console. */
@@ -101,6 +104,10 @@ export default function Game({ onReady }: { onReady: () => void }) {
             )}
             <Suspense fallback={null}>
               <Driving />
+            </Suspense>
+            <MissionWorld />
+            <Suspense fallback={null}>
+              <Interiors />
             </Suspense>
           </Physics>
           <WorldStreamer />

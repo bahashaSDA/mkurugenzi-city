@@ -13,6 +13,7 @@ import { loadContent, onlyAvailable } from '../../content/episodes';
 export const MARKET_KIT_URL = '/models/market_kit.glb';
 export const KIBERA_KIT_URL = '/models/kibera_kit.glb';
 export const ROCKS_KIT_URL = '/models/rocks_kit.glb';
+export const TOWN_KIT_URL = '/models/town_kit.glb';
 
 /** Kibera video halls: E to watch a random recent episode of Abel's (live list, removed videos skipped). */
 function hallInteractables(): Interactable[] {
@@ -36,9 +37,7 @@ function hallInteractables(): Interactable[] {
 const SHOP_OF: Record<string, [string, number]> = {
   kiosk_duka: ['kiosk', 1.9],
   kiosk_pesa: ['kiosk', 1.9],
-  shop_hoteli: ['hoteli', 5.4],
-  shop_butchery: ['butchery', 5.4],
-  shop_boutique: ['boutique', 5.4],
+  // shop_hoteli / shop_butchery / shop_boutique: walk in (interiors) and buy at the counter
   chips_booth: ['chips', 2.4],
   market_stall: ['market', 2.0],
   market_stall_b: ['market', 2.0],
@@ -78,6 +77,7 @@ export function Hub({ render = true }: { render?: boolean }) {
   const marketKit = useKit(MARKET_KIT_URL);
   const kiberaKit = useKit(KIBERA_KIT_URL);
   const rocksKit = useKit(ROCKS_KIT_URL);
+  const townKit = useKit(TOWN_KIT_URL);
   const placements = useMemo(() => getHubLayout(), []);
   const shops = useMemo(() => [...shopInteractables(placements), ...hallInteractables()], [placements]);
   useInteractables(shops);
@@ -86,6 +86,7 @@ export function Hub({ render = true }: { render?: boolean }) {
   const marketPlacements = useMemo(() => placements.filter((p) => marketKit.has(p.piece)), [placements, marketKit]);
   const kiberaPlacements = useMemo(() => placements.filter((p) => kiberaKit.has(p.piece)), [placements, kiberaKit]);
   const rockPlacements = useMemo(() => placements.filter((p) => rocksKit.has(p.piece)), [placements, rocksKit]);
+  const townPlacements = useMemo(() => placements.filter((p) => townKit.has(p.piece)), [placements, townKit]);
   useEffect(() => {
     const mk = (window as unknown as { __mk?: Record<string, unknown> }).__mk;
     if (mk) mk.hubPlacements = placements; // ?debug only: lets tests find real buildings
@@ -97,6 +98,8 @@ export function Hub({ render = true }: { render?: boolean }) {
       <KitInstances kit={marketKit} placements={marketPlacements} render={render} />
       <KitInstances kit={kiberaKit} placements={kiberaPlacements} render={render} />
       <KitInstances kit={rocksKit} placements={rockPlacements} render={render} />
+      {/* outer towns: tall buildings stay visible on the skyline from across the map */}
+      <KitInstances kit={townKit} placements={townPlacements} render={render} reach={3} />
       {render && <Cables placements={placements} />}
       {render && <WindClock />}
     </>

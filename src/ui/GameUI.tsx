@@ -5,6 +5,8 @@ import { usePrompt } from '../game/interactables';
 import { inputLock, onKeyPress, pressKey } from '../systems/input';
 import { useGame } from '../app/store';
 import { drive } from '../systems/driving/state';
+import { BigMap, MissionHud, Minimap } from './MapUI';
+import { useInterior } from '../systems/interiors/rooms';
 
 /** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
@@ -18,6 +20,7 @@ export function GameUI() {
   const isTouch = useGame((s) => s.isTouch);
   const video = useEconomy((s) => s.video);
   const [bag, setBag] = useState(false);
+  const fading = useInterior((s) => s.fading);
 
   useEffect(() => onKeyPress('KeyI', () => setBag((b) => !b)), []);
   useEffect(() => {
@@ -53,6 +56,10 @@ export function GameUI() {
 
       {area && <div className="area-name">{area}</div>}
       <Speedo />
+      <div className="fade" style={{ opacity: fading ? 1 : 0 }} />
+      <Minimap />
+      <MissionHud />
+      <BigMap />
 
       {prompt && !shop && (
         <button className="prompt" onClick={() => pressKey(prompt.key ?? 'KeyE')}>

@@ -346,16 +346,20 @@ def make_lod(src, suffix, ratio):
 def make_collider(src, base, kind):
     if callable(kind):
         cols = []
-        for i, (c, sz) in enumerate(kind(src)):
+        for i, item in enumerate(kind(src)):
+            c, sz = item[0], item[1]
+            rot = item[2] if len(item) > 2 else 0.0  # optional rotation about Z (exported as a hull)
             bm = bmesh.new()
             bmesh.ops.create_cube(bm, size=1.0)
             bmesh.ops.scale(bm, vec=sz, verts=bm.verts)
+            if rot:
+                bmesh.ops.rotate(bm, verts=bm.verts, cent=(0, 0, 0), matrix=Matrix.Rotation(rot, 3, "Z"))
             bmesh.ops.translate(bm, vec=c, verts=bm.verts)
             me = bpy.data.meshes.new(f"COL_{base}__{i}")
             bm.to_mesh(me)
             bm.free()
             col = bpy.data.objects.new(f"COL_{base}__{i}", me)
-            col["collider"] = "box"
+            col["collider"] = "hull" if rot else "box"
             KIT.objects.link(col)
             cols.append(col)
         return cols

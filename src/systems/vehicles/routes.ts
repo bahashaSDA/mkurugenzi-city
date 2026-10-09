@@ -24,7 +24,7 @@ export const ROUTES: RouteDef[] = [
   {
     id: 'A',
     name: 'Route 46: Stage - Expressway - Kibera',
-    pts: [[14, 124, T], [14, -306, HW], [-145, -312, T], [-145, 150, T], [14, 150, T]],
+    pts: [[14, 124, T], [14, -312, HW], [-145, -312, T], [-145, 150, T], [14, 150, T]],
     stops: [
       { name: 'Matatu Stage', x: 14, z: 118, dwell: 9 },
       { name: 'Mtaa wa Mkurugenzi', x: 14, z: -60, dwell: 6 },
@@ -46,9 +46,50 @@ export const ROUTES: RouteDef[] = [
     ],
   },
   {
+    id: 'C',
+    name: 'Route 33: Stage - CBD (Mkurugenzi Tower)',
+    pts: [[14, 112, T], [14, -1250, T], [290, -1250, T], [290, -1050, T], [14, -1050, T]],
+    stops: [
+      { name: 'Matatu Stage', x: 14, z: 112, dwell: 9 },
+      { name: 'CBD: Mkurugenzi Tower', x: 14, z: -1090, dwell: 8 },
+      { name: 'CBD East', x: 290, z: -1150, dwell: 6 },
+      { name: 'Expressway Junction', x: 14, z: -330, dwell: 5 },
+    ],
+  },
+  {
+    id: 'D',
+    name: 'Route 8: Utafraaaia Estate',
+    pts: [[14, 100, T], [14, -312, HW], [-1100, -312, T], [-1100, -1250, T], [-1100, -312, HW], [14, -312, T]],
+    stops: [
+      { name: 'Matatu Stage', x: 14, z: 100, dwell: 9 },
+      { name: 'Utafraaaia Estate', x: -1100, z: -900, dwell: 7 },
+      { name: 'Utafraaaia House', x: -1100, z: -1240, dwell: 6 },
+    ],
+  },
+  {
+    id: 'E',
+    name: "Route 105: Kibera - Freddie's School",
+    pts: [[-145, 150, T], [-145, 330, T], [-500, 520, T], [-850, 700, T], [-1050, 700, T], [-1050, 950, T], [-1050, 700, T], [-850, 700, T], [-500, 520, T], [-145, 330, T]],
+    stops: [
+      { name: 'Kibera (Main lane)', x: -145, z: 30, dwell: 6 },
+      { name: "Freddie's School Town", x: -1050, z: 780, dwell: 8 },
+      { name: 'Mashinani Junction', x: -500, z: 520, dwell: 5 },
+    ],
+  },
+  {
+    id: 'F',
+    name: 'Route 120: Phil-It Studios - Arena',
+    pts: [[14, -312, HW], [1100, -312, T], [1100, 250, T], [1100, -1050, T], [290, -1050, T], [14, -1050, T]],
+    stops: [
+      { name: 'Phil-It Studios Town', x: 1100, z: 20, dwell: 8 },
+      { name: 'Wakurugenzi Arena', x: 1100, z: -1000, dwell: 8 },
+      { name: 'CBD: Mkurugenzi Tower', x: 100, z: -1050, dwell: 6 },
+    ],
+  },
+  {
     id: 'X',
     name: 'Expressway',
-    pts: [[-740, -312, HW], [740, -312, HW]],
+    pts: [[-1540, -312, HW], [1540, -312, HW]],
     stops: [],
   },
 ];

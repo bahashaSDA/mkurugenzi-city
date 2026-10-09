@@ -75,7 +75,7 @@ function planParking(): Parked[] {
       const len = Math.hypot(bx - ax, bz - az);
       const dx = (bx - ax) / len;
       const dz = (bz - az) / len;
-      for (let s = 18; s < len - 18; s += 26 + r() * 30) {
+      for (let s = 18; s < len - 18; s += 45 + r() * 70) {
         const side = r() < 0.5 ? 1 : -1;
         const off = rd.width / 2 + 1.5;
         const x = ax + dx * s + dz * off * side;
