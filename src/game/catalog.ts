@@ -1,5 +1,5 @@
-// Prices are in "Mkurugenzi points" (shown as KSh-style "bob"), roughly matching real Nairobi street
-// prices in October 2026 so the economy feels familiar. Fullness: how much it fills Abel (0-100).
+// Prices are in Kenyan shillings (KSh), matching real Nairobi street prices in October 2026;
+// boutique merch uses the official mkurugenzi.ke shop prices so the economy feels familiar. Fullness: how much it fills Abel (0-100).
 
 export type ItemKind = 'food' | 'drink' | 'snack' | 'merch' | 'service';
 
@@ -42,10 +42,16 @@ export const ITEMS: Record<string, Item> = {
   mutura: { id: 'mutura', name: 'Mutura', price: 50, kind: 'snack', fullness: 12, desc: 'Grilled on the jiko.' },
   // butchery
   nyama: { id: 'nyama', name: 'Nyama choma (1/4 kg)', price: 350, kind: 'food', fullness: 50, desc: 'Roasted goat with kachumbari.' },
-  // Utafraaaia boutique (merch)
-  cap: { id: 'cap', name: 'Mkurugenzi flat cap', price: 800, kind: 'merch', fullness: 0, desc: 'The signature look.' },
-  tee: { id: 'tee', name: 'Wakurugenzi T-shirt', price: 1200, kind: 'merch', fullness: 0, desc: 'Fan merch tee.' },
-  jacket: { id: 'jacket', name: 'MKURUGENZI jacket', price: 3500, kind: 'merch', fullness: 0, desc: 'Chest print jacket.' },
+  // Utafraaaia boutique: the Mkurugenzi range (mkurugenzi.ke, Oct 2026)
+  cap: { id: 'cap', name: 'Aero Cap (brown & beige)', price: 1500, kind: 'merch', fullness: 0, desc: 'Signature script, EST. 2020.' },
+  tee: { id: 'tee', name: 'Botanical T-shirt', price: 1800, kind: 'merch', fullness: 0, desc: 'White botanical print, MK chest logo.' },
+  tee_plain: { id: 'tee_plain', name: 'Burgundy Bliss T-shirt', price: 1500, kind: 'merch', fullness: 0, desc: 'Burgundy tee, MK logo.' },
+  hoodie: { id: 'hoodie', name: 'Black Excellence hoodie', price: 3000, kind: 'merch', fullness: 0, desc: 'Black hoodie, MK chest logo.' },
+  quarterzip: { id: 'quarterzip', name: 'Quarter Zip (Black Excellence)', price: 2500, kind: 'merch', fullness: 0, desc: 'Black quarter zip.' },
+  jacket: { id: 'jacket', name: 'Black Icon jacket', price: 3500, kind: 'merch', fullness: 0, desc: 'Black jacket.' },
+  sweatsuit: { id: 'sweatsuit', name: 'Sweatsuit (Coffee Brown)', price: 6500, kind: 'merch', fullness: 0, desc: 'Crewneck and joggers, script logo.' },
+  tote: { id: 'tote', name: 'Tote bag (white)', price: 850, kind: 'merch', fullness: 0, desc: 'Canvas tote.' },
+  socks: { id: 'socks', name: 'Socks (pack of 3)', price: 1000, kind: 'merch', fullness: 0, desc: 'Three pairs.' },
 };
 
 export interface ShopDef {
@@ -61,7 +67,7 @@ export const SHOPS: Record<string, ShopDef> = {
   hoteli: { id: 'hoteli', title: 'Chai Moto Hoteli', greeting: 'Kaa chini, chai iko moto.', items: ['chai', 'mandazi', 'chapati', 'beans', 'githeri', 'pilau'] },
   chips: { id: 'chips', title: 'Chipo Express kibanda', greeting: 'Chips moto moto!', items: ['chips', 'chips_masala', 'smokie', 'mutura', 'soda'] },
   butchery: { id: 'butchery', title: 'Nyama Bora Butchery', greeting: 'Nyama choma iko tayari.', items: ['nyama', 'soda'] },
-  boutique: { id: 'boutique', title: 'Utafraaaia Boutique', greeting: 'Wakurugenzi! Merch mpya iko.', items: ['cap', 'tee', 'jacket'] },
+  boutique: { id: 'boutique', title: 'Utafraaaia Boutique', greeting: 'Wakurugenzi! Merch mpya iko.', items: ['cap', 'tee', 'tee_plain', 'hoodie', 'quarterzip', 'jacket', 'sweatsuit', 'tote', 'socks'] },
 };
 
 export const FARES = { matatu: 50, nganya: 80, bus: 40 } as const;

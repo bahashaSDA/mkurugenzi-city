@@ -19,6 +19,8 @@ export interface VehicleState {
   occupied: number; // seated passengers
   stopped: boolean;
   sound: SoundSystem | null;
+  hail: number; // route distance where someone waved it down (-1: none)
+  waited: number; // seconds spent holding at a stop for Abel
 }
 
 /** Collider handles of all vehicles (the riding camera ignores them). */
@@ -34,6 +36,7 @@ export const ride = {
   standing: false,
   exit: new THREE.Vector3(),
   justAlighted: false,
+  boardedAt: 0,
 };
 
 const _v = new THREE.Vector3();

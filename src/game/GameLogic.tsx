@@ -9,14 +9,21 @@ import { updateNearest, usePrompt } from './interactables';
 
 /** Per-frame game rules: interaction prompt, E to use, discovery rewards, walking points,
  *  hunger, and the eat/drink animation hand-off to Abel. */
+function use(key: 'KeyE' | 'KeyF') {
+  if (useEconomy.getState().shop) return;
+  const cur = usePrompt.getState().current;
+  if (cur && (cur.key ?? 'KeyE') === key) cur.use();
+}
+
 export function GameLogic() {
   const st = useRef({ t: 0, lx: playerPosition.x, lz: playerPosition.z, area: '' });
 
   useEffect(
     () =>
-      onKeyPress('KeyE', () => {
-        if (useEconomy.getState().shop) return;
-        usePrompt.getState().current?.use();
+      // E uses E-prompts (shops, doors, people); F uses F-prompts (vehicles)
+      [onKeyPress('KeyE', () => use('KeyE')), onKeyPress('KeyF', () => use('KeyF'))].reduce((a, b) => () => {
+        a();
+        b();
       }),
     [],
   );
@@ -29,6 +36,7 @@ export function GameLogic() {
     if (eco.action) {
       playerAnim.action = eco.action.clip;
       playerAnim.actionUntil = eco.action.until;
+      playerAnim.prop = eco.action.prop;
       useEconomy.setState({ action: null });
     }
     if (s.t < 0.15) return;

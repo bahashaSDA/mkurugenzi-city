@@ -5,10 +5,10 @@ import { usePrompt } from '../game/interactables';
 import { inputLock, onKeyPress, pressKey } from '../systems/input';
 import { useGame } from '../app/store';
 
-/** Contextual prompt, points wallet, fullness, bag, shop counter and toasts. */
+/** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
   const prompt = usePrompt((s) => s.current);
-  const points = useEconomy((s) => s.points);
+  const money = useEconomy((s) => s.money);
   const fullness = useEconomy((s) => s.fullness);
   const area = useEconomy((s) => s.area);
   const shop = useEconomy((s) => s.shop);
@@ -39,7 +39,7 @@ export function GameUI() {
     <div className="game-ui">
       <div className="wallet">
         <div className="wallet-points">
-          <b>{points.toLocaleString()}</b> pts
+          KSh <b>{money.toLocaleString()}</b>
         </div>
         <div className="wallet-bar" title="Shiba (fullness)">
           <span style={{ width: `${fullness}%`, background: fullness < 25 ? '#ff5a3c' : '#ffc72c' }} />
@@ -67,14 +67,14 @@ export function GameUI() {
           <ul>
             {def.items.map((id) => {
               const it = ITEMS[id]!;
-              const afford = points >= it.price;
+              const afford = money >= it.price;
               return (
                 <li key={id}>
                   <div>
                     <b>{it.name}</b>
                     <small>{it.desc}</small>
                   </div>
-                  <span className="price">{it.price} pts</span>
+                  <span className="price">KSh {it.price.toLocaleString()}</span>
                   {it.fullness > 0 && (
                     <button disabled={!afford} onClick={() => useEconomy.getState().buy(id, true) && useEconomy.getState().openShop(null)}>
                       {it.kind === 'drink' ? 'Drink now' : 'Eat now'}
@@ -88,7 +88,7 @@ export function GameUI() {
             })}
           </ul>
           <footer>
-            <span>Wallet: {points} pts</span>
+            <span>Wallet: KSh {money.toLocaleString()}</span>
             <button onClick={() => useEconomy.getState().openShop(null)}>Leave (Esc)</button>
           </footer>
         </div>

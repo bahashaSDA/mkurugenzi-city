@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { ITEMS } from './catalog';
 
-// Points wallet, inventory, fullness and discoveries. Persisted per browser (localStorage, wrapped
+// Money wallet (Kenyan shillings, KSh), inventory, fullness and discoveries. Persisted per browser (localStorage, wrapped
 // in try/catch: private windows and blocked storage must never break the game).
 
-const KEY = 'mk.economy.v1';
-const START_POINTS = 300;
+const KEY = 'mk.economy.v2'; // v2: points -> KSh
+const START_MONEY = 1000;
 
 export interface Toast {
   id: number;
@@ -14,7 +14,7 @@ export interface Toast {
 }
 
 interface Saved {
-  points: number;
+  money: number; // KSh
   inventory: Record<string, number>;
   fullness: number;
   discovered: string[];
@@ -28,7 +28,7 @@ interface EconomyState extends Saved {
   watched: string[];
   openVideo: (id: string | null, title?: string) => void;
   toasts: Toast[];
-  action: { clip: string; until: number } | null; // eating/drinking animation request
+  action: { clip: string; until: number; prop: Prop } | null; // eating/drinking animation request
   earn: (n: number, why: string) => void;
   spend: (n: number, why: string) => boolean;
   buy: (itemId: string, eatNow: boolean) => boolean;
@@ -51,7 +51,7 @@ function load(): Saved {
 }
 
 function defaults(): Saved {
-  return { points: START_POINTS, inventory: {}, fullness: 70, discovered: [], metres: 0 };
+  return { money: START_MONEY, inventory: {}, fullness: 70, discovered: [], metres: 0 };
 }
 
 let saveTimer = 0;
@@ -59,8 +59,8 @@ function save(s: Saved) {
   clearTimeout(saveTimer);
   saveTimer = window.setTimeout(() => {
     try {
-      const { points, inventory, fullness, discovered, metres } = s;
-      localStorage.setItem(KEY, JSON.stringify({ points, inventory, fullness, discovered, metres }));
+      const { money, inventory, fullness, discovered, metres } = s;
+      localStorage.setItem(KEY, JSON.stringify({ money, inventory, fullness, discovered, metres }));
     } catch {
       /* ignore */
     }
@@ -68,6 +68,18 @@ function save(s: Saved) {
 }
 
 let toastId = 1;
+
+/** What Abel holds while eating/drinking, and for how long (a meal takes several bites). */
+export type Prop = 'bottle' | 'cup' | 'fruit' | 'snack' | 'plate' | '';
+const FRUITS = ['banana', 'mango', 'avocado', 'orange', 'pineapple', 'watermelon', 'sugarcane'];
+function propFor(itemId: string): { prop: Prop; ms: number } {
+  const item = ITEMS[itemId]!;
+  if (itemId === 'chai') return { prop: 'cup', ms: 4200 };
+  if (item.kind === 'drink') return { prop: 'bottle', ms: 3800 };
+  if (FRUITS.includes(itemId)) return { prop: 'fruit', ms: 4500 };
+  if (item.fullness >= 25) return { prop: 'plate', ms: 9000 };
+  return { prop: 'snack', ms: 4500 };
+}
 
 export const useEconomy = create<EconomyState>((set, get) => ({
   ...load(),
@@ -81,7 +93,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
       document.exitPointerLock?.();
       if (!get().watched.includes(id)) {
         set((s) => ({ watched: [...s.watched, id] }));
-        get().earn(15, 'Watched a Mkurugenzi story');
+        get().earn(100, 'Watched a Mkurugenzi story');
       }
     }
   },
@@ -93,17 +105,17 @@ export const useEconomy = create<EconomyState>((set, get) => ({
     setTimeout(() => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 3200);
   },
   earn: (n, why) => {
-    set((s) => ({ points: s.points + n }));
-    get().toast(`+${n} pts · ${why}`, 'earn');
+    set((s) => ({ money: s.money + n }));
+    get().toast(`+KSh ${n.toLocaleString()} · ${why}`, 'earn');
     save(get());
   },
   spend: (n, why) => {
-    if (get().points < n) {
-      get().toast(`Not enough points for ${why} (need ${n})`, 'info');
+    if (get().money < n) {
+      get().toast(`Pesa haitoshi: ${why} costs KSh ${n.toLocaleString()}`, 'info');
       return false;
     }
-    set((s) => ({ points: s.points - n }));
-    get().toast(`-${n} pts · ${why}`, 'spend');
+    set((s) => ({ money: s.money - n }));
+    get().toast(`-KSh ${n.toLocaleString()} · ${why}`, 'spend');
     save(get());
     return true;
   },
@@ -124,7 +136,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
     set((s) => ({
       inventory: inv,
       fullness: Math.min(100, s.fullness + item.fullness),
-      action: { clip: 'Consume', until: performance.now() + 2600 },
+      action: { clip: 'Consume', until: performance.now() + propFor(itemId).ms, prop: propFor(itemId).prop },
     }));
     get().toast(item.kind === 'drink' ? `Drank ${item.name}` : `Ate ${item.name}`, 'info');
     save(get());
@@ -139,7 +151,7 @@ export const useEconomy = create<EconomyState>((set, get) => ({
     const before = Math.floor(get().metres / 100);
     set((s) => ({ metres: s.metres + m }));
     const after = Math.floor(get().metres / 100);
-    if (after > before) get().earn(2, 'Exploring the mtaa');
+    if (after > before) get().earn(10, 'Exploring the mtaa');
   },
   openShop: (id) => {
     set({ shop: id });

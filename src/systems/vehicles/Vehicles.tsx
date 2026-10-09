@@ -14,9 +14,10 @@ import { playerPosition } from '../player/playerState';
 import { playerAnim } from '../player/AbelModel';
 import { prepareCharacter, prepareClips } from '../characters';
 import { audioContext, SoundSystem } from '../audio/music';
-import { ROUTES, sampleRoute, type RouteSample } from './routes';
+import { nearestOnRoute, routeSamples, type RouteSample } from './routes';
 import { SPECS, type VehicleKind, type VehicleSpec } from './specs';
 import { ride, vehicleColliders, vehicles, type VehicleState } from './state';
+import { Stages } from './Stages';
 
 export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
 const NPC_URLS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_woman', 'worker', 'auntie'].map((v) => `/models/npc_${v}.glb`);
@@ -65,7 +66,7 @@ const _a = { x: 0, y: 0, z: 0, h: 0, hw: false };
 export function Vehicles() {
   const tier = useGame((s) => s.tier);
   const kit = useKit(VEHICLES_KIT_URL);
-  const routes = useMemo(() => Object.fromEntries(ROUTES.map((r) => [r.id, sampleRoute(r)])), []);
+  const routes = useMemo(() => routeSamples(), []);
   const group = useRef<THREE.Group>(null);
   const bodies = useRef<(RapierRigidBody | null)[]>([]);
 
@@ -86,7 +87,7 @@ export function Vehicles() {
           id: list.length, kind, route, piece: spec.pieces[Math.floor(r() * spec.pieces.length)]!,
           s: (rs.length * k) / perRoute[route]! + r() * 8, v: 0, x: 0, y: 0, z: 0, heading: 0,
           dwell: 0, lastStop: -1, nextStopName: '', occupied: Math.floor(spec.seats.length * (0.4 + r() * 0.6)),
-          stopped: false, sound: null,
+          stopped: false, sound: null, hail: -1, waited: 0,
         });
       }
     }
@@ -135,7 +136,7 @@ export function Vehicles() {
       const spec = SPECS[v.kind];
       const it: Interactable = {
         id: `veh-${v.id}`, x: 1e9, z: 1e9, radius: spec.fare ? 3.2 : 0, key: 'KeyF',
-        label: `Board ${v.kind === 'nganya' ? 'the nganya' : v.kind === 'bus' ? 'the bus' : 'the matatu'} (${spec.fare} pts)`,
+        label: `Board ${v.kind === 'nganya' ? 'the nganya' : v.kind === 'bus' ? 'the bus' : 'the matatu'} (KSh ${spec.fare})`,
         use: () => board(v),
       };
       return it;
@@ -150,7 +151,7 @@ export function Vehicles() {
   useEffect(
     () =>
       onKeyPress('KeyF', () => {
-        if (ride.vehicle < 0) return;
+        if (ride.vehicle < 0 || performance.now() - ride.boardedAt < 800) return; // same press that boarded
         const v = vehicles[ride.vehicle];
         if (!v) return;
         if (!v.stopped) {
@@ -202,6 +203,17 @@ export function Vehicles() {
           }
         }
         if (nextStop < 25) target = Math.min(target, 2 + nextStop * 0.5);
+        // waved down at the roadside: pull over beside Abel
+        if (v.hail >= 0) {
+          let d = v.hail - v.s;
+          if (d < 0) d += rs.length;
+          if (d > 400) v.hail = -1; // passed it
+          else if (d < 1.2) {
+            v.dwell = 8;
+            v.hail = -1;
+            useEconomy.getState().toast(`Conductor: "Mkurugenzi! Panda, ${v.nextStopName}!" (F to board)`);
+          } else target = Math.min(target, 1.5 + d * 0.45);
+        }
       }
       // gap keeping behind any vehicle ahead in the same lane, and stop for Abel on the road
       for (const o of fleet) {
@@ -220,6 +232,15 @@ export function Vehicles() {
       if (v.dwell > 0) {
         v.dwell -= dt;
         target = 0;
+        // the conductor waits while Abel walks up to the door (up to ~25 s)
+        const [ddx, ddz] = spec.door;
+        const dcx = v.x + ddx * Math.cos(v.heading) + ddz * Math.sin(v.heading);
+        const dcz = v.z - ddx * Math.sin(v.heading) + ddz * Math.cos(v.heading);
+        if (spec.fare && ride.vehicle < 0 && v.dwell < 0.6 && v.waited < 25 && Math.hypot(playerPosition.x - dcx, playerPosition.z - dcz) < 10) {
+          v.dwell = 0.6;
+          v.waited += dt;
+        }
+        if (v.dwell <= 0) v.waited = 0;
         if (ride.vehicle === v.id && v.dwell <= 0) useEconomy.getState().toast('Conductor: "Twende! Twende!"');
       }
       v.v += THREE.MathUtils.clamp(target - v.v, -6 * dt, 2.5 * dt);
@@ -334,8 +355,44 @@ export function Vehicles() {
         );
       })}
       <Crew fleet={fleet} />
+      <Stages />
     </>
   );
+}
+
+// ------------------------------------------------------------------- hailing
+/** Abel waves at the roadside: the nearest matatu/bus coming along a road beside him pulls over. */
+export function hail() {
+  if (ride.vehicle >= 0) return;
+  playerAnim.action = 'Interact';
+  playerAnim.actionUntil = performance.now() + 1400;
+  const routes = routeSamples();
+  let best: VehicleState | null = null;
+  let bestS = 0;
+  let bestD = Infinity;
+  for (const v of vehicles) {
+    if (!SPECS[v.kind].fare) continue;
+    const rs = routes[v.route]!;
+    const n = nearestOnRoute(rs, playerPosition.x, playerPosition.z);
+    if (n.d > 9) continue; // this route doesn't pass here
+    let ahead = n.s - v.s; // how far the vehicle still has to drive to reach Abel
+    if (ahead < 0) ahead += rs.length;
+    if (ahead < 12 || ahead > 600) continue;
+    if (ahead < bestD) {
+      best = v;
+      bestD = ahead;
+      bestS = n.s;
+    }
+  }
+  const eco = useEconomy.getState();
+  if (!best) {
+    eco.toast('No matatu route passes here. Walk to a stage or a main road.');
+    return;
+  }
+  // stop so the passenger door (left side, slightly behind centre) lines up with Abel
+  const rs = routes[best.route]!;
+  best.hail = (bestS - SPECS[best.kind].door[1] + rs.length) % rs.length;
+  eco.toast(`You wave... a ${best.kind === 'nganya' ? 'nganya' : best.kind === 'bus' ? 'bus' : 'matatu'} is coming (${Math.round(bestD)} m away)`);
 }
 
 // ------------------------------------------------------------------- boarding / alighting
@@ -359,6 +416,7 @@ function board(v: VehicleState) {
     useEconomy.getState().toast(`Conductor: "Panda panda! Fare ni ${spec.fare}, Mkurugenzi!"`);
   }
   ride.vehicle = v.id;
+  ride.boardedAt = performance.now();
   playerAnim.riding = true;
 }
 

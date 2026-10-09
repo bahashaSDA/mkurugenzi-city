@@ -21,9 +21,9 @@ function hallInteractables(): Interactable[] {
     x: h.x,
     z: h.z + 2.6,
     radius: 2.2,
-    label: "Watch tonight's show (video hall, 20 pts)",
+    label: "Watch tonight's show (video hall, KSh 30)",
     use: async () => {
-      if (!useEconomy.getState().spend(20, 'video hall ticket')) return;
+      if (!useEconomy.getState().spend(30, 'video hall ticket')) return;
       const c = await loadContent();
       const pool = await onlyAvailable(c.episodes.slice(0, 30));
       const ep = pool[Math.floor(Math.random() * pool.length)];

@@ -59,6 +59,8 @@ export function Player() {
     facing: Math.PI,
     camDist: 4.5,
     speed: 0,
+    eating: false,
+    eatFacing: 0,
   });
 
   const controller = useMemo<KinematicCharacterController>(() => {
@@ -116,6 +118,16 @@ export function Player() {
       s.facing += d * Math.min(1, dt * 12);
     }
     _move.multiplyScalar(s.speed * dt);
+
+    // GTA-style eating: step back from the counter (turn away from it) so you can watch him eat
+    const eating = playerAnim.action === 'Consume' && performance.now() < playerAnim.actionUntil && !playerAnim.riding;
+    if (eating && !s.eating) s.eatFacing = s.facing + Math.PI;
+    s.eating = eating;
+    if (eating) {
+      let d = s.eatFacing - s.facing;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      s.facing += d * Math.min(1, dt * 4);
+    }
 
     // --- Gravity / jump ---
     if (s.grounded && s.vy <= 0) {
@@ -178,7 +190,13 @@ export function Player() {
       return;
     }
     const now = performance.now();
-    if (cameraMode === 'third' && mag > 0.1 && now - input.lastLookTime > RECENTER_DELAY) {
+    if (s.eating && cameraMode === 'third') {
+      // three-quarter front view at head height
+      let d = s.facing + 0.65 - s.yaw;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      s.yaw += d * Math.min(1, dt * 3);
+      s.pitch = THREE.MathUtils.damp(s.pitch, 0.08, 3, dt);
+    } else if (cameraMode === 'third' && mag > 0.1 && now - input.lastLookTime > RECENTER_DELAY) {
       // GTA-style auto recentre behind the player when moving without look input.
       const behind = s.facing + Math.PI;
       let d = behind - s.yaw;
@@ -195,11 +213,11 @@ export function Player() {
     }
 
     // Pull out when sprinting on open ground, in when near walls (handled by collision cast).
-    const wantDist = riding ? 7.5 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
+    const wantDist = riding ? 7.5 : s.eating ? 2.1 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
     s.camDist = THREE.MathUtils.damp(s.camDist, wantDist, 3, dt);
 
     // Over-the-shoulder pivot
-    _target.set(nx, ny + 0.65, nz).addScaledVector(_right, 0.45);
+    _target.set(nx, ny + (s.eating ? 0.55 : 0.65), nz).addScaledVector(_right, s.eating ? 0 : 0.45);
     _dir.set(
       Math.sin(s.yaw) * Math.cos(s.pitch),
       Math.sin(s.pitch),

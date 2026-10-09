@@ -27,8 +27,11 @@ export const ROUTES: RouteDef[] = [
     pts: [[14, 124, T], [14, -306, HW], [-145, -312, T], [-145, 150, T], [14, 150, T]],
     stops: [
       { name: 'Matatu Stage', x: 14, z: 118, dwell: 9 },
-      { name: 'Kibera (Railway)', x: -145, z: -150, dwell: 5 },
-      { name: 'Kibera (Main lane)', x: -145, z: 20, dwell: 5 },
+      { name: 'Mtaa wa Mkurugenzi', x: 14, z: -60, dwell: 6 },
+      { name: 'Expressway Junction', x: 14, z: -290, dwell: 5 },
+      { name: 'Kibera (Railway)', x: -145, z: -150, dwell: 6 },
+      { name: 'Kibera (Main lane)', x: -145, z: 20, dwell: 6 },
+      { name: 'Soko (Market)', x: -60, z: 150, dwell: 6 },
     ],
   },
   {
@@ -37,8 +40,9 @@ export const ROUTES: RouteDef[] = [
     pts: [[14, 132, T], [14, 330, T], [300, 330, T], [300, 200, T], [220, 60, T], [140, -40, T], [18, -40, T]],
     stops: [
       { name: 'Matatu Stage', x: 14, z: 138, dwell: 9 },
-      { name: 'Rocky Ridge', x: 300, z: 300, dwell: 5 },
-      { name: 'East Road', x: 140, z: -40, dwell: 4 },
+      { name: 'South Road', x: 14, z: 300, dwell: 6 },
+      { name: 'Rocky Ridge', x: 300, z: 300, dwell: 6 },
+      { name: 'East Road', x: 140, z: -40, dwell: 6 },
     ],
   },
   {
@@ -48,6 +52,26 @@ export const ROUTES: RouteDef[] = [
     stops: [],
   },
 ];
+
+let cached: Record<string, RouteSample> | null = null;
+/** All routes, sampled once (shared by the traffic, stages and hailing). */
+export function routeSamples(): Record<string, RouteSample> {
+  return (cached ??= Object.fromEntries(ROUTES.map((r) => [r.id, sampleRoute(r)])));
+}
+
+/** Nearest sample index on a route to (x, z), and its distance. */
+export function nearestOnRoute(r: RouteSample, x: number, z: number) {
+  let best = 0;
+  let bd = Infinity;
+  for (let i = 0; i < r.x.length; i++) {
+    const d = (r.x[i]! - x) ** 2 + (r.z[i]! - z) ** 2;
+    if (d < bd) {
+      bd = d;
+      best = i;
+    }
+  }
+  return { s: best * r.step, d: Math.sqrt(bd) };
+}
 
 export interface RouteSample {
   x: Float32Array;
