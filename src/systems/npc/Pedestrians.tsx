@@ -33,7 +33,7 @@ const FANS = ['fan_hoodie_black', 'fan_lady_black', 'fan_tee_burgundy', 'fan_hoo
 const LOCALS = ['mama_mboga', 'hustler', 'student', 'elder', 'auntie', 'worker', 'office', 'young_woman'];
 const VARIANT_COUNT = { low: [4, 2], mid: [8, 3], high: [12, 4] } as const;
 export const variantsFor = (tier: 'low' | 'mid' | 'high') => [...FANS.slice(0, VARIANT_COUNT[tier][0]), ...LOCALS.slice(0, VARIANT_COUNT[tier][1])];
-const POOL = { low: 14, mid: 26, high: 36 } as const;
+const POOL = { low: 10, mid: 22, high: 36 } as const;
 const SHADOW_DIST = 20; // only people close to the camera cast shadows (each one is ~7 draw calls)
 const DETAIL_DIST = 30; // eyes, brows and lashes are a few pixels beyond this
 const ANIMATE_DIST = 70;
@@ -258,7 +258,7 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
   const name = useMemo(() => NAMES[Math.floor(Math.random() * NAMES.length)]!, []);
   const talk = useMemo(
     () => ({
-      id: `npc-${Math.random().toString(36).slice(2)}`, x: 1e9, z: 1e9, radius: 0, label: 'Talk', key: 'KeyE' as const,
+      id: `npc-${Math.random().toString(36).slice(2)}`, x: 1e9, z: 1e9, radius: 0, label: 'Talk', key: 'KeyE' as const, priority: 1,
       use: () => {
         const s = st.current;
         s.talkUntil = s.t + 5;

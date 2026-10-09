@@ -62,7 +62,7 @@ export const MISSIONS: MissionDef[] = [
     title: 'Chai ya Asubuhi',
     giver: 'Mama Wanjiku',
     intro: 'Mkurugenzi! Hujakunywa chai leo? Pita hoteli ya Chai Moto, ukunywe chai na mandazi kabla ya kazi.',
-    start: () => ({ x: 9, z: 24 }),
+    start: () => ({ x: 10.5, z: 36 }), // on the pavement by the spawn, clear of shop doors
     reward: 300,
     steps: [
       { text: 'Walk to Chai Moto Hoteli', at: () => near(6, piecePos('shop_hoteli', { x: -6, z: -40 })) },

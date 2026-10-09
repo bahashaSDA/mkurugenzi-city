@@ -2,6 +2,40 @@
 
 _Last updated: 2026-10-08 (session 5)_
 
+## Session 7: GTA-style city life (owner feedback round 2)
+Owner asked: fix boarding; eating view; enter any house; all GTA functions (fighting, stealing cars...),
+missions with a map bottom-left; money in KSh; talk to people; many more people, ~90% in Mkurugenzi merch;
+more towns far away; realistic cars you can enter and drive; matatu stages and waving; Kibera trees,
+washing lines, poles, sewage and dirt; Abel's face closer to his photo; matatus/nganyas like the photos.
+
+**Done (each verified in the browser by a test in tools/)**
+- Boarding fixed (F was never wired) and matatu stages with shelters at every stop; E at a stage or H by any
+  route waves one down; the conductor waits at the door. `tools/ride-test.mjs`: wave, board, ride 160 m, alight.
+- KSh money everywhere; the boutique sells the real Mkurugenzi range at the shop's prices.
+- Eating: Abel turns from the counter, camera swings round, food/drink in his hands, meals take several bites.
+- Vehicles v2 from real side profiles: NTSA matatu, pimped HiAce, three graffiti nganyas with headboards, Sacco
+  bus, four car types; see-through windows with seats and passengers inside.
+- Driving (`tools/drive-test.mjs`): ~40 parked cars, F at the driver's door, raycast-vehicle physics, chase cam,
+  speedometer, horn, handbrake, F to get out.
+- World 3.2 km with five far towns (CBD + Mkurugenzi Tower, Wakurugenzi Arena, Phil-It Studios Town, Utafraaaia
+  Estate, Freddie's School Town) and the Storyteller's Fire hill; 4 new matatu routes.
+- Missions (7) with beacons, objective box, timer and KSh rewards; radar bottom-left; full map (M) with waypoint.
+  `tools/mission-test.mjs`.
+- Talk to anyone (E). Interiors: E at almost any door, furnished rooms, eat/drink, TV episodes, shop counters.
+  `tools/interior-test.mjs`.
+- Crowd: 12 merch fans (~90% of people), crowd texture atlases (2 draw calls per person).
+- Kibera: trees, washing lines, litter, power lines with roof drops, open sewage drains, mud and ash.
+- Abel face v2 (oval head, eyes, smile; 22-landmark thin-plate warp of the owner photo).
+
+**Not done (decision needed / honest gaps)**
+- Fighting and stealing cars: SPEC 8.6 says "no violence or damage systems"; waiting for the owner's decision.
+- Performance (software-GL counts from `tools/perf-probe.mjs`, worst spot = market/mtaa; budgets in brackets):
+  low 232-235 calls (250) / 0.5-0.69M tris (0.4M); mid 503-562 calls (500) / 1.2-1.57M tris (1.2M);
+  high 677-757 calls (900) / 2.0-2.6M tris (3M). High passes; low passes on calls; mid and low triangles
+  are over. Done this session: crowd texture atlases (2 calls per person), merged far LODs with GPU-averaged
+  colours, merged roads/stages/median, NPC shadows by distance, tier terrain resolution. Next: lighter
+  market produce at LOD0, collapse street/hub kit materials, then real-device `?benchmark` runs.
+
 ## Session 6: a bigger city to live in (market, Kibera, matatus, rocks, points)
 Owner brief (19 photos): busy mama mboga market, buy and eat/drink with earned points, shops and food places,
 Kibera like the rooftop photo, enterable homes, a big city with many roads and a highway, matatus and pimped

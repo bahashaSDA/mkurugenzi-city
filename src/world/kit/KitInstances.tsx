@@ -27,7 +27,7 @@ function scaledHull(points: Float32Array, k: number): Float32Array {
 
 // LOD switch distances (m) per tier. The hub is dense (a shack every ~22 m²), so the LOD0 radius
 // dominates the triangle budget: 18 m on low tier keeps ~45 full-detail shacks in view.
-const LOD_DIST = { low: [18, 70], mid: [25, 90], high: [35, 110] } as const;
+const LOD_DIST = { low: [12, 50], mid: [20, 70], high: [35, 110] } as const;
 const CULL_DIST = { low: 260, mid: 420, high: 600 } as const;
 const UPDATE_EVERY_S = 0.25;
 const UPDATE_MOVE_M = 2;

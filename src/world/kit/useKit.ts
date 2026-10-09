@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { getKTX2Loader } from '../ktx2';
+import { useGame } from '../../app/store';
 
 // A "kit" GLB (built by blender/scripts/build_*_kit.py) holds many pieces, each as nodes
 //   <piece>_LOD0, <piece>_LOD1, <piece>_LOD2   render meshes (any number of primitives)
@@ -80,6 +82,7 @@ export type Kit = Map<string, KitPiece>;
 
 export function useKit(url: string): Kit {
   const gl = useThree((s) => s.gl);
+  const tier = useGame((s) => s.tier);
   const gltf = useGLTF(url, false, true, (loader) => {
     const ktx2 = getKTX2Loader(gl); // shared with runtime materials (one worker pool)
     // drei types its loader with three-stdlib; three's own KTX2Loader is used deliberately because
@@ -137,8 +140,91 @@ export function useKit(url: string): Kit {
     for (const p of kit.values()) {
       for (let i = 1; i < 3; i++) if (!p.lods[i]!.length) p.lods[i] = p.lods[i - 1]!;
     }
+    // Far LOD: one merged, untextured mesh per piece (average texture colour baked into vertex
+    // colours) instead of one draw call per material. Alpha cards and glowing parts stay as they are.
+    for (const p of kit.values()) {
+      p.lods[2] = mergeFar(p.lods[2]!, gl);
+      if (tier === 'low') p.lods[1] = mergeFar(p.lods[1]!, gl); // phones: mid distance untextured too
+    }
     return kit;
-  }, [gltf]);
+  }, [gltf, gl, tier]);
+}
+
+const farMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0.0, name: 'kit_far' });
+const avgCache = new WeakMap<THREE.Texture, THREE.Color>();
+let avgRig: { rt: THREE.WebGLRenderTarget; scene: THREE.Scene; cam: THREE.Camera; mat: THREE.ShaderMaterial } | null = null;
+
+/** Average colour (linear) of a texture: sample its smallest mip on the GPU (works for KTX2). */
+function averageColour(tex: THREE.Texture, gl: THREE.WebGLRenderer): THREE.Color {
+  const hit = avgCache.get(tex);
+  if (hit) return hit;
+  avgRig ??= (() => {
+    const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.FloatType });
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { map: { value: null } },
+      vertexShader: 'void main() { gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      fragmentShader: 'uniform sampler2D map; void main() { gl_FragColor = textureLod(map, vec2(0.5), 16.0); }',
+    });
+    const scene = new THREE.Scene();
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+    return { rt, scene, cam: new THREE.OrthographicCamera(), mat };
+  })();
+  const out = new THREE.Color(0.5, 0.5, 0.5);
+  try {
+    avgRig.mat.uniforms.map!.value = tex;
+    const prev = gl.getRenderTarget();
+    gl.setRenderTarget(avgRig.rt);
+    gl.render(avgRig.scene, avgRig.cam);
+    const px = new Float32Array(4);
+    gl.readRenderTargetPixels(avgRig.rt, 0, 0, 1, 1, px);
+    gl.setRenderTarget(prev);
+    if (px.every(Number.isFinite)) out.setRGB(px[0]!, px[1]!, px[2]!);
+  } catch {
+    /* keep grey */
+  }
+  avgCache.set(tex, out);
+  return out;
+}
+
+function mergeFar(parts: KitPart[], gl: THREE.WebGLRenderer): KitPart[] {
+  const keep: KitPart[] = [];
+  const geos: THREE.BufferGeometry[] = [];
+  for (const part of parts) {
+    const m = part.material as THREE.MeshStandardMaterial;
+    if (/_alpha|_glow|glass/.test(m.name) || !part.geometry.getAttribute('position')) {
+      keep.push(part);
+      continue;
+    }
+    const base = m.color ? m.color.clone() : new THREE.Color(1, 1, 1);
+    if (m.map) base.multiply(averageColour(m.map, gl));
+    // meshopt-quantised attributes (int16/int8) can't take a transform: rebuild them as float
+    const src0 = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry;
+    const g = new THREE.BufferGeometry();
+    for (const k of ['position', 'normal'] as const) {
+      const a = src0.getAttribute(k);
+      if (!a) continue;
+      const f = new Float32Array(a.count * 3);
+      for (let i = 0; i < a.count; i++) f.set([a.getX(i), a.getY(i), a.getZ(i)], i * 3);
+      g.setAttribute(k, new THREE.BufferAttribute(f, 3));
+    }
+    g.applyMatrix4(part.local);
+    const n = g.getAttribute('position').count;
+    const src = src0.getAttribute('color');
+    const cols = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const f = src ? [src.getX(i), src.getY(i), src.getZ(i)] : [1, 1, 1];
+      cols[i * 3] = base.r * f[0]!;
+      cols[i * 3 + 1] = base.g * f[1]!;
+      cols[i * 3 + 2] = base.b * f[2]!;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    if (!g.getAttribute('normal')) g.computeVertexNormals();
+    geos.push(g);
+  }
+  if (geos.length < 2) return parts;
+  const merged = mergeGeometries(geos);
+  if (!merged) return parts;
+  return [{ geometry: merged, material: farMaterial, local: new THREE.Matrix4() }, ...keep];
 }
 
 // No module-level preload: KTX2 support needs the live renderer, so kits load inside the

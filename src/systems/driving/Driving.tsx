@@ -62,7 +62,7 @@ export function Driving() {
 
   return (
     <>
-      <KitInstances kit={kit} placements={cars} />
+      <KitInstances kit={kit} placements={cars} reach={0.5} />
       {driving && <DrivenCar key={`${driving.x},${driving.z}`} car={driving} kit={kit} onExit={() => setDriving(null)} />}
     </>
   );

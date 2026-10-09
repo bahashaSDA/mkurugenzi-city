@@ -17,6 +17,7 @@ import os
 import sys
 
 import bpy
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from common import script_args  # noqa: E402
@@ -218,6 +219,102 @@ def decimate_for_crowd():
     print(f"[human]   crowd mesh {total} tris before web simplification")
 
 
+# ----------------------------------------------------------------------------- crowd atlas
+CUTOUT_RE = ("short0", "afro", "braid", "bob", "long0", "ponytail", "eyebrow", "eyelash", "beard")
+
+
+def _srgb_to_lin(c):
+    return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+
+
+def _lin_to_srgb(c):
+    return np.where(c <= 0.0031308, c * 12.92, 1.055 * np.power(np.maximum(c, 0), 1 / 2.4) - 0.055)
+
+
+def _base_colour(mat, size):
+    """(size, size, 4) sRGB RGBA of a material's base colour: its diffuse texture (resized) times any
+    MULTIPLY tint (recolour_outfit), or a flat colour."""
+    nt = mat.node_tree
+    bsdf = nt.nodes.get("Principled BSDF")
+    texs = [n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image]
+    pick = [n for n in texs if any(k in n.image.name.lower() for k in ("diffuse", "albedo", "color", "dyed", "_d."))]
+    pick = pick or [n for n in texs if not any(k in n.image.name.lower() for k in ("normal", "rough", "spec", "bump", "ao"))]
+    out = np.ones((size, size, 4), dtype=np.float32)
+    if pick:
+        img = pick[0].image.copy()
+        img.scale(size, size)
+        px = np.empty(size * size * 4, dtype=np.float32)
+        img.pixels.foreach_get(px)
+        out = px.reshape(size, size, 4)
+        bpy.data.images.remove(img)
+    elif bsdf:
+        out[..., :3] = _lin_to_srgb(np.array(bsdf.inputs["Base Color"].default_value[:3]))
+    for n in nt.nodes:
+        if n.type == "MIX" and getattr(n, "blend_type", "") == "MULTIPLY":
+            tint = np.array(n.inputs[7].default_value[:3])
+            out[..., :3] = _lin_to_srgb(_srgb_to_lin(out[..., :3]) * tint)
+    return out
+
+
+def _atlas(objs, name, size, alpha):
+    """Join objs into one mesh; composite every material into a grid atlas and remap UVs to it.
+    One material = one draw call per person instead of one per garment."""
+    objs = [o for o in objs if o.data.materials]
+    if not objs:
+        return
+    for o in bpy.context.view_layer.objects:
+        o.select_set(o in objs)
+    bpy.context.view_layer.objects.active = objs[0]
+    if len(objs) > 1:
+        bpy.ops.object.join()
+    ob = bpy.context.view_layer.objects.active
+    mats = list(ob.data.materials)
+    g = math.ceil(math.sqrt(len(mats)))
+    cell = size // g
+    pad = 4
+    atlas = np.zeros((size, size, 4), dtype=np.float32)
+    for i, m in enumerate(mats):
+        cx, cy = (i % g) * cell, (i // g) * cell
+        atlas[cy:cy + cell, cx:cx + cell] = _base_colour(m, cell)
+    me = ob.data
+    uv = me.uv_layers.active.data
+    for poly in me.polygons:
+        i = poly.material_index
+        ox, oy = (i % g) * cell, (i // g) * cell
+        for li in poly.loop_indices:
+            u, v = uv[li].uv
+            u = min(max(u, 0.0), 1.0)
+            v = min(max(v, 0.0), 1.0)
+            uv[li].uv = ((ox + pad + u * (cell - 2 * pad)) / size, (oy + pad + v * (cell - 2 * pad)) / size)
+    img = bpy.data.images.new(name, size, size, alpha=True)
+    img.pixels.foreach_set(atlas.ravel())
+    img.pack()
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    nt = mat.node_tree
+    t = nt.nodes.new("ShaderNodeTexImage")
+    t.image = img
+    b = nt.nodes["Principled BSDF"]
+    nt.links.new(t.outputs["Color"], b.inputs["Base Color"])
+    b.inputs["Roughness"].default_value = 0.75
+    if alpha:
+        nt.links.new(t.outputs["Alpha"], b.inputs["Alpha"])
+    me.materials.clear()
+    me.materials.append(mat)
+    for poly in me.polygons:
+        poly.material_index = 0
+    print(f"[human]   atlas {name}: {len(mats)} materials -> 1 ({g}x{g} grid, {cell}px cells)")
+
+
+def atlas_crowd(name):
+    """Pedestrians: 2 draw calls each (opaque atlas + hair/brow cut-out atlas)."""
+    meshes = [o for o in bpy.data.objects if o.type == "MESH" and o.visible_get() and not o.name.endswith(".body")]
+    cut = [o for o in meshes if any(k in m.name.lower() for m in o.data.materials if m for k in CUTOUT_RE)]
+    opaque = [o for o in meshes if o not in cut]
+    _atlas(opaque, f"{name}_atlas", 1024, alpha=False)
+    _atlas(cut, f"{name}_hair_alpha", 512, alpha=True)
+
+
 DATA = os.path.join(os.environ["APPDATA"], "Blender Foundation", "Blender", "4.5", "extensions", ".user",
                     "blender_org", "mpfb", "data")
 
@@ -349,6 +446,7 @@ for name, spec in CHARACTERS.items():
             add_animations(PLAYER_ANIMS if name == "abel" else NPC_ANIMS)
         if name != "abel":
             decimate_for_crowd()
+            atlas_crowd(name)
         export(name)
 
 

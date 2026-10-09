@@ -7,14 +7,17 @@ import { buildGroundMask } from './materials/groundMask';
 import { groundGeometry, makeGroundMaterial } from './materials/surfaceMaterials';
 import { useKTX2 } from './useKTX2';
 import { heightAt } from './heights';
+import { useGame } from '../app/store';
 
 // Collider rule (session 1): never use huge primitive colliders. Rapier lost precision on a
 // 1.6 km cuboid and the character sank ~17 cm. The ground is a heightfield; long walls are
 // split into short segments.
-const HF_SUBDIV = 400; // 8 m grid over 3.2 km, shared by the visual mesh and the physics heightfield
+const HF_SUBDIV = 400; // physics heightfield: 8 m grid over 3.2 km
+const VIS_SUBDIV = { low: 200, mid: 300, high: 400 } as const; // visual mesh by tier (16 / 10.7 / 8 m)
 const WALL_SEG = 200;
 
 export function Terrain() {
+  const tier = useGame((s) => s.tier);
   const [bc, bn, br, pc, pn, pr, rc, rn, rr] = useKTX2([
     '/textures/murram_color.ktx2',
     '/textures/murram_normal.ktx2',
@@ -28,7 +31,7 @@ export function Terrain() {
   ]);
   const { geometry, material } = useMemo(() => {
     const mask = buildGroundMask(getHubLayout());
-    const geometry = groundGeometry(WORLD_HALF * 2, HF_SUBDIV);
+    const geometry = groundGeometry(WORLD_HALF * 2, VIS_SUBDIV[tier]);
     const pos = geometry.getAttribute('position') as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) pos.setY(i, heightAt(pos.getX(i), pos.getZ(i)));
     pos.needsUpdate = true;
@@ -39,7 +42,7 @@ export function Terrain() {
       material: makeGroundMaterial({ color: bc!, normal: bn!, rough: br! }, { color: pc!, normal: pn!, rough: pr! }, mask,
         { color: rc!, normal: rn!, rough: rr! }),
     };
-  }, [bc, bn, br, pc, pn, pr, rc, rn, rr]);
+  }, [bc, bn, br, pc, pn, pr, rc, rn, rr, tier]);
   // Rapier heightfield order (verified in a unit test): index = i * (n + 1) + j, i along X, j along Z
   const heights = useMemo(() => {
     const n = HF_SUBDIV;

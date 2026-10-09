@@ -72,6 +72,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
         camera={{ fov: 62, near: 0.1, far: 2500, position: [0, 3, 14] }}
         gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
         onCreated={({ gl }) => {
+          if (params.has('noshadow')) gl.shadowMap.enabled = false; // perf experiments
           gl.toneMapping = THREE.AgXToneMapping;
           gl.toneMappingExposure = 1.05;
           attachInput(gl.domElement);
@@ -106,9 +107,11 @@ export default function Game({ onReady }: { onReady: () => void }) {
               <Driving />
             </Suspense>
             <MissionWorld />
-            <Suspense fallback={null}>
-              <Interiors />
-            </Suspense>
+            {!minimal && (
+              <Suspense fallback={null}>
+                <Interiors />
+              </Suspense>
+            )}
           </Physics>
           <WorldStreamer />
           <GameLogic />

@@ -44,7 +44,7 @@ export function MissionWorld() {
   useEffect(() => {
     const offs = markers
       .filter((m) => m.use && m.label)
-      .map((m) => register({ id: `mission-${m.key}`, x: m.x, z: m.z, y: heightAt(m.x, m.z) + 0.9, radius: Math.max(2.5, m.r), label: m.label!, key: 'KeyE', use: m.use! }));
+      .map((m) => register({ id: `mission-${m.key}`, x: m.x, z: m.z, y: heightAt(m.x, m.z) + 0.9, radius: Math.max(2.5, m.r), label: m.label!, key: 'KeyE', priority: 2, use: m.use! }));
     return () => offs.forEach((f) => f());
   }, [markers]);
 

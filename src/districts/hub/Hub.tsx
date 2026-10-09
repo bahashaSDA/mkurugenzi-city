@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { KitInstances } from '../../world/kit/KitInstances';
+import { useGame } from '../../app/store';
 import { useKit, wind } from '../../world/kit/useKit';
 import { KiberaDrains } from '../kibera/Drains';
 import { KIBERA_POLE_LINES } from '../kibera/layout';
@@ -80,6 +81,7 @@ export function Hub({ render = true }: { render?: boolean }) {
   const kiberaKit = useKit(KIBERA_KIT_URL);
   const rocksKit = useKit(ROCKS_KIT_URL);
   const townKit = useKit(TOWN_KIT_URL);
+  const tier = useGame((st) => st.tier);
   const placements = useMemo(() => getHubLayout(), []);
   const shops = useMemo(() => [...shopInteractables(placements), ...hallInteractables()], [placements]);
   useInteractables(shops);
@@ -105,7 +107,7 @@ export function Hub({ render = true }: { render?: boolean }) {
       <KitInstances kit={kiberaKit} placements={kiberaDecor} render={render} reach={0.15} />
       <KitInstances kit={rocksKit} placements={rockPlacements} render={render} />
       {/* outer towns: tall buildings stay visible on the skyline from across the map */}
-      <KitInstances kit={townKit} placements={townPlacements} render={render} reach={3} />
+      <KitInstances kit={townKit} placements={townPlacements} render={render} reach={tier === 'low' ? 1.5 : 3} />
       {render && <Cables placements={placements} lines={KIBERA_POLE_LINES} />}
       {render && <KiberaDrains />}
       {render && <WindClock />}

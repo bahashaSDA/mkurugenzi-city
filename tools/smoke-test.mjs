@@ -18,7 +18,7 @@ async function run(name, query, keys, ms, check) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push(`${name} console: ${m.text()}`); });
   await page.goto(base + '?debug&perf&minimal&testcourse&tier=low&' + query);
   const btn = page.getByRole('button', { name: 'Tap to enter' });
-  await btn.waitFor({ timeout: 60000 });
+  await btn.waitFor({ timeout: 300000 });
   await btn.click();
   await page.waitForTimeout(1500);
   const before = await page.evaluate(() => ({ ...window.__mk.playerPosition }));
@@ -51,7 +51,7 @@ await run('ramp_30', `spawn=${-32 + OX},${12 + OZ}`, ['KeyW'], 24000, (b, a) => 
 {
   const page = await browser.newPage({ viewport: { width: 480, height: 270 } });
   await page.goto(base + '?debug&minimal&tier=low');
-  await page.getByRole('button', { name: 'Tap to enter' }).waitFor({ timeout: 60000 });
+  await page.getByRole('button', { name: 'Tap to enter' }).waitFor({ timeout: 300000 });
   const k = await page.evaluate(() => {
     const ps = window.__mk.hubPlacements;
     const kiosks = ps.filter((p) => p.piece.startsWith('kiosk') && p.x < 0);

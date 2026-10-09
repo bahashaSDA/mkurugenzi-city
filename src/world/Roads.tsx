@@ -135,18 +135,28 @@ function Median({ road }: { road: Road }) {
     }
     return out;
   }, [road]);
+  // one instanced mesh for every segment (was one draw call per 50 m)
+  const mesh = useMemo(() => {
+    const m = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: '#b8b2a6', roughness: 0.9 }), items.length);
+    const q = new THREE.Quaternion();
+    items.forEach((s, i) => {
+      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), s.rot);
+      m.setMatrixAt(i, new THREE.Matrix4().compose(new THREE.Vector3(s.x, heightAt(s.x, s.z) + 0.4, s.z), q, new THREE.Vector3(0.6, 0.8, s.len)));
+    });
+    m.castShadow = true;
+    m.receiveShadow = true;
+    m.computeBoundingSphere();
+    return m;
+  }, [items]);
   return (
-    <RigidBody type="fixed" colliders={false}>
-      {items.map((s, i) => (
-        <group key={i} position={[s.x, 0.4, s.z]} rotation={[0, s.rot, 0]}>
-          <CuboidCollider args={[0.3, 0.4, s.len / 2]} />
-          <mesh castShadow receiveShadow>
-            <boxGeometry args={[0.6, 0.8, s.len]} />
-            <meshStandardMaterial color="#b8b2a6" roughness={0.9} />
-          </mesh>
-        </group>
-      ))}
-    </RigidBody>
+    <>
+      <primitive object={mesh} />
+      <RigidBody type="fixed" colliders={false}>
+        {items.map((s, i) => (
+          <CuboidCollider key={i} args={[0.3, 0.4, s.len / 2]} position={[s.x, heightAt(s.x, s.z) + 0.4, s.z]} rotation={[0, s.rot, 0]} />
+        ))}
+      </RigidBody>
+    </>
   );
 }
 

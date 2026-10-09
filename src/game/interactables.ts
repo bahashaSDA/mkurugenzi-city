@@ -13,6 +13,8 @@ export interface Interactable {
   radius: number;
   label: string;
   key?: 'KeyE' | 'KeyF';
+  /** Higher wins over nearer (missions 2, people 1, doors/shops 0). */
+  priority?: number;
   use: () => void;
 }
 
@@ -41,13 +43,17 @@ export function useInteractables(list: Interactable[]) {
 export function updateNearest(): Interactable | null {
   let best: Interactable | null = null;
   let bestD = Infinity;
+  let bestP = -Infinity;
   for (const i of registry.values()) {
     const dx = i.x - playerPosition.x;
     const dz = i.z - playerPosition.z;
     const d = dx * dx + dz * dz;
-    if (d < i.radius * i.radius && d < bestD && Math.abs((i.y ?? playerPosition.y) - playerPosition.y) < 3) {
+    if (d >= i.radius * i.radius || Math.abs((i.y ?? playerPosition.y) - playerPosition.y) >= 3) continue;
+    const p = i.priority ?? 0;
+    if (p > bestP || (p === bestP && d < bestD)) {
       best = i;
       bestD = d;
+      bestP = p;
     }
   }
   const cur = usePrompt.getState().current;

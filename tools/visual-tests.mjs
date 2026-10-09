@@ -42,11 +42,11 @@ for (const [name, cam] of Object.entries(SHOTS)) {
   if (only && !only.test(name)) continue;
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.log(name, 'pageerror', e.message));
-  await page.goto(`http://localhost:4173/?tier=high&cam=${cam}`);
+  await page.goto(`http://localhost:4173/?tier=${process.env.TIER ?? 'mid'}&cam=${cam}`);
   await page.getByRole('button', { name: 'Tap to enter' }).click({ timeout: 300000 });
   await page.waitForTimeout(15000); // software GL is slow; let LODs and shadows settle
   await page.evaluate(() => document.querySelectorAll('.hud, .perf-overlay').forEach((e) => e.remove()));
-  await page.screenshot({ path: `${out}/${name}.png`, timeout: 120000 });
+  await page.screenshot({ path: `${out}/${name}.png`, timeout: 400000 });
   console.log('[visual]', `${out}/${name}.png`);
   await page.close();
 }
