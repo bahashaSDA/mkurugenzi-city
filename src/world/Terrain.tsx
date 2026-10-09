@@ -1,34 +1,53 @@
 import { useMemo } from 'react';
+import * as THREE from 'three';
 import { CuboidCollider, HeightfieldCollider, RigidBody } from '@react-three/rapier';
 import { WORLD_HALF } from '../config/world';
 import { getHubLayout } from '../districts/hub/layout';
 import { buildGroundMask } from './materials/groundMask';
 import { groundGeometry, makeGroundMaterial } from './materials/surfaceMaterials';
 import { useKTX2 } from './useKTX2';
+import { heightAt } from './heights';
 
 // Collider rule (session 1): never use huge primitive colliders. Rapier lost precision on a
 // 1.6 km cuboid and the character sank ~17 cm. The ground is a heightfield; long walls are
 // split into short segments.
-const HF_SUBDIV = 64; // flat for now; real heights arrive with the terrain pass (V6)
+const HF_SUBDIV = 256; // 6.25 m grid shared by the visual mesh and the physics heightfield
 const WALL_SEG = 200;
 
 export function Terrain() {
-  const [bc, bn, br, pc, pn, pr] = useKTX2([
+  const [bc, bn, br, pc, pn, pr, rc, rn, rr] = useKTX2([
     '/textures/murram_color.ktx2',
     '/textures/murram_normal.ktx2',
     '/textures/murram_rough.ktx2',
     '/textures/murram_path_color.ktx2',
     '/textures/murram_path_normal.ktx2',
     '/textures/murram_path_rough.ktx2',
+    '/textures/rock_color.ktx2',
+    '/textures/rock_normal.ktx2',
+    '/textures/rock_rough.ktx2',
   ]);
   const { geometry, material } = useMemo(() => {
     const mask = buildGroundMask(getHubLayout());
+    const geometry = groundGeometry(WORLD_HALF * 2, HF_SUBDIV);
+    const pos = geometry.getAttribute('position') as THREE.BufferAttribute;
+    for (let i = 0; i < pos.count; i++) pos.setY(i, heightAt(pos.getX(i), pos.getZ(i)));
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+    geometry.computeBoundingSphere();
     return {
-      geometry: groundGeometry(WORLD_HALF * 2),
-      material: makeGroundMaterial({ color: bc!, normal: bn!, rough: br! }, { color: pc!, normal: pn!, rough: pr! }, mask),
+      geometry,
+      material: makeGroundMaterial({ color: bc!, normal: bn!, rough: br! }, { color: pc!, normal: pn!, rough: pr! }, mask,
+        { color: rc!, normal: rn!, rough: rr! }),
     };
-  }, [bc, bn, br, pc, pn, pr]);
-  const heights = useMemo(() => new Array<number>((HF_SUBDIV + 1) * (HF_SUBDIV + 1)).fill(0), []);
+  }, [bc, bn, br, pc, pn, pr, rc, rn, rr]);
+  // Rapier heightfield order (verified in a unit test): index = i * (n + 1) + j, i along X, j along Z
+  const heights = useMemo(() => {
+    const n = HF_SUBDIV;
+    const hs = new Array<number>((n + 1) * (n + 1));
+    for (let i = 0; i <= n; i++)
+      for (let j = 0; j <= n; j++) hs[i * (n + 1) + j] = heightAt(-WORLD_HALF + (2 * WORLD_HALF * i) / n, -WORLD_HALF + (2 * WORLD_HALF * j) / n);
+    return hs;
+  }, []);
   const n = (WORLD_HALF * 2) / WALL_SEG;
   const wall = Array.from({ length: n }, (_, i) => -WORLD_HALF + WALL_SEG * (i + 0.5));
 

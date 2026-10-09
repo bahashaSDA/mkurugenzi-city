@@ -3,11 +3,12 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { CapsuleCollider, RigidBody, useRapier, type RapierRigidBody } from '@react-three/rapier';
 import type { Collider, KinematicCharacterController } from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
-import { input, onCameraToggle, pad, pollGamepad } from '../input';
+import { input, inputLock, onCameraToggle, pad, pollGamepad } from '../input';
 import { useGame } from '../../app/store';
 import { SPAWN } from '../../config/world';
 import { playerPosition } from './playerState';
 import { AbelModel, playerAnim } from './AbelModel';
+import { ride, rideWorld, vehicleColliders } from '../vehicles/state';
 import { benchmark } from '../../perf/Benchmark';
 
 // Tuning (SPEC 8.1). Relaxed exploration speeds, no stamina.
@@ -38,6 +39,8 @@ const _camPos = new THREE.Vector3();
 const _dir = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _up = new THREE.Vector3(0, 1, 0);
+const _ride = new THREE.Vector3();
+const _zero = { x: 0, y: 0, z: 0 };
 
 export function Player() {
   const body = useRef<RapierRigidBody>(null);
@@ -93,8 +96,10 @@ export function Player() {
     s.pitch = THREE.MathUtils.clamp(s.pitch + lookY * LOOK_SENS, -1.2, 1.2);
 
     // --- Move intent (camera-relative) ---
-    const mx = THREE.MathUtils.clamp(input.moveX + input.touchMoveX + pad.x, -1, 1);
-    const my = THREE.MathUtils.clamp(input.moveY + input.touchMoveY + pad.y, -1, 1);
+    // movement is frozen while a shop/menu is open, while eating, and while riding a vehicle
+    const locked = inputLock.ui || performance.now() < playerAnim.actionUntil || playerAnim.riding;
+    const mx = locked ? 0 : THREE.MathUtils.clamp(input.moveX + input.touchMoveX + pad.x, -1, 1);
+    const my = locked ? 0 : THREE.MathUtils.clamp(input.moveY + input.touchMoveY + pad.y, -1, 1);
     const mag = Math.min(1, Math.hypot(mx, my));
     const sprinting = input.sprint || input.touchSprint || pad.sprint;
     const targetSpeed = mag < 0.01 ? 0 : sprinting ? SPRINT : mag > 0.6 ? RUN : WALK;
@@ -121,20 +126,39 @@ export function Player() {
     }
     _move.y = s.vy * dt;
 
+    // --- riding a matatu/nganya: follow the seat, no character controller ---
+    if (ride.vehicle >= 0) {
+      const heading = rideWorld(_ride);
+      const by = _ride.y + CAPSULE_HALF + CAPSULE_R + 0.02;
+      rb.setNextKinematicTranslation({ x: _ride.x, y: by, z: _ride.z });
+      playerPosition.set(_ride.x, by, _ride.z);
+      s.facing = heading;
+      s.vy = 0;
+      playerAnim.speed = 0;
+      playerAnim.grounded = true;
+    } else if (ride.justAlighted) {
+      ride.justAlighted = false;
+      rb.setNextKinematicTranslation({ x: ride.exit.x, y: ride.exit.y + 0.3, z: ride.exit.z });
+      playerPosition.copy(ride.exit);
+    }
+    const riding = ride.vehicle >= 0;
+    if (riding) _move.set(0, 0, 0);
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
-    const m = controller.computedMovement();
-    s.grounded = controller.computedGrounded();
+    const m = riding ? _zero : controller.computedMovement();
+    s.grounded = riding || controller.computedGrounded();
     // actual ground speed (not the input): animations follow what the body really does
     playerAnim.speed = Math.hypot(m.x, m.z) / dt;
     playerAnim.grounded = s.grounded;
     playerAnim.vy = s.vy;
     if (s.grounded && s.vy < 0) s.vy = 0;
-    const p = rb.translation();
+    const p = riding ? playerPosition : rb.translation();
     const nx = p.x + m.x;
     const ny = p.y + m.y;
     const nz = p.z + m.z;
-    rb.setNextKinematicTranslation({ x: nx, y: ny, z: nz });
-    playerPosition.set(nx, ny, nz);
+    if (!riding) {
+      rb.setNextKinematicTranslation({ x: nx, y: ny, z: nz });
+      playerPosition.set(nx, ny, nz);
+    }
 
     // Fell out of the world: respawn.
     if (ny < -30) rb.setNextKinematicTranslation({ x: SPAWN[0], y: SPAWN[1], z: SPAWN[2] });
@@ -171,7 +195,7 @@ export function Player() {
     }
 
     // Pull out when sprinting on open ground, in when near walls (handled by collision cast).
-    const wantDist = 4.2 + (s.speed / SPRINT) * 1.6;
+    const wantDist = riding ? 7.5 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
     s.camDist = THREE.MathUtils.damp(s.camDist, wantDist, 3, dt);
 
     // Over-the-shoulder pivot
@@ -184,7 +208,8 @@ export function Player() {
 
     // Camera collision: cast from the pivot toward the desired camera position.
     let dist = s.camDist;
-    const hit = world.castRay(camRay, s.camDist, true, undefined, undefined, col, rb);
+    const hit = world.castRay(camRay, s.camDist, true, undefined, undefined, col, rb,
+      riding ? (c) => !vehicleColliders.has(c.handle) : undefined);
     if (hit) dist = Math.max(0.6, hit.timeOfImpact - 0.25);
 
     _camPos.copy(_target).addScaledVector(_dir, dist);

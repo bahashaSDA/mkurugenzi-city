@@ -30,6 +30,22 @@ export interface KitPiece {
 export const wind = { uTime: { value: 0 } };
 
 function prepareMaterial(m: THREE.Material) {
+  const std = m as THREE.MeshStandardMaterial;
+  if (m.name.includes('glass')) {
+    // tinted vehicle/window glass: see-through so passengers and the street are visible
+    m.transparent = true;
+    m.opacity = 0.42;
+    m.depthWrite = false;
+    std.roughness = 0.05;
+    std.envMapIntensity = 1.5;
+    return;
+  }
+  if (m.name.includes('_glow')) {
+    // LEDs, screens, lights, sign boxes: self-lit (bloom picks them up)
+    std.emissive = std.color.clone();
+    std.emissiveIntensity = 1.6;
+    return;
+  }
   if (!m.name.includes('_alpha')) return;
   // Alpha-tested foliage: no sorting, writes depth, casts cut-out shadows.
   m.transparent = false;

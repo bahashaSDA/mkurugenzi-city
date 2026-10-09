@@ -93,3 +93,53 @@ button, select { font: inherit; }
 .fallback-links { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
 .fallback-episodes { padding: 0; list-style: none; display: grid; gap: 8px; }
 .fallback-episodes small { display: block; color: #9a958c; }
+
+/* ---------- Game UI: wallet, prompt, shop, bag, toasts ---------- */
+.game-ui { position: fixed; inset: 0; pointer-events: none; z-index: 20; font-family: var(--sans); }
+.game-ui button { pointer-events: auto; cursor: pointer; }
+.wallet {
+  position: absolute; top: calc(60px + var(--safe-t)); left: calc(12px + var(--safe-l)); width: 190px; padding: 10px 12px;
+  background: rgba(14, 14, 16, 0.66); border-radius: 8px; display: grid; gap: 4px; pointer-events: auto;
+}
+.wallet-points { font-family: var(--display); font-size: 24px; color: var(--matatu-yellow); letter-spacing: 0.04em; }
+.wallet-points b { font-weight: 400; }
+.wallet-bar { height: 6px; background: rgba(255, 255, 255, 0.15); border-radius: 3px; overflow: hidden; }
+.wallet-bar span { display: block; height: 100%; transition: width 0.4s; }
+.wallet small { color: #cfc8bb; font-size: 11px; }
+.wallet-bag { margin-top: 4px; min-height: 34px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; background: transparent; color: var(--paper); }
+.area-name {
+  position: absolute; top: calc(70px + var(--safe-t)); right: calc(14px + var(--safe-r)); font-family: var(--display); font-size: 22px;
+  color: var(--paper); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7); letter-spacing: 0.06em;
+}
+.prompt {
+  position: absolute; bottom: calc(90px + var(--safe-b)); left: 50%; transform: translateX(-50%); padding: 10px 16px; min-height: 48px;
+  background: rgba(14, 14, 16, 0.78); color: var(--paper); border: 1px solid rgba(255, 199, 44, 0.6); border-radius: 999px; font-size: 15px;
+}
+.prompt kbd {
+  display: inline-block; min-width: 24px; padding: 2px 6px; margin-right: 6px; border-radius: 4px; background: var(--matatu-yellow);
+  color: var(--ink); font-family: var(--display); font-size: 16px;
+}
+.panel {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100vw - 32px)); max-height: min(78vh, 640px);
+  overflow: auto; pointer-events: auto; background: rgba(18, 16, 14, 0.94); border: 1px solid rgba(255, 199, 44, 0.45); border-radius: 12px;
+  padding: 16px; color: var(--paper);
+}
+.panel h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 30px; color: var(--matatu-yellow); }
+.panel header p { margin: 2px 0 10px; color: #cfc8bb; font-style: italic; }
+.panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.panel li { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.05); }
+.panel li small { display: block; color: #a9a294; font-size: 12px; }
+.panel .price { font-family: var(--display); font-size: 18px; color: var(--matatu-yellow); white-space: nowrap; }
+.panel li button, .panel footer button {
+  min-height: 40px; padding: 0 12px; border: 0; border-radius: 6px; background: var(--matatu-yellow); color: var(--ink); font-weight: 600;
+}
+.panel li button:disabled { background: #444; color: #888; cursor: not-allowed; }
+.panel footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.toasts { position: absolute; top: calc(110px + var(--safe-t)); right: calc(14px + var(--safe-r)); display: grid; gap: 6px; justify-items: end; }
+.toast { padding: 6px 12px; border-radius: 6px; background: rgba(14, 14, 16, 0.78); font-size: 14px; animation: toast-in 0.25s ease-out; }
+.toast-earn { color: #9cff8a; } .toast-spend { color: #ffd27a; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }
+@media (max-width: 560px) { .panel li { grid-template-columns: 1fr auto; } }
+.video-panel { width: min(900px, calc(100vw - 32px)); }
+.video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 8px; overflow: hidden; }
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }

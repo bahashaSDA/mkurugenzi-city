@@ -11,6 +11,18 @@ export interface Placement {
   z: number;
   rotY: number;
   y?: number;
+  /** Uniform scale (rocks); colliders scale with it. */
+  scale?: number;
+}
+
+const scaledHulls = new WeakMap<Float32Array, Map<number, Float32Array>>();
+function scaledHull(points: Float32Array, k: number): Float32Array {
+  if (k === 1) return points;
+  let m = scaledHulls.get(points);
+  if (!m) scaledHulls.set(points, (m = new Map()));
+  let out = m.get(k);
+  if (!out) m.set(k, (out = points.map((v) => v * k)));
+  return out;
 }
 
 // LOD switch distances (m) per tier. The hub is dense (a shack every ~22 m²), so the LOD0 radius
@@ -50,13 +62,13 @@ export function KitInstances({ kit, placements, render = true }: { kit: Kit; pla
     }
     const q = new THREE.Quaternion();
     const up = new THREE.Vector3(0, 1, 0);
-    const one = new THREE.Vector3(1, 1, 1);
+    const sc = new THREE.Vector3();
     for (const [piece, list] of groups) {
       const xz = new Float32Array(list.length * 2);
       const matrices = list.map((p, i) => {
         xz[i * 2] = p.x;
         xz[i * 2 + 1] = p.z;
-        return new THREE.Matrix4().compose(new THREE.Vector3(p.x, p.y ?? 0, p.z), q.setFromAxisAngle(up, p.rotY), one);
+        return new THREE.Matrix4().compose(new THREE.Vector3(p.x, p.y ?? 0, p.z), q.setFromAxisAngle(up, p.rotY), sc.setScalar(p.scale ?? 1));
       });
       map.set(piece, { matrices, xz });
     }
@@ -149,17 +161,18 @@ export function KitInstances({ kit, placements, render = true }: { kit: Kit; pla
           (kit.get(p.piece)?.colliders ?? []).map((col, j) => {
             const rot: [number, number, number] = [0, p.rotY, 0];
             const key = `${i}.${j}`;
+            const k = p.scale ?? 1;
             if (col.kind === 'hull') {
-              return <ConvexHullCollider key={key} args={[col.points]} position={[p.x, p.y ?? 0, p.z]} rotation={rot} />;
+              return <ConvexHullCollider key={key} args={[scaledHull(col.points, k)]} position={[p.x, p.y ?? 0, p.z]} rotation={rot} />;
             }
             // Rotate the collider's centre offset into place with the piece.
             const c = Math.cos(p.rotY);
             const s = Math.sin(p.rotY);
-            const [cx, cy, cz] = col.center;
+            const [cx, cy, cz] = col.center.map((v) => v * k) as [number, number, number];
             return (
               <CuboidCollider
                 key={key}
-                args={col.halfExtents}
+                args={col.halfExtents.map((v) => v * k) as [number, number, number]}
                 position={[p.x + cx * c + cz * s, (p.y ?? 0) + cy, p.z - cx * s + cz * c]}
                 rotation={rot}
               />

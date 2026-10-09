@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { MASK_SIZE_M } from './groundMask';
+import { RIDGE } from '../heights';
 
 // PBR surface materials for ground and roads, extended with small shader patches.
 // Colours are measured from Nairobi reference photos (research/visual-references/PALETTES.md):
@@ -27,9 +28,10 @@ function prep(t: SurfaceTextures, srgb = true) {
  * Anti-tiling: colour is sampled at two scales/rotations and mixed by macro noise.
  * The plane's UVs must be world metres / TILE_M (see groundGeometry).
  */
-export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures, mask: THREE.Texture) {
+export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures, mask: THREE.Texture, rock: SurfaceTextures) {
   prep(base);
   prep(path);
+  prep(rock);
   const mat = new THREE.MeshStandardMaterial({
     map: base.color,
     normalMap: base.normal,
@@ -42,6 +44,8 @@ export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures,
     shader.uniforms.uPathMap = { value: path.color };
     shader.uniforms.uMask = { value: mask };
     shader.uniforms.uMaskSize = { value: MASK_SIZE_M };
+    shader.uniforms.uRockMap = { value: rock.color };
+    shader.uniforms.uRidge = { value: new THREE.Vector3(RIDGE.x, RIDGE.z, RIDGE.r) };
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vWorldPosG;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWorldPosG = (modelMatrix * vec4(transformed, 1.0)).xyz;');
@@ -52,7 +56,14 @@ export function makeGroundMaterial(base: SurfaceTextures, path: SurfaceTextures,
 varying vec3 vWorldPosG;
 uniform sampler2D uPathMap;
 uniform sampler2D uMask;
-uniform float uMaskSize;`,
+uniform float uMaskSize;
+uniform sampler2D uRockMap;
+uniform vec3 uRidge;
+float gHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float gNoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(gHash(i), gHash(i + vec2(1, 0)), u.x), mix(gHash(i + vec2(0, 1)), gHash(i + vec2(1, 1)), u.x), u.y);
+}`,
       )
       .replace(
         '#include <map_fragment>',
@@ -74,11 +85,22 @@ vec3 pathCol = texture2D(uPathMap, guv * 1.3).rgb * vec3(1.05, 0.78, 0.62);
 vec3 grassCol = baseCol * vec3(0.52, 0.62, 0.36);
 vec3 col = mix(baseCol, pathCol, mask.r * inMask);
 col = mix(col, grassCol, mask.g * inMask * 0.85);
+// outside the mtaa: wild grass/bush patches on open ground
+float wildN = gNoise(vWorldPosG.xz * 0.035) * 0.7 + gNoise(vWorldPosG.xz * 0.15) * 0.3;
+col = mix(col, grassCol * 0.9, (1.0 - inMask) * smoothstep(0.5, 0.75, wildN) * 0.8);
+// Kibera: trodden red earth between the houses (owner photo)
+float kib = smoothstep(-150.0, -175.0, vWorldPosG.x) * smoothstep(-300.0, -280.0, vWorldPosG.z) * smoothstep(310.0, 290.0, vWorldPosG.z);
+col = mix(col, pathCol * vec3(1.0, 0.92, 0.85), kib * (0.55 + 0.25 * gNoise(vWorldPosG.xz * 0.2)));
+// Rocky Ridge: cracked bare rock breaking through the soil
+float rd = length(vWorldPosG.xz - uRidge.xy);
+float rocky = smoothstep(uRidge.z, uRidge.z * 0.45, rd) * smoothstep(0.35, 0.6, gNoise(vWorldPosG.xz * 0.05) * 0.6 + 0.4);
+vec3 rockCol = texture2D(uRockMap, guv * 0.6).rgb * vec3(1.05, 0.98, 0.9);
+col = mix(col, rockCol, clamp(rocky * 1.4, 0.0, 1.0));
 diffuseColor.rgb *= col;
 `,
       );
   };
-  mat.customProgramCacheKey = () => 'ground-v1';
+  mat.customProgramCacheKey = () => 'ground-v2';
   return mat;
 }
 

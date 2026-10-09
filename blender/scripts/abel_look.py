@@ -443,13 +443,34 @@ def pocket_square_and_bracelet():
     _rigid_to_bone(ob, "lowerarm_l")
 
 
-def apply_abel_look():
+def _chin_dz(hf):
+    body = _find("male_generic") or _find("female_generic")
+    mw = body.matrix_world
+    ez, front = hf["eye_mid"].z, hf["eye_front_y"]
+    pts = [mw @ v.co for v in body.data.vertices]
+    face_front = [p for p in pts if abs(p.x) < 0.02 and p.y < front + 0.03 and -0.22 < p.z - ez < -0.05]
+    return min(p.z for p in face_front) - ez
+
+
+def apply_abel_look(photo_face=True):
     hf = head_frame()
-    lighten_skin()
+    if photo_face:
+        # Likeness from the owner's front photo (abel_face.py). His close buzz cut and goatee come
+        # from the photo, so the hair cards, modelled brows and beard shell are not used.
+        from abel_face import project_face
+        body = _find("male_generic")
+        skin = next(n.image for sl in body.material_slots for n in sl.material.node_tree.nodes
+                    if n.type == "TEX_IMAGE" and n.image and "diffuse" in n.image.name.lower())
+        project_face(body, skin, _find("low-poly"), hf["eye_front_y"], _chin_dz(hf))
+        for o in list(_mesh_objects()):
+            if "short0" in o.name or "eyebrow" in o.name:
+                bpy.data.objects.remove(o, do_unlink=True)
+    else:
+        lighten_skin()
+        beard(hf)
     recolour_suit()
     flat_cap(hf)
     glasses(hf)
-    beard(hf)
     pocket_square_and_bracelet()
 
 

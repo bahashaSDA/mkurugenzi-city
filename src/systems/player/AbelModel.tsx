@@ -14,7 +14,7 @@ import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 export const ABEL_URL = '/models/abel.glb';
 
 /** Written by the Player each frame, read here: drives clip selection without React renders. */
-export const playerAnim = { speed: 0, grounded: true, vy: 0, idleTime: 0 };
+export const playerAnim = { speed: 0, grounded: true, vy: 0, idleTime: 0, action: '', actionUntil: 0, riding: false, rideClip: '' };
 
 const FADE = 0.25;
 const IDLE_VARIANTS = ['Idle_FoldArms_Loop', 'Idle_TalkingPhone_Loop', 'Idle_Talking_Loop', 'Idle_Loop'];
@@ -57,7 +57,9 @@ export function AbelModel() {
     const s = st.current;
     const { speed, grounded, vy } = playerAnim;
     let want: string;
-    if (!grounded && vy > 1.5) want = 'Jump_Start';
+    if (playerAnim.riding) want = playerAnim.rideClip || 'Sitting_Idle_Loop';
+    else if (playerAnim.action && performance.now() < playerAnim.actionUntil) want = playerAnim.action;
+    else if (!grounded && vy > 1.5) want = 'Jump_Start';
     else if (!grounded) want = 'Jump_Loop';
     else if (speed > 5.0) want = 'Sprint_Loop';
     else if (speed > 2.6) want = 'Jog_Fwd_Loop';

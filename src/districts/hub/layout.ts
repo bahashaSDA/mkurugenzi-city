@@ -1,4 +1,7 @@
 import type { Placement } from '../../world/kit/KitInstances';
+import { nearRoad } from '../../config/roads';
+import { buildKiberaLayout } from '../kibera/layout';
+import { buildRidgeLayout } from '../ridge/layout';
 
 // Mtaa wa Mkurugenzi layout v2 ("vertical slice"): density at street level first.
 //   * Central avenue (tarmac, x = 14, kerbs at x = 10 / 18) lined on BOTH sides by a continuous
@@ -25,7 +28,8 @@ const FRONT_SETBACK = 4; // kerb to facade: 1.7 m shoulder + 2.3 m veranda
 type Rect = [x0: number, z0: number, x1: number, z1: number];
 // Kept clear: spawn plaza + letters, the avenue, the market lane, the matatu stage (SPEC 6).
 const PLAZA: Rect = [-16, -17, 9, 19];
-const KEEP_CLEAR: Rect[] = [PLAZA, [9, -400, 19, 400], [LANE_X - 4.4, -400, LANE_X + 4.4, 400], [-30, 104, 40, 150]];
+export const MARKET: Rect = [-70, 36, -18, 88]; // Soko la Mkurugenzi (owner market photo)
+const KEEP_CLEAR: Rect[] = [PLAZA, [9, -400, 19, 400], [LANE_X - 4.4, -400, LANE_X + 4.4, 400], [-30, 104, 40, 150], MARKET];
 const clear = (x: number, z: number, pad = 0) =>
   !KEEP_CLEAR.some(([x0, z0, x1, z1]) => x > x0 - pad && x < x1 + pad && z > z0 - pad && z < z1 + pad);
 const inPlaza = (z: number) => z > PLAZA[1] - UNIT_W / 2 && z < PLAZA[3] + UNIT_W / 2;
@@ -41,7 +45,7 @@ function rng(seed: number) {
 let cached: Placement[] | null = null;
 /** The hub layout, built once and shared (terrain mask, kit instances, cables, tests). */
 export function getHubLayout(): Placement[] {
-  return (cached ??= buildHubLayout());
+  return (cached ??= [...buildHubLayout(), ...buildMarketLayout(), ...buildKiberaLayout(), ...buildRidgeLayout()]);
 }
 
 export function buildHubLayout(seed = 254): Placement[] {
@@ -106,7 +110,7 @@ export function buildHubLayout(seed = 254): Placement[] {
       for (let x = x0; x <= x1; x += 4.5) {
         const jx = x + (r() - 0.5) * 0.7;
         const jz = z + (r() - 0.5) * 0.9;
-        if (r() < 0.1 || !clear(jx, jz, 2.2)) continue;
+        if (r() < 0.1 || !clear(jx, jz, 2.2) || nearRoad(jx, jz, 2.5)) continue;
         out.push({ piece: pick(SHACKS), x: jx, z: jz, rotY: Math.floor(r() * 4) * (Math.PI / 2) + (r() - 0.5) * 0.08 });
         if (r() < 0.12 && clear(jx + 2.4, jz, 0.8)) out.push({ piece: 'water_tank', x: jx + 2.45, z: jz + (r() - 0.5), rotY: 0 });
       }
@@ -115,5 +119,29 @@ export function buildHubLayout(seed = 254): Placement[] {
   field(-80, -21, -150, 100);
   field(50, 86, -150, 100);
 
+  return out;
+}
+
+/** The market: rows of produce stalls under big umbrellas with aisles between, sacks and crates,
+ *  and a chips booth. Stall fronts (+Z local) face the aisles. */
+export function buildMarketLayout(seed = 77): Placement[] {
+  const r = rng(seed);
+  const out: Placement[] = [];
+  const [x0, z0, x1, z1] = MARKET;
+  // aisles every 9 m; stall rows on both sides of each aisle facing it
+  for (let az = z0 + 6; az < z1 - 3; az += 9) {
+    for (const side of [-1, 1]) {
+      const z = az + side * 2.6;
+      for (let x = x0 + 3; x < x1 - 2; x += 3.1 + r() * 0.6) {
+        if (r() < 0.12) continue;
+        const piece = r() < 0.62 ? 'market_stall' : 'market_stall_b';
+        out.push({ piece, x: x + (r() - 0.5) * 0.4, z: z + (r() - 0.5) * 0.4, rotY: side < 0 ? 0 : Math.PI });
+        if (r() < 0.25) out.push({ piece: r() < 0.5 ? 'sack_pile' : 'crate_stack', x: x + 1.5, z: z + side * 1.4, rotY: r() * 6 });
+      }
+    }
+  }
+  out.push({ piece: 'chips_booth', x: x1 + 1.5, z: z0 + 4, rotY: Math.PI / 2 });
+  out.push({ piece: 'chips_booth', x: -25, z: 118, rotY: Math.PI / 2 }); // by the matatu stage
+  out.push({ piece: 'crate_stack', x: -23, z: 115, rotY: 0.3 });
   return out;
 }

@@ -8,18 +8,27 @@ import { useGame } from '../../app/store';
 import { getKTX2Loader } from '../../world/ktx2';
 import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 import { playerPosition } from '../player/playerState';
-import { getHubLayout, KERB_E, KERB_W } from '../../districts/hub/layout';
+import { getHubLayout, KERB_E, KERB_W, MARKET } from '../../districts/hub/layout';
+import { KIBERA_ALLEYS, ROOM_D, ROOM_W } from '../../districts/kibera/layout';
+import { ROADS } from '../../config/roads';
+import { heightAt } from '../../world/heights';
 
 // Street life (VISUAL_OVERHAUL 19 / SPEC 8.6): MPFB2 pedestrians with retargeted CC0 clips.
-//   walkers  - stroll the pavements under the verandas, both directions, step aside for Abel
-//   standers - wait at kiosks and shopfronts: talk, phone, fold arms; nod when Abel walks past
+// A GTA-style ambient crowd that follows Abel: a fixed pool of people, each one respawning out of
+// sight near him when he leaves it behind, so the avenue, the market and Kibera are all busy.
+//   walkers  - pavements, market aisles, Kibera alleys and murram lanes; step aside for Abel
+//   standers - kiosk/shop customers, mama mboga and buyers at the stalls, neighbours at Kibera
+//              doorways: talk, phone, fold arms; nod when the Mkurugenzi walks past
 //   sitters  - on the plastic chairs by the kiosks
-// Pool size per tier; only people near the camera animate (SPEC 8.6 LOD), the rest are hidden.
+// Only people near the camera are drawn and animated (SPEC 8.6 LOD).
 
 const VARIANTS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_woman', 'worker', 'auntie'];
 const URLS = VARIANTS.map((v) => `/models/npc_${v}.glb`);
-const POOL = { low: 10, mid: 18, high: 28 } as const;
+const POOL = { low: 12, mid: 22, high: 34 } as const;
 const ANIMATE_DIST = 70;
+const RESPAWN_DIST = 85; // left this far behind -> reappear near Abel
+const SPAWN_MIN = 8;
+const SPAWN_MAX = 60;
 const STAND_CLIPS = ['Idle_Talking_Loop', 'Idle_TalkingPhone_Loop', 'Idle_FoldArms_Loop', 'Idle_Loop'];
 
 type Role = 'walk' | 'stand' | 'sit';
@@ -29,12 +38,22 @@ interface Agent {
   x: number;
   z: number;
   rotY: number;
-  laneX: number; // walkers: pavement line they follow
+  seg: number; // walkers: segment index, distance u along it, lateral offset
+  u: number;
+  lat: number;
+  anchor: number; // standers/sitters: anchor index
   dir: 1 | -1;
   speed: number;
   clip: string;
   nodded: boolean;
 }
+interface Anchor {
+  x: number;
+  z: number;
+  rotY: number;
+  sit: boolean;
+}
+type Seg = [number, number, number, number];
 
 function rng(seed: number) {
   let s = seed >>> 0;
@@ -43,48 +62,146 @@ function rng(seed: number) {
     return s / 4294967296;
   };
 }
+const rnd = rng(4242);
 
-function planAgents(count: number): Agent[] {
+/** Where people can stand, sit and walk, built once from the world layout. */
+function buildWorld() {
+  const layout = getHubLayout(); // also fills KIBERA_ALLEYS
   const r = rng(91);
-  const layout = getHubLayout();
-  const chairs = layout.filter((p) => p.piece === 'plastic_chair');
-  const kiosks = layout.filter((p) => p.piece.startsWith('kiosk'));
-  const shops = layout.filter((p) => p.piece.startsWith('shop_'));
-  const out: Agent[] = [];
-  const base = (role: Role, x: number, z: number, rotY: number, clip: string): Agent => ({
-    role, variant: Math.floor(r() * VARIANTS.length), x, z, rotY, laneX: x, dir: r() < 0.5 ? 1 : -1,
-    speed: 1.1 + r() * 0.4, clip, nodded: false,
-  });
-  // ~55% walkers concentrated near the spawn end of the street, ~30% standers, ~15% sitters
-  for (let i = 0; i < count; i++) {
-    const k = i / count;
-    if (k < 0.55) {
-      const west = r() < 0.5;
-      const lane = west ? KERB_W - 2.6 + (r() - 0.5) * 0.8 : KERB_E + 2.6 + (r() - 0.5) * 0.8;
-      const a = base('walk', lane, -60 + r() * 110, 0, 'Walk_Loop');
-      a.speed = 0.9 + r() * 0.6; // real pedestrian pace: 0.9-1.5 m/s
-      a.clip = a.speed < 1.2 ? 'Walk_Slow_Loop' : 'Walk_Loop';
-      out.push(a);
-    } else if (k < 0.85) {
-      const atKiosk = r() < 0.5 && kiosks.length;
-      const p = atKiosk ? kiosks[Math.floor(r() * kiosks.length)]! : shops[Math.floor(r() * shops.length)]!;
-      // stand ~1.6 m in front of the serving hatch / shop door, facing it
-      const fx = Math.sin(p.rotY);
-      const fz = Math.cos(p.rotY);
-      const d = atKiosk ? 2.2 : 6.0;
-      out.push(base('stand', p.x + fx * d + (r() - 0.5), p.z + fz * d + (r() - 0.5) * 1.5, p.rotY + Math.PI,
-        STAND_CLIPS[Math.floor(r() * STAND_CLIPS.length)]!));
-    } else if (chairs.length) {
-      const c = chairs[Math.floor(r() * chairs.length)]!;
-      out.push(base('sit', c.x, c.z, c.rotY + Math.PI, 'Sitting_Idle_Loop'));
+  const anchors: Anchor[] = [];
+  const stand = (x: number, z: number, rotY: number) => anchors.push({ x, z, rotY, sit: false });
+  for (const p of layout) {
+    const fx = Math.sin(p.rotY);
+    const fz = Math.cos(p.rotY);
+    if (p.piece.startsWith('kiosk') || p.piece === 'chips_booth') {
+      // customers ~2 m in front of the serving hatch, facing it
+      stand(p.x + fx * 2.2 + (r() - 0.5), p.z + fz * 2.2 + (r() - 0.5), p.rotY + Math.PI);
+    } else if (p.piece.startsWith('shop_')) {
+      stand(p.x + fx * 6 + (r() - 0.5), p.z + fz * 6 + (r() - 0.5) * 1.5, p.rotY + Math.PI);
+    } else if (p.piece === 'plastic_chair') {
+      anchors.push({ x: p.x, z: p.z, rotY: p.rotY + Math.PI, sit: true });
+    } else if (p.piece.startsWith('market_stall')) {
+      stand(p.x - fx * 0.9, p.z - fz * 0.9, p.rotY); // mama mboga behind her stall
+      if (r() < 0.6) stand(p.x + fx * 1.3 + (r() - 0.5) * 0.6, p.z + fz * 1.3, p.rotY + Math.PI); // a buyer
+    } else if (p.piece.startsWith('kib_row')) {
+      // neighbours outside their doors (rows run along local X, doors on local +Z)
+      const n = Number(p.piece.slice(7));
+      const c = Math.cos(p.rotY);
+      const sn = Math.sin(p.rotY);
+      for (let i = 0; i < n; i++) {
+        if (r() > 0.3) continue;
+        const lx = (i - (n - 1) / 2) * ROOM_W;
+        const lz = ROOM_D / 2 + 0.45;
+        stand(p.x + lx * c + lz * sn, p.z - lx * sn + lz * c, p.rotY + (r() - 0.5) * 1.6);
+      }
     }
+  }
+  const segs: Seg[] = [];
+  for (const lane of [KERB_W - 2.6, KERB_E + 2.6]) segs.push([lane, -145, lane, 95]);
+  const [mx0, mz0, mx1, mz1] = MARKET;
+  for (let az = mz0 + 6; az < mz1 - 3; az += 9) segs.push([mx0 + 2, az, mx1 - 2, az]);
+  for (const [x, z0, z1] of KIBERA_ALLEYS) segs.push([x, z0, x, z1]);
+  for (const rd of ROADS) {
+    if (rd.kind !== 'murram') continue;
+    for (let i = 0; i < rd.pts.length - 1; i++) segs.push([...rd.pts[i]!, ...rd.pts[i + 1]!] as Seg);
+  }
+  // spatial grid over anchors (32 m cells) for quick "near Abel" queries
+  const grid = new Map<string, number[]>();
+  anchors.forEach((a, i) => {
+    const k = `${Math.floor(a.x / 32)},${Math.floor(a.z / 32)}`;
+    let l = grid.get(k);
+    if (!l) grid.set(k, (l = []));
+    l.push(i);
+  });
+  return { anchors, segs, grid, used: new Set<number>() };
+}
+type World = ReturnType<typeof buildWorld>;
+
+const _cam = new THREE.Vector3();
+const _fwd = new THREE.Vector3();
+/** Respawn spot check: not too close, not too far, and not popping in right in front of the camera. */
+function goodSpot(x: number, z: number, camera: THREE.Camera | null) {
+  const d = Math.hypot(x - playerPosition.x, z - playerPosition.z);
+  if (d < SPAWN_MIN || d > SPAWN_MAX) return false;
+  if (!camera) return true;
+  camera.getWorldPosition(_cam);
+  camera.getWorldDirection(_fwd);
+  const vx = x - _cam.x;
+  const vz = z - _cam.z;
+  const vd = Math.hypot(vx, vz);
+  return vd > 38 || (vx * _fwd.x + vz * _fwd.z) / vd < 0.35;
+}
+
+/** Move an agent to a fresh spot near Abel. Returns false if nothing suitable was found. */
+function respawn(a: Agent, w: World, camera: THREE.Camera | null): boolean {
+  if (a.role !== 'walk') {
+    const cx = Math.floor(playerPosition.x / 32);
+    const cz = Math.floor(playerPosition.z / 32);
+    const near: number[] = [];
+    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) for (const k of w.grid.get(`${cx + i},${cz + j}`) ?? []) near.push(k);
+    for (let t = 0; t < 24 && near.length; t++) {
+      const k = near[Math.floor(rnd() * near.length)]!;
+      const an = w.anchors[k]!;
+      if (w.used.has(k) || an.sit !== (a.role === 'sit') || !goodSpot(an.x, an.z, camera)) continue;
+      w.used.delete(a.anchor);
+      w.used.add(k);
+      a.anchor = k;
+      a.x = an.x;
+      a.z = an.z;
+      a.rotY = an.rotY;
+      a.nodded = false;
+      return true;
+    }
+    if (a.role === 'stand') return false;
+    a.role = 'stand'; // no free chairs here: stand instead
+    return respawn(a, w, camera);
+  }
+  for (let t = 0; t < 24; t++) {
+    const i = Math.floor(rnd() * w.segs.length);
+    const [ax, az, bx, bz] = w.segs[i]!;
+    const dx = bx - ax;
+    const dz = bz - az;
+    const L = Math.hypot(dx, dz);
+    const tp = Math.max(0, Math.min(1, ((playerPosition.x - ax) * dx + (playerPosition.z - az) * dz) / (L * L)));
+    const u = Math.max(0, Math.min(1, tp + ((rnd() - 0.5) * 80) / L));
+    const lat = (rnd() - 0.5) * 1.2;
+    const x = ax + dx * u - (dz / L) * lat;
+    const z = az + dz * u + (dx / L) * lat;
+    if (!goodSpot(x, z, camera)) continue;
+    w.used.delete(a.anchor);
+    a.anchor = -1;
+    a.seg = i;
+    a.u = u * L;
+    a.lat = lat;
+    a.x = x;
+    a.z = z;
+    a.dir = rnd() < 0.5 ? 1 : -1;
+    return true;
+  }
+  return false;
+}
+
+function planAgents(count: number, w: World): Agent[] {
+  const r = rng(91);
+  const out: Agent[] = [];
+  for (let i = 0; i < count; i++) {
+    const k = i % 10;
+    const role: Role = k < 5 ? 'walk' : k < 9 ? 'stand' : 'sit';
+    const speed = 0.9 + r() * 0.6; // real pedestrian pace: 0.9-1.5 m/s
+    const clip = role === 'walk' ? (speed < 1.2 ? 'Walk_Slow_Loop' : 'Walk_Loop') : role === 'sit' ? 'Sitting_Idle_Loop' : STAND_CLIPS[Math.floor(r() * STAND_CLIPS.length)]!;
+    const a: Agent = { role, variant: Math.floor(r() * VARIANTS.length), x: 0, z: 0, rotY: 0, seg: 0, u: 0, lat: 0, anchor: -1, dir: 1, speed, clip, nodded: false };
+    respawn(a, w, null);
+    out.push(a);
   }
   return out;
 }
 
+// at most two respawns per rendered frame (cheap, but avoids a burst after a long bus ride)
+const budget = { frame: -1, n: 0 };
+
 const _toPlayer = new THREE.Vector3();
 
-function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] } }) {
+function Person({ agent, world, source }: { agent: Agent; world: World; source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] } }) {
   const tier = useGame((s) => s.tier);
   const body = useRef<RapierRigidBody>(null);
   const holder = useRef<THREE.Group>(null);
@@ -133,6 +250,21 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
     const s = st.current;
     const g = holder.current;
     if (!g) return;
+    if (Math.hypot(s.x - playerPosition.x, s.z - playerPosition.z) > RESPAWN_DIST) {
+      const frame = state.gl.info.render.frame;
+      if (budget.frame !== frame) {
+        budget.frame = frame;
+        budget.n = 0;
+      }
+      if (budget.n < 2 && respawn(agent, world, state.camera)) {
+        budget.n++;
+        s.x = agent.x;
+        s.z = agent.z;
+        s.rotY = agent.rotY;
+        if (agent.role === 'stand' && !STAND_CLIPS.includes(agent.clip)) agent.clip = 'Idle_Talking_Loop'; // ex-sitter
+        play(agent.clip, 0.01);
+      }
+    }
     const cam = state.camera.position;
     const far = Math.hypot(s.x - cam.x, s.z - cam.z) > ANIMATE_DIST;
     g.visible = !far;
@@ -142,22 +274,30 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
     const pd = _toPlayer.length();
 
     if (agent.role === 'walk') {
+      const [ax, az, bx, bz] = world.segs[agent.seg]!;
+      const L = Math.hypot(bx - ax, bz - az);
+      const ux = (bx - ax) / L;
+      const uz = (bz - az) / L;
       // step aside / pause when Abel is right in the path
-      const ahead = (playerPosition.z - s.z) * agent.dir;
-      const blocked = pd < 1.6 && ahead > 0;
-      if (blocked) {
+      const ahead = (_toPlayer.x * ux + _toPlayer.z * uz) * agent.dir;
+      if (pd < 1.6 && ahead > 0) {
         s.pause = 0.8;
-        s.x += Math.sign(s.x - playerPosition.x || 1) * dt * 0.8;
+        agent.lat += (agent.lat >= 0 ? 1 : -1) * dt * 0.8;
       }
       if (s.pause > 0) {
         s.pause -= dt;
         play('Idle_Loop', 0.2);
       } else {
         play(agent.clip, 0.25);
-        s.z += agent.dir * agent.speed * dt;
-        s.x += (agent.laneX - s.x) * Math.min(1, dt * 0.6); // drift back to the pavement line
-        if (s.z > 95 || s.z < -145) agent.dir = (agent.dir * -1) as 1 | -1; // turn at the street ends
-        const want = agent.dir > 0 ? 0 : Math.PI;
+        agent.u += agent.dir * agent.speed * dt;
+        if (agent.u > L || agent.u < 0) {
+          agent.u = Math.max(0, Math.min(L, agent.u));
+          agent.dir = (agent.dir * -1) as 1 | -1; // turn back at the end of the lane
+        }
+        agent.lat *= 1 - Math.min(1, dt * 0.3); // drift back towards the lane line
+        s.x = ax + ux * agent.u - uz * agent.lat;
+        s.z = az + uz * agent.u + ux * agent.lat;
+        const want = Math.atan2(ux * agent.dir, uz * agent.dir);
         let d = want - s.rotY;
         d = Math.atan2(Math.sin(d), Math.cos(d));
         s.rotY += d * Math.min(1, dt * 3);
@@ -178,9 +318,10 @@ function Person({ agent, source }: { agent: Agent; source: { scene: THREE.Object
       d = Math.atan2(Math.sin(d), Math.cos(d));
       s.rotY += d * Math.min(1, dt * 2);
     }
-    g.position.set(s.x, 0, s.z);
+    const y = far ? 0 : heightAt(s.x, s.z); // Kibera is on a hillside
+    g.position.set(s.x, y, s.z);
     g.rotation.y = s.rotY;
-    body.current?.setNextKinematicTranslation({ x: s.x, y: 0.9, z: s.z });
+    body.current?.setNextKinematicTranslation({ x: s.x, y: y + 0.9, z: s.z });
     if (!far) mixer.update(dt);
   });
 
@@ -202,11 +343,12 @@ export function Pedestrians() {
   const gltfs = useGLTF(URLS, false, true, (loader) => {
     loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
   });
-  const agents = useMemo(() => planAgents(POOL[tier]), [tier]);
+  const world = useMemo(() => buildWorld(), []);
+  const agents = useMemo(() => planAgents(POOL[tier], world), [tier, world]);
   return (
     <>
       {agents.map((a, i) => (
-        <Person key={`${tier}-${i}`} agent={a} source={gltfs[a.variant]!} />
+        <Person key={`${tier}-${i}`} agent={a} world={world} source={gltfs[a.variant]!} />
       ))}
     </>
   );

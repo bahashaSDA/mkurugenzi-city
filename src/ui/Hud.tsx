@@ -17,15 +17,11 @@ export function Hud() {
 
   return (
     <div className="hud">
-      <div className="hud-quest">
-        <small>Phase 0 test map</small>
-        <span>Karibu Mkurugenzi. Knock over the letters, try the stairs and ramps.</span>
-      </div>
       {hint && (
         <div className="hud-hint">
           {isTouch
             ? 'Left stick to move · drag right side to look · tap RUN to sprint'
-            : 'Click to look · WASD move · Shift sprint · Space jump · V first-person'}
+            : 'Click to look · WASD move · Shift sprint · Space jump · E use · F matatu · I bag · V first-person'}
         </div>
       )}
       <div className="hud-settings">

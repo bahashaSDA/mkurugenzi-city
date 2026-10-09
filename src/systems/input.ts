@@ -15,6 +15,25 @@ export const input = {
 };
 
 const keys = new Set<string>();
+const pressListeners = new Map<string, Set<() => void>>();
+
+/** One-shot key press (not held): E interact, F enter/exit vehicle, etc. */
+export function onKeyPress(code: string, fn: () => void) {
+  const set = pressListeners.get(code) ?? new Set();
+  set.add(fn);
+  pressListeners.set(code, set);
+  return () => {
+    set.delete(fn);
+  };
+}
+
+/** Touch buttons call this to trigger the same actions as keys. */
+export function pressKey(code: string) {
+  pressListeners.get(code)?.forEach((fn) => fn());
+}
+
+/** True while a UI panel is open: the player ignores movement keys. */
+export const inputLock = { ui: false };
 const onVKey: Array<() => void> = [];
 
 export function onCameraToggle(fn: () => void) {
@@ -40,6 +59,7 @@ function recompute() {
 export function attachInput(canvas: HTMLElement): () => void {
   const down = (e: KeyboardEvent) => {
     if (e.code === 'KeyV' && !e.repeat) onVKey.forEach((fn) => fn());
+    if (!e.repeat) pressListeners.get(e.code)?.forEach((fn) => fn());
     if (e.code === 'Space') e.preventDefault();
     keys.add(e.code);
     recompute();

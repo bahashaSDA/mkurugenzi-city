@@ -2,6 +2,29 @@
 
 _Last updated: 2026-10-08 (session 5)_
 
+## Session 6: a bigger city to live in (market, Kibera, matatus, rocks, points)
+Owner brief (19 photos): busy mama mboga market, buy and eat/drink with earned points, shops and food places,
+Kibera like the rooftop photo, enterable homes, a big city with many roads and a highway, matatus and pimped
+nganyas with fare, seats, standing, a maroon-uniformed conductor and loud bass music, rocky places, Abel's face from his photo.
+
+**Done**
+- Economy (`src/game/`): points (start 300; +2 per 100 m walked; +15 per new episode watched; +20 at video halls),
+  27 items with prices (banana 10, chai 30, soda 60, chips 100, pilau 200, nyama choma 350...). Buy, then eat or drink now (GTA-style animation, fills the "shiba" bar) or take it away (bag, `I`).
+- Market (52 x 52 m, 5 aisles of stalls with umbrellas, produce and price cards), kiosks, hoteli, butchery, boutique, chips booths: press `E` to shop.
+- Kibera (west, on a 20 m hillside): ~2,000 terraced mabati rows squeezed back to back on 1.3 m alleys, matte rust roofs, murram lanes and the old railway path. Enterable homes (look around, walk out) and video halls that play Abel's episodes.
+- Roads: avenue, Kibera Road, Stage Road, North Street, East Road, South Road, a dual-carriageway expressway with a median, and murram shortcuts. Terrain heights are graded flat under paved roads.
+- Matatus, nganyas (3 pimped liveries, LED strips, loud bass), Sacco buses and cars on 3 routes with stops.
+  `F` boards at the door when stopped; the conductor (maroon uniform) takes the fare; you sit or stand if it is full; `F` gets off at the next stop. Music is synthesised in the browser, never copied from YouTube.
+- Rocky Ridge (south-east): broken hills, clusters of big crags and boulder fields (grey Rock030).
+- Ambient crowd: a pool of people that follows Abel and respawns out of sight, at market stalls (mama mboga and buyers), Kibera doorways and alleys, kiosks and pavements.
+- Abel's face is projected from the owner's photo (dev/demo only; see ASSETS.md).
+- Fixes: road ribbons were back-face culled (wrong winding); Kibera roofs looked grey (too metallic); the smoke-test course got buried by the new hill (`?testcourse` now flattens a pad).
+
+**Still to do (honest)**
+- Shop interiors (kiosks and shops are served from outside); Utafraaaia shop interior.
+- Matatu and bus riding is untested on real devices; check vehicle draw calls and Kibera triangle counts on a phone (`?benchmark`).
+- Boda bodas, washing lines in Kibera alleys, more stalls clutter.
+
 ## Session 4: owner feedback "this looks so lame", so we switched to a vertical slice
 Owner screenshot: the avenue in an empty beige plain with a capsule player.
 

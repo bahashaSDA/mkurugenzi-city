@@ -24,6 +24,7 @@ export const TEXTURES = {
   LeafSet022: 'green leaf atlas with opacity (second species)',
   Bark007: 'light rough bark (street trees)',
   Foliage003: 'grass/weed atlas with opacity (roadside weeds)',
+  Rock030: 'grey cliff rock: Rocky Ridge ground and boulders (owner ref: grey cracked rocky ground)',
 };
 
 const RES = process.env.TEX_RES ?? '1K';

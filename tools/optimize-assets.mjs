@@ -108,8 +108,8 @@ for (const f of files) {
     prune(),
     weld(),
     instance({ min: 3 }),
-    // Pedestrians: seam-preserving simplification (meshoptimizer) to crowd budget (~28%)
-    ...(f.startsWith('npc_') ? [simplify({ simplifier: MeshoptSimplifier, ratio: 0.28, error: 0.004 })] : []),
+    // Pedestrians: seam-preserving simplification (meshoptimizer) to crowd budget (~25%)
+    ...(f.startsWith('npc_') ? [simplify({ simplifier: MeshoptSimplifier, ratio: 0.25, error: 0.004 })] : []),
     resample(), // drop redundant animation keys (baked clips are sampled every frame)
     // Normal maps at half resolution: UASTC is ~1 byte/px, and SPEC 5.1 texel density for
     // background assets (256 px/m on 2 m tiles) is 512 px. Roughness/metal are low-frequency

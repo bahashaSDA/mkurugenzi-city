@@ -1,3 +1,4 @@
+import { heightAt } from '../world/heights';
 // World layout (SPEC section 6). Metres; (0,0) = spawn; -Z = north.
 export const WORLD_SIZE = 1600;
 export const WORLD_HALF = WORLD_SIZE / 2;
@@ -26,7 +27,7 @@ export const DISTRICTS: DistrictDef[] = [
 function spawnFromUrl(): [number, number, number] {
   const raw = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('spawn') : null;
   const parts = raw?.split(',').map(Number);
-  if (parts && parts.length === 2 && parts.every(Number.isFinite)) return [parts[0]!, 2, parts[1]!];
+  if (parts && parts.length === 2 && parts.every(Number.isFinite)) return [parts[0]!, heightAt(parts[0]!, parts[1]!) + 2, parts[1]!]; // on the terrain (Kibera is a hill)
   return [7.6, 2, 30]; // west pavement of the avenue, looking north up the shopping street
 }
 

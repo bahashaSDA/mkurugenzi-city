@@ -38,6 +38,9 @@ NPC_DRESS = {
     # secondary-school uniform: bottle-green top, grey skirt
     "student": lambda: recolour_outfit("female_elegantsuit01", (0.02, 0.12, 0.05), (0.15, 0.15, 0.16),
                                        "uniform_sweater", "uniform_grey"),
+    # matatu conductor (owner photo): the regulation maroon shirt and maroon trousers
+    "conductor": lambda: recolour_outfit("male_casualsuit01", (0.22, 0.03, 0.06), (0.16, 0.025, 0.045),
+                                         "conductor_shirt", "conductor_trousers"),
     # boda boda rider: hi-vis reflective vest over his clothes
     "hustler": lambda: hi_vis_vest("male_casualsuit05"),
 }
@@ -119,9 +122,11 @@ CHARACTERS = {
     "abel": human("abel", gender=1.0, years=38, weight=0.6, muscle=0.55, height=0.55,
                   skin="middleage_african_male", hair="short01", eyebrows="eyebrow002",
                   clothes=("male_elegantsuit01", "shoes03"),
-                  targets=(("head-round", 0.45), ("head-fat-incr", 0.25), ("l-cheek-volume-incr", 0.35),
-                           ("r-cheek-volume-incr", 0.35), ("mouth-angles-up", 0.35), ("mouth-scale-horiz-incr", 0.25),
-                           ("mouth-lowerlip-volume-incr", 0.3))),
+                  # his face (ref photo): broad and round, full cheeks, wide jaw, short neck
+                  targets=(("head-round", 0.7), ("head-scale-horiz-incr", 0.45), ("head-fat-incr", 0.35),
+                           ("l-cheek-volume-incr", 0.5), ("r-cheek-volume-incr", 0.5), ("chin-width-incr", 0.5),
+                           ("head-scale-vert-decr", 0.2), ("neck-scale-horiz-incr", 0.4),
+                           ("mouth-scale-horiz-incr", 0.3), ("mouth-lowerlip-volume-incr", 0.3))),
     # Street pedestrians: varied ages, builds, hair and clothing (VISUAL_OVERHAUL 19: no clones).
     "mama_mboga": human("mama_mboga", gender=0.0, years=45, weight=0.7, muscle=0.45, height=0.42,
                         skin="middleage_african_female", hair="braid01", clothes=("female_elegantsuit01", "shoes05")),
@@ -137,6 +142,8 @@ CHARACTERS = {
                          skin="young_african_female", hair="afro01", clothes=("female_sportsuit01", "shoes04")),
     "worker": human("worker", gender=1.0, years=30, weight=0.55, muscle=0.62, height=0.5,
                     skin="young_african_male", hair="short02", clothes=("male_worksuit01", "shoes01")),
+    "conductor": human("conductor", gender=1.0, years=27, weight=0.42, muscle=0.55, height=0.55,
+                       skin="young_african_male", hair="short04", clothes=("male_casualsuit01", "shoes01")),
     "auntie": human("auntie", gender=0.0, years=55, weight=0.62, muscle=0.42, height=0.45,
                     skin="old_african_female", hair="bob02", clothes=("female_elegantsuit01", "shoes05")),
 }

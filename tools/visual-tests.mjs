@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Visual regression screenshots from fixed cameras (VISUAL_OVERHAUL_SPEC section 58).
 //   npm run build && npx vite preview --port 4173      (other terminal)
-//   node tools/visual-tests.mjs <version-label>          -> research/visual-tests/<label>/*.png
+//   node tools/visual-tests.mjs <version-label> [name-regex]        -> research/visual-tests/<label>/*.png
 // Headless software GL: images are for look comparison only, not performance.
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
@@ -20,10 +20,19 @@ const SHOTS = {
   character_closeup: '8.5,1.55,32.4,7.6,1.2,30',
   street_spawn_view: '7.6,2.4,34.5,9,2.0,0',
   street_from_road: '14,1.7,40,14,2.5,-30',
+  market_aisle: '-44,1.7,40,-44,1.4,70&spawn=-44,46',
+  market_wide: '-10,14,30,-45,0,65&spawn=-40,60',
+  matatu_stage: '28,3,142,14,1.5,124',
+  kibera_rooftops: '-175,26,40,-300,8,-20&spawn=-230,15',
+  kibera_lane: '-200,9,14,-240,6,10&spawn=-215,12',
+  rocky_ridge: '170,22,430,300,8,440',
+  expressway: '40,8,-280,10,1,-340',
 };
+const only = process.argv[3] ? new RegExp(process.argv[3]) : null;
 
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 for (const [name, cam] of Object.entries(SHOTS)) {
+  if (only && !only.test(name)) continue;
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.log(name, 'pageerror', e.message));
   await page.goto(`http://localhost:4173/?tier=high&cam=${cam}`);

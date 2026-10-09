@@ -7,17 +7,20 @@ import { Environment } from '../world/Environment';
 import { StreamedCell, WorldStreamer } from '../world/streaming';
 import { TEST_COURSE, TestMap } from '../districts/testmap/TestMap';
 import { Terrain } from '../world/Terrain';
-import { Avenue } from '../world/Roads';
+import { RoadNetwork } from '../world/Roads';
 import { PostFX } from '../world/PostFX';
 import { SpawnLetters } from '../districts/hub/SpawnLetters';
 import { Hub } from '../districts/hub/Hub';
 import { Pedestrians } from '../systems/npc/Pedestrians';
+import { Vehicles } from '../systems/vehicles/Vehicles';
 import { Player } from '../systems/player/Player';
 import { attachInput } from '../systems/input';
 import { PerfMonitor, PerfOverlay, perfStats } from '../perf/PerfMonitor';
 import { playerPosition } from '../systems/player/playerState';
 import { Benchmark, benchmark, type BenchmarkResult } from '../perf/Benchmark';
 import { Hud } from '../ui/Hud';
+import { GameUI } from '../ui/GameUI';
+import { GameLogic } from '../game/GameLogic';
 import { isAvailable, loadContent } from '../content/episodes';
 import { TouchControls } from '../ui/TouchControls';
 
@@ -70,7 +73,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
           <Environment />
           <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60} paused={phase !== 'playing'}>
             <Terrain />
-            <Avenue />
+            <RoadNetwork />
             {TEST_COURSE && <TestMap />}
             <Hub render={!minimal} />
             {/* The letters sit in the spawn cell; they unmount when it streams out. */}
@@ -86,8 +89,14 @@ export default function Game({ onReady }: { onReady: () => void }) {
                 <Pedestrians />
               </Suspense>
             )}
+            {!minimal && (
+              <Suspense fallback={null}>
+                <Vehicles />
+              </Suspense>
+            )}
           </Physics>
           <WorldStreamer />
+          <GameLogic />
           <PerfMonitor />
           <PostFX />
           {benchmark.enabled && phase === 'playing' && !bench && <Benchmark onDone={setBench} />}
@@ -96,6 +105,7 @@ export default function Game({ onReady }: { onReady: () => void }) {
         </Suspense>
       </Canvas>
       {phase === 'playing' && <Hud />}
+      {phase === 'playing' && <GameUI />}
       {phase === 'playing' && isTouch && <TouchControls />}
       {showPerf && <PerfOverlay />}
       {bench && (
