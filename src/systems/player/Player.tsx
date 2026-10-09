@@ -9,6 +9,7 @@ import { SPAWN } from '../../config/world';
 import { playerPosition } from './playerState';
 import { AbelModel, playerAnim } from './AbelModel';
 import { ride, rideWorld, vehicleColliders } from '../vehicles/state';
+import { drive } from '../driving/state';
 import { benchmark } from '../../perf/Benchmark';
 
 // Tuning (SPEC 8.1). Relaxed exploration speeds, no stamina.
@@ -148,12 +149,30 @@ export function Player() {
       s.vy = 0;
       playerAnim.speed = 0;
       playerAnim.grounded = true;
+    } else if (drive.active) {
+      // driving: Abel sits at the wheel; his capsule is switched off so it can't shove the car
+      // no collision groups at all (membership 0): it can't shove the car it sits in
+      if (col.collisionGroups() !== 0) {
+        col.setCollisionGroups(0);
+        col.setSolverGroups(0);
+      }
+      const by = drive.seat.y + CAPSULE_HALF + CAPSULE_R + 0.02;
+      rb.setNextKinematicTranslation({ x: drive.seat.x, y: by, z: drive.seat.z });
+      playerPosition.set(drive.seat.x, by, drive.seat.z);
+      s.facing = drive.heading;
+      s.vy = 0;
+    } else if (drive.justExited) {
+      drive.justExited = false;
+      col.setCollisionGroups(0xffffffff);
+      col.setSolverGroups(0xffffffff);
+      rb.setNextKinematicTranslation({ x: drive.exit.x, y: drive.exit.y + 0.3, z: drive.exit.z });
+      playerPosition.copy(drive.exit);
     } else if (ride.justAlighted) {
       ride.justAlighted = false;
       rb.setNextKinematicTranslation({ x: ride.exit.x, y: ride.exit.y + 0.3, z: ride.exit.z });
       playerPosition.copy(ride.exit);
     }
-    const riding = ride.vehicle >= 0;
+    const riding = ride.vehicle >= 0 || drive.active;
     if (riding) _move.set(0, 0, 0);
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = riding ? _zero : controller.computedMovement();
@@ -190,7 +209,13 @@ export function Player() {
       return;
     }
     const now = performance.now();
-    if (s.eating && cameraMode === 'third') {
+    if (drive.active && cameraMode === 'third' && now - input.lastLookTime > 1200) {
+      // chase cam: swing in behind the car (faster at speed)
+      let d = drive.heading + Math.PI - s.yaw;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      s.yaw += d * Math.min(1, dt * (1.5 + Math.abs(drive.speed) * 0.12));
+      s.pitch = THREE.MathUtils.damp(s.pitch, 0.18, 2, dt);
+    } else if (s.eating && cameraMode === 'third') {
       // three-quarter front view at head height
       let d = s.facing + 0.65 - s.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
@@ -213,11 +238,12 @@ export function Player() {
     }
 
     // Pull out when sprinting on open ground, in when near walls (handled by collision cast).
-    const wantDist = riding ? 7.5 : s.eating ? 2.1 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
+    const wantDist = drive.active ? 6.8 + Math.abs(drive.speed) * 0.05 : riding ? 7.5 : s.eating ? 2.1 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
     s.camDist = THREE.MathUtils.damp(s.camDist, wantDist, 3, dt);
 
     // Over-the-shoulder pivot
-    _target.set(nx, ny + (s.eating ? 0.55 : 0.65), nz).addScaledVector(_right, s.eating ? 0 : 0.45);
+    if (drive.active) _target.set(drive.x, drive.y + 1.9, drive.z);
+    else _target.set(nx, ny + (s.eating ? 0.55 : 0.65), nz).addScaledVector(_right, s.eating ? 0 : 0.45);
     _dir.set(
       Math.sin(s.yaw) * Math.cos(s.pitch),
       Math.sin(s.pitch),
@@ -227,7 +253,7 @@ export function Player() {
     // Camera collision: cast from the pivot toward the desired camera position.
     let dist = s.camDist;
     const hit = world.castRay(camRay, s.camDist, true, undefined, undefined, col, rb,
-      riding ? (c) => !vehicleColliders.has(c.handle) : undefined);
+      riding ? (c) => !vehicleColliders.has(c.handle) && c.parent()?.handle !== drive.bodyHandle : undefined);
     if (hit) dist = Math.max(0.6, hit.timeOfImpact - 0.25);
 
     _camPos.copy(_target).addScaledVector(_dir, dist);

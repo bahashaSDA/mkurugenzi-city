@@ -157,10 +157,10 @@ export function KitInstances({ kit, placements, render = true }: { kit: Kit; pla
     <>
       <group ref={group} />
       <RigidBody type="fixed" colliders={false}>
-        {placements.flatMap((p, i) =>
+        {placements.flatMap((p) =>
           (kit.get(p.piece)?.colliders ?? []).map((col, j) => {
             const rot: [number, number, number] = [0, p.rotY, 0];
-            const key = `${i}.${j}`;
+            const key = `${p.piece}@${p.x.toFixed(2)},${p.z.toFixed(2)}.${j}`; // stable when placements are added/removed (parked cars)
             const k = p.scale ?? 1;
             if (col.kind === 'hull') {
               return <ConvexHullCollider key={key} args={[scaledHull(col.points, k)]} position={[p.x, p.y ?? 0, p.z]} rotation={rot} />;

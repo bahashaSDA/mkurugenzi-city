@@ -18,6 +18,7 @@ import { nearestOnRoute, routeSamples, type RouteSample } from './routes';
 import { SPECS, type VehicleKind, type VehicleSpec } from './specs';
 import { ride, vehicleColliders, vehicles, type VehicleState } from './state';
 import { Stages } from './Stages';
+import { drive } from '../driving/state';
 
 export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
 const NPC_URLS = ['mama_mboga', 'hustler', 'office', 'student', 'elder', 'young_woman', 'worker', 'auntie'].map((v) => `/models/npc_${v}.glb`);
@@ -363,7 +364,7 @@ export function Vehicles() {
 // ------------------------------------------------------------------- hailing
 /** Abel waves at the roadside: the nearest matatu/bus coming along a road beside him pulls over. */
 export function hail() {
-  if (ride.vehicle >= 0) return;
+  if (ride.vehicle >= 0 || drive.active) return; // H is the horn while driving
   playerAnim.action = 'Interact';
   playerAnim.actionUntil = performance.now() + 1400;
   const routes = routeSamples();

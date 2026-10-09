@@ -143,3 +143,25 @@ button, select { font: inherit; }
 .video-panel { width: min(900px, calc(100vw - 32px)); }
 .video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 8px; overflow: hidden; }
 .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.speedo {
+  position: absolute;
+  right: 24px;
+  bottom: 28px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(10, 10, 12, 0.6);
+  color: #fff;
+  font-family: 'Bebas Neue', 'Oswald', sans-serif;
+}
+.speedo b {
+  font-size: 44px;
+  line-height: 1;
+}
+.speedo small {
+  font-size: 16px;
+  opacity: 0.8;
+}

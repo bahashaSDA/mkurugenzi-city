@@ -3,6 +3,8 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { ride, vehicles } from '../systems/vehicles/state';
+import { Driving } from '../systems/driving/Driving';
+import { drive, useParking } from '../systems/driving/state';
 import { usePrompt } from '../game/interactables';
 import { useEconomy } from '../game/economy';
 import { useGame } from './store';
@@ -34,7 +36,7 @@ const showPerf = import.meta.env.DEV || params.has('perf');
 const minimal = params.has('minimal');
 if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
-  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy };
+  (window as unknown as { __mk: object }).__mk = { playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking };
 }
 
 /** ?debug: expose the live scene/renderer for profiling from tests and the console. */
@@ -97,6 +99,9 @@ export default function Game({ onReady }: { onReady: () => void }) {
                 <Vehicles />
               </Suspense>
             )}
+            <Suspense fallback={null}>
+              <Driving />
+            </Suspense>
           </Physics>
           <WorldStreamer />
           <GameLogic />

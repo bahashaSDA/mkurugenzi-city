@@ -4,6 +4,7 @@ import { useEconomy } from '../game/economy';
 import { usePrompt } from '../game/interactables';
 import { inputLock, onKeyPress, pressKey } from '../systems/input';
 import { useGame } from '../app/store';
+import { drive } from '../systems/driving/state';
 
 /** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
@@ -51,6 +52,7 @@ export function GameUI() {
       </div>
 
       {area && <div className="area-name">{area}</div>}
+      <Speedo />
 
       {prompt && !shop && (
         <button className="prompt" onClick={() => pressKey(prompt.key ?? 'KeyE')}>
@@ -159,6 +161,22 @@ export function GameUI() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** km/h readout while driving (polled: the physics writes `drive` every frame). */
+function Speedo() {
+  const [kmh, setKmh] = useState<number | null>(null);
+  useEffect(() => {
+    const id = setInterval(() => setKmh(drive.active ? Math.round(Math.abs(drive.speed) * 3.6) : null), 150);
+    return () => clearInterval(id);
+  }, []);
+  if (kmh === null) return null;
+  return (
+    <div className="speedo">
+      <b>{kmh}</b>
+      <small>km/h</small>
     </div>
   );
 }
