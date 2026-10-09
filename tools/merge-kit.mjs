@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Merges per-piece GLBs (blender/cache/real/*.glb from build_real_kit.py) into one kit GLB with a
 // single scene, so useKit() sees every <piece>_LOD0/1/2 node.
-//   node tools/merge-kit.mjs <out.glb> <glob-prefix> [dir=blender/cache/real]
+//   node tools/merge-kit.mjs <out.glb> <prefix[,prefix...]> [dir=blender/cache/real]
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { NodeIO } from '@gltf-transform/core';
@@ -10,7 +10,8 @@ import { mergeDocuments, unpartition, dedup, prune } from '@gltf-transform/funct
 
 const [out, prefix = 'rv_', dir = 'blender/cache/real'] = process.argv.slice(2);
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
-const files = readdirSync(dir).filter((f) => f.startsWith(prefix) && f.endsWith('.glb')).sort();
+const prefixes = prefix.split(','); // several prefixes: rv_hiace,rv_ma3,...
+const files = readdirSync(dir).filter((f) => prefixes.some((p) => f.startsWith(p)) && f.endsWith('.glb')).sort();
 if (!files.length) throw new Error(`no ${prefix}*.glb in ${dir}`);
 const doc = await io.read(path.join(dir, files[0]));
 const root = doc.getRoot();

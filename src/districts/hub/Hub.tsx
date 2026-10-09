@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { KitInstances } from '../../world/kit/KitInstances';
+import { KitInstances, type Placement } from '../../world/kit/KitInstances';
 import { useGame } from '../../app/store';
 import { useKit, wind } from '../../world/kit/useKit';
 import { KiberaDrains } from '../kibera/Drains';
@@ -17,6 +17,17 @@ export const MARKET_KIT_URL = '/models/market_kit.glb';
 export const KIBERA_KIT_URL = '/models/kibera_kit.glb';
 export const ROCKS_KIT_URL = '/models/rocks_kit.glb';
 export const TOWN_KIT_URL = '/models/town_kit.glb';
+/** Real buildings from Sketchfab (blender/scripts/build_real_kit.py --kit buildings); streams after the splash. */
+export const REAL_BUILDINGS_KIT_URL = '/models/real_buildings_kit.glb';
+/** Real trees (acacia, jacaranda, palms) with alpha-tested, wind-swayed leaf cards. */
+export const REAL_TREES_KIT_URL = '/models/real_trees_kit.glb';
+
+function RealKit({ url, placements, render }: { url: string; placements: Placement[]; render: boolean }) {
+  const kit = useKit(url);
+  const tier = useGame((st) => st.tier);
+  const list = useMemo(() => placements.filter((p) => kit.has(p.piece)), [placements, kit]);
+  return <KitInstances kit={kit} placements={list} render={render} reach={tier === 'low' ? 1.5 : 3} />;
+}
 
 /** Kibera video halls: E to watch a random recent episode of Abel's (live list, removed videos skipped). */
 function hallInteractables(): Interactable[] {
@@ -108,6 +119,12 @@ export function Hub({ render = true }: { render?: boolean }) {
       <KitInstances kit={rocksKit} placements={rockPlacements} render={render} />
       {/* outer towns: tall buildings stay visible on the skyline from across the map */}
       <KitInstances kit={townKit} placements={townPlacements} render={render} reach={tier === 'low' ? 1.5 : 3} />
+      <Suspense fallback={null}>
+        <RealKit url={REAL_BUILDINGS_KIT_URL} placements={placements} render={render} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <RealKit url={REAL_TREES_KIT_URL} placements={placements} render={render} />
+      </Suspense>
       {render && <Cables placements={placements} lines={KIBERA_POLE_LINES} />}
       {render && <KiberaDrains />}
       {render && <WindClock />}

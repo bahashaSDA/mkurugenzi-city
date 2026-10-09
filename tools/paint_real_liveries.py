@@ -139,7 +139,24 @@ def matatu(idx):
     im.save(os.path.join(OUT, f"rliv_matatu_{idx}.png"))
 
 
+def bus(idx):
+    """A Sacco city bus: two-tone body, a sweep, the operator name (fictional) and the route."""
+    top, low, sweep, name = [((236, 236, 230), (176, 20, 30), (250, 198, 20), "MKURUGENZI SACCO"),
+                             ((236, 236, 230), (20, 70, 160), (60, 190, 230), "WAKURUGENZI LINE")][idx]
+    im = vgrad(top, top)
+    d = ImageDraw.Draw(im)
+    d.rectangle([0, int(H * 0.55), W, H], fill=low)
+    d.polygon([(0, int(H * 0.55)), (W * 0.55, int(H * 0.55)), (W * 0.8, int(H * 0.38)), (W, int(H * 0.38)), (W, int(H * 0.45)), (W * 0.82, int(H * 0.45)), (W * 0.58, int(H * 0.62)), (0, int(H * 0.62))], fill=sweep)
+    d.text((W * 0.5, H * 0.75), name, font=font("Anton-Regular.ttf", 120), fill=(255, 255, 255), anchor="mm")
+    d.text((W * 0.5, H * 0.9), "ROUTE 33  ·  STAGE  -  CBD  -  EXPRESSWAY", font=font("BebasNeue-Regular.ttf", 58), fill=(255, 240, 200), anchor="mm")
+    im = gloss(im)
+    im = dust(im, 0.3)
+    im.save(os.path.join(OUT, f"rliv_bus_{idx}.png"))
+
+
 for i in range(3):
     nganya(i)
     matatu(i)
+for i in range(2):
+    bus(i)
 print("[liveries] written to", OUT)

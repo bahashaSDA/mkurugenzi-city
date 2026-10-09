@@ -101,7 +101,9 @@ function prepareMaterial(m: THREE.Material) {
   if (!m.name.includes('_alpha')) return;
   // Alpha-tested foliage: no sorting, writes depth, casts cut-out shadows.
   m.transparent = false;
-  m.alphaTest = 0.5;
+  // real (Sketchfab) trees have fine leaflets: their mipmapped alpha averages low, so cut lower or
+  // whole crowns vanish at distance (acacia)
+  m.alphaTest = m.name.startsWith('foliage_rt_') ? 0.22 : 0.5;
   m.side = THREE.DoubleSide;
   m.depthWrite = true;
   if (!m.name.startsWith('foliage')) return;

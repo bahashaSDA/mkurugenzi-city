@@ -29,7 +29,8 @@ const budgetFor = (name) => {
   if (name.startsWith('npc_fan_')) return { bytes: 0.65 * MB, tex: 1024 }; // merch prints (botanical) compress less
   if (name.startsWith('npc_')) return { bytes: 0.6 * MB, tex: 1024 };
   // real Sketchfab vehicles stream in after the splash (own Suspense boundary), shared by every vehicle
-  if (name.startsWith('real_')) return { bytes: 6 * MB, tex: 1024 };
+  if (name.startsWith('real_buildings')) return { bytes: 11 * MB, tex: 2048 }; // big facades need the pixels (streams after the splash)
+  if (name.startsWith('real_')) return { bytes: 6.5 * MB, tex: 1024 };
   return { bytes: 4 * MB, tex: 1024 }; // district chunks and kits
 };
 

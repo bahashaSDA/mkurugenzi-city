@@ -328,3 +328,11 @@ button, select { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .sp-ch, .sp-city, .sp-word, .sp-grain { animation: none !important; transform: none !important; opacity: 1 !important; }
 }
+
+/* ---------- Credits (CC BY attribution) ---------- */
+.credits-panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(720px, 92vw); max-height: 80vh; overflow: auto;
+  background: rgba(12, 12, 14, 0.94); color: #eee; padding: 18px 22px; border-radius: 10px; pointer-events: auto; font: 13px/1.5 var(--sans); z-index: 50; }
+.credits-panel h2 { margin: 0 0 6px; font: 400 30px/1 var(--display); color: #ffc72c; }
+.credits-panel ul { padding-left: 18px; margin: 8px 0; }
+.credits-panel a { color: #7fc8ff; }
+.credits-panel button { margin-top: 6px; }

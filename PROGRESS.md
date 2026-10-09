@@ -1,6 +1,24 @@
 # PROGRESS
 
-_Last updated: 2026-10-09 (session 8)_
+_Last updated: 2026-10-09 (session 9)_
+
+## Session 9: the Sketchfab library (owner supplied the API token)
+- Token stored in `.env.local` (gitignored). `tools/sketchfab-fetch.mjs` fetched 27 curated CC BY models (licence
+  re-checked per model; credits in `sketchfab/CREDITS.md`, ASSETS.md and the in-game **Credits** panel).
+- `build_real_kit.py` grew: auto paint-material detection, livery coverage control, texture fixes (the Hiace's
+  Japanese shop lettering painted out in a cleaned copy), face-winding recalculation, ground-slab dropping,
+  height scaling (buildings), a tree pipeline (leaf cards keep alpha as `foliage_*_alpha`, wind sway, far LODs
+  thin cards, no morph targets), and `merge-kit.mjs` takes several prefixes.
+- Vehicles now: Isuzu nganyas, Kenyan Ma3 minibus, VW Crafter + Toyota Hiace + graffiti matatus, two Sacco buses
+  (repainted city bus), Golf, Corolla, Land Cruiser; bodas parked at every stage. Kits: `real_vehicles_kit.glb`
+  6.1 MB + `real_vehicles2_kit.glb` 5.6 MB (stream after the splash).
+- Buildings (`real_buildings_kit.glb`, 10.2 MB, 2K atlases): CBD towers (Co-op House, three glass offices) on the
+  CBD avenue, apartment blocks and walk-up flats on the cross streets and in Phil-It / Freddie's towns, small
+  mabati shops; flats and shops are enterable.
+- Trees (`real_trees_kit.glb`, 5.5 MB): jacarandas in bloom on town streets, ~260 acacias over the savanna and
+  the Storyteller's Fire hills, coconut and date palms on the beach (replacing the procedural palms).
+- Rejected after review: Toyota Probox (broken source mesh), "Kenyan Bus/nganya" (too crude), the pickup (it was an
+  armed "technical": no weapons), the petrol station (fell apart), red-brick NY block (not Nairobi).
 
 ## Session 8: realism, the coast, 200 missions, the Grand Theatre, fights (owner feedback round 3)
 Owner asked: real (not cartoon) cars and buildings from Sketchfab; health and GTA swimming; a sea after the

@@ -49,19 +49,37 @@ MODELS = {
         "rv_car": dict(file="volkswagen_golf_gti_2025", length=4.28, tris=18000, atlas=2048, forward="+y", paint=r"rojo", clearcoat=r"rojo|material_atlas", weld=False,
                        strip=r"airbag|lighter_dark_grey|carpet|roofliner|brake_rotor",
                        variants=[(0.5, 0.01, 0.01), (0.8, 0.8, 0.8), (0.12, 0.13, 0.15), (0.02, 0.06, 0.25)]),
-        "rv_hiace": dict(file="toyota_hiace_2005", length=5.38, tris=14000, atlas=2048, forward="-y",
-                         variants=[(0.85, 0.85, 0.84), (0.85, 0.85, 0.84)]),
-        "rv_ma3": dict(file="tulaga_ma3_minibus", length=7.6, tris=24000, atlas=2048, forward="-y", variants=None),
-        "rv_bus": dict(file="stagecoach_bus_kenya", length=10.5, tris=26000, atlas=2048, forward="-y", variants=None),
-        "rv_probox": dict(file="toyota_probox", length=4.2, tris=14000, atlas=2048, forward="-y",
+        "rv_hiace": dict(file="toyota_hiace_2005_clean", length=5.38, tris=16000, atlas=2048, forward="+y", paint="auto", livery_nx=0.4,
+                         variants=[None, None, None], liveries=["rliv_matatu_0", "rliv_matatu_1", "rliv_matatu_2"]),
+        "rv_ma3": dict(file="tulaga_ma3_minibus", length=7.4, tris=26000, atlas=2048, forward="-y", variants=None),
+        "rv_bus": dict(file="stagecoach_bus_kenya", length=10.5, tris=26000, atlas=2048, forward="-y", paint="auto",
+                       variants=[None, None], liveries=["rliv_bus_0", "rliv_bus_1"]),
+        "rv_probox": dict(file="toyota_probox", length=4.2, tris=16000, atlas=2048, forward="-y", paint=r"^body1$", recalc=True,
                           variants=[(0.8, 0.8, 0.8), (0.55, 0.56, 0.58), (0.8, 0.8, 0.8)]),
-        "rv_corolla": dict(file="toyota_corolla_e180", length=4.62, tris=16000, atlas=2048, forward="-y",
+        "rv_corolla": dict(file="toyota_corolla_e180", length=4.62, tris=18000, atlas=2048, forward="-y", paint=r"main_paint", weld=False,
                            variants=[(0.55, 0.56, 0.58), (0.02, 0.02, 0.025), (0.8, 0.8, 0.8)]),
-        "rv_cruiser": dict(file="toyota_land_cruiser", length=4.95, tris=18000, atlas=2048, forward="-y",
-                           variants=[(0.8, 0.8, 0.8), (0.02, 0.02, 0.025)]),
-        "rv_pickup": dict(file="toyota_pickup", length=5.3, tris=12000, atlas=2048, forward="-y",
-                          variants=[(0.8, 0.8, 0.8), (0.3, 0.02, 0.02)]),
-        "rv_boda": dict(file="motorcycle_boda", length=2.0, tris=6000, atlas=1024, forward="-y", variants=None),
+        "rv_cruiser": dict(file="toyota_land_cruiser", length=4.2, tris=18000, atlas=2048, forward="-y", paint="auto",
+                           variants=[(0.8, 0.8, 0.8), (0.12, 0.2, 0.1), (0.5, 0.05, 0.03)]),
+        "rv_graffiti": dict(file="graffiti_safari_matatu", length=5.1, tris=40000, weld=False, planar=False, atlas=2048, forward="+y", variants=None),
+        "rv_boda": dict(file="motorcycle_boda", length=2.0, tris=6000, atlas=1024, forward="-x", variants=None),
+    },
+    # trees: leaf cards keep their alpha textures (renamed foliage_*_alpha: alpha-test + wind in the
+    # game), bark is decimated, far LODs thin the leaf cards instead of collapsing them
+    "trees": {
+        "rt_acacia": dict(file="acacia", height=8.5, bark_tris=4000, keep=(1.0, 0.5, 0.22)),
+        "rt_jacaranda": dict(file="jacaranda", height=9.5, bark_tris=3000, keep=(0.6, 0.3, 0.12)),
+        "rt_coconut": dict(file="coconut_palm", height=11.0, bark_tris=2000, keep=(1.0, 0.6, 0.35)),
+        "rt_palm": dict(file="palm_realistic", height=10.5, bark_tris=2000, keep=(0.7, 0.35, 0.18)),
+    },
+    # buildings: scaled to a real height, sat on the ground (slabs dropped), boxes from the bounds
+    "buildings": {
+        "rb_flats": dict(file="apartment_block_8k", height=27, tris=24000, atlas=4096, forward="-x", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_residential": dict(file="old_residential_building", height=21, tris=40000, weld=False, planar=False, atlas=4096, forward="+y", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_shop": dict(file="old_shop_building", height=4.6, tris=14000, atlas=2048, forward="-y", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_coop": dict(file="coop_house_kenya", height=72, tris=26000, atlas=4096, forward="-y", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_office_a": dict(file="office_corporate", height=96, tris=24000, atlas=4096, forward="-y", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_office_b": dict(file="office_skyscraper", height=80, tris=24000, atlas=4096, forward="-y", variants=None, drop_ground=True, col_lift=0, strip=None),
+        "rb_tower": dict(file="skyscraper_glass", height=150, tris=20000, atlas=4096, forward="-y", variants=None, drop_ground=True, col_lift=0, strip=None),
     },
 }
 
@@ -140,7 +158,7 @@ def reduce_parts(meshes, target, exterior=PAINT, weld=True):
     log(f"  per-part reduce {total} -> ~{int(target)} tris over {len(meshes)} parts")
 
 
-def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True):
+def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True, texfix=None, recalc=False):
     """Import a GLB, bake every transform into the mesh data, join into one object."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
@@ -159,6 +177,26 @@ def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True)
             o.data = o.data.copy()
         o.data.transform(o.matrix_world)
         o.matrix_world = Matrix.Identity(4)
+    # texture fixes: replace a source image (e.g. paint out real-world lettering) before baking
+    for img_name, fix in (texfix or {}).items():
+        img = bpy.data.images.get(img_name)
+        if img:
+            # the source image is packed in the GLB: point every texture node at the fixed copy
+            new = bpy.data.images.load(os.path.join(CACHE, "texfix", fix), check_existing=True)
+            for m in bpy.data.materials:
+                if m.use_nodes:
+                    for n in m.node_tree.nodes:
+                        if n.type == "TEX_IMAGE" and n.image == img:
+                            n.image = new
+            log(f"  texture {img_name} <- {fix}")
+    if recalc:
+        # inconsistent face winding in the source: make every part's faces point outward
+        for o in meshes:
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+            bm.to_mesh(o.data)
+            bm.free()
     if strip:
         keep = strip_parts(meshes, strip)
         for o in meshes:
@@ -189,6 +227,23 @@ def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True)
     return ob
 
 
+def drop_ground(ob):
+    """Buildings often ship on a ground slab or a lawn disc: delete the big flat faces at the very
+    bottom (the world has its own ground), so the footprint and collider fit the building."""
+    zs = [v.co.z for v in ob.data.vertices]
+    z0, z1 = min(zs), max(zs)
+    eps = (z1 - z0) * 0.02
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    dead = [f for f in bm.faces if all(v.co.z < z0 + eps for v in f.verts) and abs(f.normal.z) > 0.9]
+    bmesh.ops.delete(bm, geom=dead, context="FACES")
+    loose = [v for v in bm.verts if not v.link_faces]
+    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bm.to_mesh(ob.data)
+    bm.free()
+    log(f"  dropped {len(dead)} ground faces")
+
+
 def normalise(ob, cfg):
     """Forward -> -Y, scale to real length, centred on X/Y, wheels on z = 0."""
     rot = {"-y": 0.0, "+y": math.pi, "-x": -math.pi / 2, "+x": math.pi / 2}[cfg["forward"]]
@@ -197,7 +252,7 @@ def normalise(ob, cfg):
     xs = [v.co.x for v in ob.data.vertices]
     ys = [v.co.y for v in ob.data.vertices]
     zs = [v.co.z for v in ob.data.vertices]
-    k = cfg["length"] / (max(ys) - min(ys))
+    k = cfg["height"] / (max(zs) - min(zs)) if "height" in cfg else cfg["length"] / (max(ys) - min(ys))
     c = Vector(((max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, min(zs)))
     ob.data.transform(Matrix.Scale(k, 4) @ Matrix.Translation(-c))
     ob.data.update()
@@ -284,6 +339,25 @@ def atlas_uv(ob):
     bpy.ops.uv.pack_islands(rotate=True, margin=0.0015, shape_method="CONCAVE")
     bpy.ops.object.mode_set(mode="OBJECT")
     return uv
+
+
+def auto_paint(ob):
+    """Regex for the body-paint material: the one covering the most flank area (side-facing faces
+    between 35% and 85% of the height), for models whose material names say nothing."""
+    zs = [v.co.z for v in ob.data.vertices]
+    z0, z1 = min(zs), max(zs)
+    area = {}
+    for p in ob.data.polygons:
+        h = (p.center.z - z0) / max(1e-6, z1 - z0)
+        if abs(p.normal.x) > 0.6 and 0.35 < h < 0.85:
+            m = ob.data.materials[p.material_index]
+            if m and not re.search(GLASS, m.name, re.I):
+                area[m.name] = area.get(m.name, 0) + p.area
+    if not area:
+        return PAINT
+    name = max(area, key=area.get)
+    log(f"  auto paint material: {name}")
+    return "^" + re.escape(name) + "$"
 
 
 def paint_as_clearcoat(ob, paint):
@@ -388,7 +462,7 @@ def apply_livery(ob, image_path):
             b.inputs["Roughness"].default_value = min(b.inputs["Roughness"].default_value, 0.3)
 
 
-def livery_faces(ob, faces, image_path, mat_name):
+def livery_faces(ob, faces, image_path, mat_name, min_nx=0.62):
     """Flank faces of the paint get their own material with the side livery, planar-projected
     (sharp lettering: the shared atlas has too few pixels per metre for text)."""
     me = ob.data
@@ -415,7 +489,7 @@ def livery_faces(ob, faces, image_path, mat_name):
     for fi in faces:
         p = me.polygons[fi]
         nx = p.normal.x
-        if abs(nx) < 0.62:
+        if abs(nx) < min_nx:
             continue
         p.material_index = idx
         n += 1
@@ -584,14 +658,14 @@ def lod_copy(ob, name, ratio):
     return dup
 
 
-def box_collider(ob, base):
+def box_collider(ob, base, lift=0.25):
     xs = [v.co.x for v in ob.data.vertices]
     ys = [v.co.y for v in ob.data.vertices]
     zs = [v.co.z for v in ob.data.vertices]
     bm = bmesh.new()
     bmesh.ops.create_cube(bm, size=1.0)
     # body only: lift the box off the ground by the tyre gap so the car does not snag kerbs
-    lo = min(zs) + 0.25
+    lo = min(zs) + lift
     bmesh.ops.scale(bm, vec=(max(xs) - min(xs), max(ys) - min(ys), max(zs) - lo), verts=bm.verts)
     bmesh.ops.translate(bm, vec=((max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, (max(zs) + lo) / 2), verts=bm.verts)
     me = bpy.data.meshes.new(f"COL_{base}")
@@ -608,9 +682,14 @@ def build_piece(base, cfg, variant, rgb, store):
     path = os.path.join(SRC, cfg["file"] + ".glb")
     reset()
     ob = import_joined(path, cfg["tris"] if cfg.get("per_part", True) else None, cfg.get("strip", r"airbag"),
-                       cfg.get("clearcoat", cfg.get("paint", PAINT)), cfg.get("weld", True))
+                       cfg.get("clearcoat", cfg.get("paint", PAINT)) if cfg.get("paint") != "auto" else PAINT, cfg.get("weld", True),
+                       cfg.get("texfix"), cfg.get("recalc", False))
+    if cfg.get("drop_ground"):
+        drop_ground(ob)
     normalise(ob, cfg)
     paint = cfg.get("paint", PAINT)
+    if paint == "auto":
+        paint = auto_paint(ob)
     paint_as_clearcoat(ob, cfg.get("clearcoat", paint))
     if rgb:
         tint_paint(ob, rgb, paint)
@@ -630,11 +709,11 @@ def build_piece(base, cfg, variant, rgb, store):
     atlas_uv(ob)
     imgs = bake_atlas(ob, name, cfg["atlas"])
     paint_faces = [p_.index for p_ in ob.data.polygons
-                   if ob.data.materials[p_.material_index] and re.search(PAINT, ob.data.materials[p_.material_index].name, re.I)]
+                   if ob.data.materials[p_.material_index] and re.search(paint, ob.data.materials[p_.material_index].name, re.I)]
     finalize(ob, atlas_material(f"{name}_atlas", imgs))
     livs = cfg.get("liveries")
     if livs:
-        livery_faces(ob, paint_faces, os.path.join(CACHE, livs[variant] + ".png"), f"{name}_livery")
+        livery_faces(ob, paint_faces, os.path.join(CACHE, livs[variant] + ".png"), f"{name}_livery", cfg.get("livery_nx", 0.62))
     # LOD0 = body + glass under an empty; LOD1/LOD2 decimated copies
     for lod, ratio in ((0, 1.0), (1, 0.3), (2, 0.07)):
         root = bpy.data.objects.new(f"{name}_LOD{lod}", None)
@@ -647,12 +726,12 @@ def build_piece(base, cfg, variant, rgb, store):
             ob.name = f"{name}_body_L0"
             if glass:
                 glass.name = f"{name}_glass_L0"
-    box_collider(ob, name)
+    box_collider(ob, name, cfg.get("col_lift", 0.25))
     # export this variant on its own; the kit is merged by tools/merge-kit.mjs
     part = os.path.join(CACHE, f"{name}.glb")
     bpy.ops.export_scene.gltf(filepath=part, export_format="GLB", export_extras=True, export_yup=True, export_apply=True,
                               export_texcoords=True, export_normals=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=88, export_animations=False)
+                              export_image_format="JPEG", export_jpeg_quality=88, export_animations=False, export_morph=False, export_skins=False)
     store.append(part)
     if PREVIEW:
         preview(name, ob, glass)
@@ -687,6 +766,113 @@ def preview(name, ob, glass):
     sc.render.engine = "CYCLES"
 
 
+def is_leaf(m):
+    if not m or not m.use_nodes:
+        return False
+    b = m.node_tree.nodes.get("Principled BSDF")
+    return bool(b and b.inputs["Alpha"].is_linked) or m.blend_method in ("BLEND", "CLIP", "HASHED") and bool(re.search(r"leaf|leaves|branch|frond|plane|foliage|tree_2|tree_3", m.name, re.I))
+
+
+def thin_cards(ob, keep, seed=7):
+    """Delete a random share of the leaf cards (loose parts of leaf faces): a sparser far crown."""
+    if keep >= 0.999:
+        return
+    import random
+    r = random.Random(seed)
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    leaf = {i for i, m in enumerate(ob.data.materials) if m and m.name.endswith("_alpha")}
+    seen, dead = set(), []
+    bm.faces.ensure_lookup_table()
+    for f0 in bm.faces:
+        if f0.index in seen or f0.material_index not in leaf:
+            continue
+        stack, comp = [f0], []
+        seen.add(f0.index)
+        while stack:
+            f = stack.pop()
+            comp.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g.index not in seen and g.material_index in leaf:
+                        seen.add(g.index)
+                        stack.append(g)
+        if r.random() > keep:
+            dead.extend(comp)
+    bmesh.ops.delete(bm, geom=dead, context="FACES")
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
+def build_tree(base, cfg, store):
+    reset()
+    ob = import_joined(os.path.join(SRC, cfg["file"] + ".glb"), None, None)
+    cfg = dict(cfg, forward="-y")
+    normalise(ob, cfg)
+    for i, m in enumerate(ob.data.materials):
+        if not m:
+            continue
+        if is_leaf(m):
+            m.name = f"foliage_{base}_{i}_alpha"
+            m.blend_method = "CLIP"
+        else:
+            m.name = f"bark_{base}_{i}"
+    # decimate the bark only: separate it, collapse, join back
+    bpy.ops.object.select_all(action="DESELECT")
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    bark_idx = {i for i, m in enumerate(ob.data.materials) if m and not m.name.endswith("_alpha")}
+    has_bark = any(p.material_index in bark_idx for p in ob.data.polygons)
+    bpy.ops.object.mode_set(mode="EDIT" if has_bark else "OBJECT")
+    bark = []
+    if has_bark:
+        bm = bmesh.from_edit_mesh(ob.data)
+        for f in bm.faces:
+            f.select = f.material_index in bark_idx
+        bmesh.update_edit_mesh(ob.data)
+        bpy.ops.mesh.separate(type="SELECTED")
+        bpy.ops.object.mode_set(mode="OBJECT")
+        bark = [o for o in bpy.context.selected_objects if o != ob]
+    if bark:
+        decimate(bark[0], cfg["bark_tris"])
+        bpy.ops.object.select_all(action="DESELECT")
+        ob.select_set(True)
+        bark[0].select_set(True)
+        bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.join()
+    for lod, k in enumerate(cfg["keep"]):
+        dup = ob if lod == 0 else ob.copy()
+        if lod:
+            dup.data = ob.data.copy()
+            bpy.context.scene.collection.objects.link(dup)
+        thin_cards(dup, k, seed=lod + 3)
+        if lod and dup is not ob:
+            pass
+        root = bpy.data.objects.new(f"{base}_LOD{lod}", None)
+        bpy.context.scene.collection.objects.link(root)
+        dup.name = f"{base}_mesh_L{lod}"
+        dup.parent = root
+        log(f"  {base} LOD{lod}: {tris(dup)} tris")
+    # trunk collider: a thin box at the base
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.scale(bm, vec=(0.5, 0.5, 3.0), verts=bm.verts)
+    bmesh.ops.translate(bm, vec=(0, 0, 1.5), verts=bm.verts)
+    me = bpy.data.meshes.new(f"COL_{base}")
+    bm.to_mesh(me)
+    bm.free()
+    col = bpy.data.objects.new(f"COL_{base}", me)
+    col["collider"] = "box"
+    bpy.context.scene.collection.objects.link(col)
+    part = os.path.join(CACHE, f"{base}.glb")
+    bpy.ops.export_scene.gltf(filepath=part, export_format="GLB", export_extras=True, export_yup=True, export_apply=True,
+                              export_texcoords=True, export_normals=True, export_materials="EXPORT",
+                              export_image_format="AUTO", export_animations=False, export_morph=False, export_skins=False)
+    store.append(part)
+    if PREVIEW:
+        preview(base, bpy.data.objects[f"{base}_mesh_L0"], None)
+
+
 def main():
     import subprocess
     subprocess.run(["python", os.path.join(ROOT, "tools", "paint_real_liveries.py"), CACHE], check=True)
@@ -698,6 +884,9 @@ def main():
             log(f"skip {base}: sketchfab/{cfg['file']}.glb not downloaded")
             continue
         log(f"{base} <- {cfg['file']}")
+        if KIT == "trees":
+            build_tree(base, cfg, parts)
+            continue
         variants = cfg["variants"] or [None]
         for i, rgb in enumerate(variants):
             build_piece(base, cfg, i, rgb, parts)

@@ -26,16 +26,20 @@ export const CAR_DIMS: Record<string, CarDims> = {
   suv: { L: 4.8, W: 1.88, H: 1.85, r: 0.38, wb: 2.8, track: 0.8, seat: [-0.49, 0.08, 0.2], maxSpeed: 40, power: 2600 },
   hatch: { L: 3.9, W: 1.69, H: 1.5, r: 0.3, wb: 2.45, track: 0.7, seat: [-0.4, -0.06, 0.0], maxSpeed: 38, power: 1500 },
   // real hatchback (rv_car_*, sketchfab VW Golf, baked by blender/scripts/build_real_kit.py)
+  corolla: { L: 4.62, W: 1.78, H: 1.46, r: 0.32, wb: 2.7, track: 0.76, seat: [-0.38, -0.05, 0.0], maxSpeed: 44, power: 2000 },
+  cruiser: { L: 4.2, W: 1.75, H: 1.95, r: 0.4, wb: 2.3, track: 0.72, seat: [-0.4, 0.15, -0.1], maxSpeed: 36, power: 2700 },
   car: { L: 4.28, W: 1.8, H: 1.49, r: 0.33, wb: 2.63, track: 0.78, seat: [-0.38, -0.05, -0.1], maxSpeed: 46, power: 2200 },
   pickup: { L: 5.3, W: 1.85, H: 1.8, r: 0.38, wb: 3.08, track: 0.78, seat: [-0.47, 0.12, 0.45], maxSpeed: 39, power: 2600 },
 };
 
 export function carKind(piece: string) {
+  if (piece.startsWith('rv_corolla')) return 'corolla';
+  if (piece.startsWith('rv_cruiser')) return 'cruiser';
   if (piece.startsWith('rv_')) return 'car';
   return piece.split('_')[1] ?? 'saloon';
 }
 
-export const CAR_PIECES = ['rv_car_0', 'rv_car_1', 'rv_car_2', 'rv_car_3'];
+export const CAR_PIECES = ['rv_car_0', 'rv_car_1', 'rv_car_2', 'rv_car_3', 'rv_corolla_0', 'rv_corolla_1', 'rv_corolla_2', 'rv_cruiser_0', 'rv_cruiser_1', 'rv_cruiser_2'];
 
 /** Live state of the car Abel is driving (written by the physics each frame). */
 export const drive = {

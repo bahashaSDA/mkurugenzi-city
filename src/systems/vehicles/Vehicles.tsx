@@ -14,7 +14,9 @@ import { playerPosition } from '../player/playerState';
 import { playerAnim } from '../player/AbelModel';
 import { prepareCharacter, prepareClips } from '../characters';
 import { audioContext, SoundSystem } from '../audio/music';
-import { nearestOnRoute, routeSamples, type RouteSample } from './routes';
+import { nearestOnRoute, routeSamples, ROUTES, type RouteSample } from './routes';
+import { KitInstances, type Placement } from '../../world/kit/KitInstances';
+import { heightAt } from '../../world/heights';
 import { SPECS, type VehicleKind, type VehicleSpec } from './specs';
 import { ride, vehicleColliders, vehicles, type VehicleState } from './state';
 import { Stages } from './Stages';
@@ -76,6 +78,23 @@ export function Vehicles() {
   const tier = useGame((s) => s.tier);
   const kit = useVehicleKit();
   const routes = useMemo(() => routeSamples(), []);
+  // boda bodas waiting for customers at every matatu stage (two or three, angled to the kerb)
+  const bodas = useMemo<Placement[]>(() => {
+    const out: Placement[] = [];
+    const seen = new Set<string>();
+    for (const rt of ROUTES)
+      for (const st of rt.stops) {
+        const key = `${Math.round(st.x / 20)},${Math.round(st.z / 20)}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        for (let i = 0; i < 2 + (st.x % 2 === 0 ? 1 : 0); i++) {
+          const x = st.x - 9 - i * 1.3;
+          const z = st.z + 7 + i * 0.4;
+          out.push({ piece: 'rv_boda', x, z, rotY: 0.6 + i * 0.15, y: heightAt(x, z) });
+        }
+      }
+    return out;
+  }, []);
   const group = useRef<THREE.Group>(null);
   const bodies = useRef<(RapierRigidBody | null)[]>([]);
 
@@ -415,6 +434,7 @@ export function Vehicles() {
       })}
       <Crew fleet={fleet} />
       <Stages />
+      <KitInstances kit={kit} placements={bodas} reach={0.4} />
     </>
   );
 }

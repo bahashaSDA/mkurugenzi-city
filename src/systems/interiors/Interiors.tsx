@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import { useKit, type Kit } from '../../world/kit/useKit';
 import { getHubLayout } from '../../districts/hub/layout';
-import { HUB_KIT_URL, KIBERA_KIT_URL, STREET_KIT_URL, TOWN_KIT_URL } from '../../districts/hub/Hub';
+import { HUB_KIT_URL, KIBERA_KIT_URL, REAL_BUILDINGS_KIT_URL, STREET_KIT_URL, TOWN_KIT_URL } from '../../districts/hub/Hub';
 import { ROOM_W } from '../../districts/kibera/layout';
 import { heightAt } from '../../world/heights';
 import { register, type Interactable } from '../../game/interactables';
@@ -39,6 +39,9 @@ const ROOM_OF: Record<string, [RoomType, string, string?]> = {
   bld_shops_2: ['int_shop', 'the shop', 'kiosk'],
   bld_shops_3: ['int_shop', 'the shop', 'kiosk'],
   bld_shops_4: ['int_shop', 'the shop', 'kiosk'],
+  rb_flats: ['int_house', 'flat'],
+  rb_residential: ['int_house', 'flat'],
+  rb_shop: ['int_shop', 'the duka', 'kiosk'],
 };
 
 /** How far the front of a piece reaches (+Z, three.js), from its colliders. */
@@ -80,7 +83,7 @@ function buildDoors(kits: Kit[]): Door[] {
 }
 
 export function Interiors() {
-  const kits = [useKit(HUB_KIT_URL), useKit(STREET_KIT_URL), useKit(KIBERA_KIT_URL), useKit(TOWN_KIT_URL)];
+  const kits = [useKit(HUB_KIT_URL), useKit(STREET_KIT_URL), useKit(KIBERA_KIT_URL), useKit(TOWN_KIT_URL), useKit(REAL_BUILDINGS_KIT_URL)];
   const interiorKit = useKit(INTERIOR_KIT_URL);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const doors = useMemo(() => buildDoors(kits), kits);

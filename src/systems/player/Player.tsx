@@ -36,9 +36,9 @@ const RECENTER_DELAY = 2000;
 const SWIM_DEPTH = 1.25;
 const SWIM = 1.6;
 const SWIM_FAST = 2.6;
-// Falls: landing faster than this hurts (about a 5 m drop), damage per m/s beyond it
-const FALL_SAFE_VY = 12.5;
-const FALL_DAMAGE = 7;
+// Falls: dropping further than this hurts
+const FALL_SAFE_M = 4.5;
+const FALL_DAMAGE = 9; // health per metre beyond that
 
 const FIXED_CAM = (() => {
   const q = new URLSearchParams(location.search);
@@ -90,6 +90,7 @@ export function Player() {
     tilt: 0,
     wastedPhase: 0, // 0 alive, 1 lying, 2 woken at the hospital
     seated: false,
+    airTop: 0, // highest point since leaving the ground (fall damage is by height fallen, not speed)
   });
 
   const controller = useMemo<KinematicCharacterController>(() => {
@@ -293,10 +294,15 @@ export function Player() {
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = riding ? _zero : controller.computedMovement();
     s.grounded = riding || controller.computedGrounded();
-    // fall damage on a hard landing (not in water, not when teleported)
-    if (!riding && !s.swimming && s.grounded && !wasGrounded && -fallVy > FALL_SAFE_VY) {
-      useHealth.getState().damage((-fallVy - FALL_SAFE_VY) * FALL_DAMAGE, 'You fell too far');
-    }
+    // fall damage on a hard landing: by the real height fallen (a paused or teleporting frame can
+    // build up fall speed without any fall), never in water or vehicles
+    if (riding || s.swimming || s.grounded) {
+      if (!riding && !s.swimming && s.grounded && !wasGrounded) {
+        const fell = s.airTop - playerPosition.y;
+        if (fell > FALL_SAFE_M && -fallVy > 8) useHealth.getState().damage((fell - FALL_SAFE_M) * FALL_DAMAGE, 'You fell too far');
+      }
+      s.airTop = playerPosition.y;
+    } else s.airTop = Math.max(s.airTop, playerPosition.y);
     // actual ground speed (not the input): animations follow what the body really does
     playerAnim.speed = Math.hypot(m.x, m.z) / dt;
     playerAnim.grounded = s.grounded;
