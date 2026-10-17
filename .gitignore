@@ -21,3 +21,6 @@ research/owner-references/
 # Sketchfab downloads: large, and some licences forbid redistributing the raw files (only the baked kit ships)
 sketchfab/*.glb
 sketchfab/*.gltf
+
+# owner videos in the project root are never committed
+/*.mp4
