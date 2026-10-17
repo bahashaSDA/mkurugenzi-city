@@ -5,7 +5,7 @@ import { playerAnim } from '../systems/player/AbelModel';
 import { playerPosition } from '../systems/player/playerState';
 import { AREAS } from '../config/areas';
 import { useEconomy } from './economy';
-import { updateNearest, usePrompt } from './interactables';
+import { nearestFor, updateNearest, usePrompt } from './interactables';
 import { checkMission } from './missions';
 import { useHealth } from './health';
 import { useCutscene } from './cutscene';
@@ -16,6 +16,7 @@ function use(key: 'KeyE' | 'KeyF') {
   if (useEconomy.getState().shop || useCutscene.getState().active) return;
   const cur = usePrompt.getState().current;
   if (cur && (cur.key ?? 'KeyE') === key) cur.use();
+  else nearestFor(key)?.use(); // the shown prompt is for the other key: use the nearest one for this key
 }
 
 export function GameLogic() {

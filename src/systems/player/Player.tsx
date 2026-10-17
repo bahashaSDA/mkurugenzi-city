@@ -3,15 +3,21 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { CapsuleCollider, RigidBody, useRapier, type RapierRigidBody } from '@react-three/rapier';
 import type { Collider, KinematicCharacterController } from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
-import { input, inputLock, onCameraToggle, pad, pollGamepad } from '../input';
+import { input, inputLock, keyHeld, onCameraToggle, pad, pollGamepad } from '../input';
 import { useGame } from '../../app/store';
 import { SPAWN } from '../../config/world';
 import { heightAt } from '../../world/heights';
-import { playerPosition, playerView, teleport } from './playerState';
+import { diving, playerPosition, playerView, teleport } from './playerState';
+import { setUnderwater } from '../audio/mixer';
 import { AbelModel, playerAnim } from './AbelModel';
-import { ride, rideWorld, vehicleColliders } from '../vehicles/state';
-import { drive } from '../driving/state';
+import { vehicleColliders } from '../vehicles/state';
+import { bike, CAR_DIMS, carKind, drive } from '../driving/state';
+import { playerIK } from './ik';
+import { abort, beginBoarding, occ, sampleFeet, samplePath, type Key } from '../vehicles/occupancy';
+import { playSfx } from '../audio/sfx';
+import { useEconomy } from '../../game/economy';
 import { benchmark } from '../../perf/Benchmark';
+import { MAPRENDER } from '../../perf/MapRender';
 import { SEA_Y, coastWeight } from '../../config/coast';
 import { oceanTime, waveHeight } from '../../world/Ocean';
 import { useHealth } from '../../game/health';
@@ -58,11 +64,28 @@ const _fwd = new THREE.Vector3();
 const _right = new THREE.Vector3();
 const _target = new THREE.Vector3();
 const _camPos = new THREE.Vector3();
+/** ?debug: test films can pin the camera (world position + look-at). */
+export const camOverride = { on: false, x: 0, y: 0, z: 0, lx: 0, ly: 0, lz: 0 };
 const _dir = new THREE.Vector3();
 const _q = new THREE.Quaternion();
 const _up = new THREE.Vector3(0, 1, 0);
 const _ride = new THREE.Vector3();
 const _zero = { x: 0, y: 0, z: 0 };
+const _w = new THREE.Vector3();
+const _fq = new THREE.Quaternion();
+const _fp = new THREE.Vector3();
+const _fs = new THREE.Vector3();
+const _m = new THREE.Matrix4();
+const _pm = new THREE.Matrix4();
+const _vehPivot = new THREE.Vector3();
+const _seatFrom = { p: new THREE.Vector3(), yaw: 0 };
+const _ikv = new THREE.Vector3();
+
+/** Yaw of a vehicle's world matrix (its local +Z projected on the ground). */
+function frameYaw(m: THREE.Matrix4): number {
+  const e = m.elements;
+  return Math.atan2(e[8]!, e[10]!);
+}
 const _qTilt = new THREE.Quaternion();
 const _xAxis = new THREE.Vector3(1, 0, 0);
 
@@ -86,14 +109,37 @@ export function Player() {
     eating: false,
     eatFacing: 0,
     swimming: false,
+    wasUnder: false,
+    camUnder: false,
     surface: 0,
     tilt: 0,
     wastedPhase: 0, // 0 alive, 1 lying, 2 woken at the hospital
     seated: false,
     airTop: 0, // highest point since leaving the ground (fall damage is by height fallen, not speed)
+    // vehicles (systems/vehicles/occupancy)
+    apStuckAt: 0,
+    apStuckX: 0,
+    apStuckZ: 0,
+    keyIndex: -1, // last boarding/exit key reached (its sound plays once)
+    lastFrameX: 0,
+    lastFrameZ: 0,
+    vehSpeed: 0, // m/s of the vehicle Abel is in (from its rendered frame)
+    camBlend: 0, // 0 walking camera .. 1 vehicle camera
+    lastVehYaw: 0,
+    wasInVehicle: false,
+    poseX: 0, // last feet position on a boarding/exit path (animation speed)
+    poseZ: 0,
+    // the boarding / exit path being walked this frame (foot IK: one leg in, sit, the other in)
+    pathKeys: null as Key[] | null,
+    pathKey: 0,
+    pathE: 0,
+    pathYaw: 0,
   });
 
-  const controller = useMemo<KinematicCharacterController>(() => {
+  // created in the effect that removes it (React dev mounts effects twice: a controller made in
+  // useMemo was freed by the first cleanup and the game crashed on a black screen)
+  const controllerRef = useRef<KinematicCharacterController | null>(null);
+  useEffect(() => {
     const c = world.createCharacterController(0.02);
     c.setUp({ x: 0, y: 1, z: 0 });
     c.setMaxSlopeClimbAngle(MAX_SLOPE);
@@ -102,16 +148,25 @@ export function Player() {
     c.enableSnapToGround(0.3);
     c.setApplyImpulsesToDynamicBodies(true);
     c.setCharacterMass(70);
-    return c;
+    controllerRef.current = c;
+    return () => {
+      controllerRef.current = null;
+      world.removeCharacterController(c);
+    };
   }, [world]);
 
   // Ray holds references to the scratch vectors, so it always reads their current values.
   const camRay = useMemo(() => new rapier.Ray(_target, _dir), [rapier]);
 
-  useEffect(() => () => world.removeCharacterController(controller), [world, controller]);
+  useEffect(() => {
+    const mk = (window as unknown as { __mk?: Record<string, unknown> }).__mk;
+    if (mk) mk.abelVisual = visual.current; // ?debug: tests measure the seated pose against the seat
+  }, []);
   useEffect(() => onCameraToggle(toggleCamera), [toggleCamera]);
 
   useFrame((_, rawDt) => {
+    const controller = controllerRef.current;
+    if (!controller) return; // not created yet (first frame)
     const rb = body.current;
     const col = collider.current;
     if (!rb || !col) return;
@@ -151,6 +206,55 @@ export function Player() {
     }
     _move.multiplyScalar(s.speed * dt);
 
+    // vehicles: simulated time in the phase, and how many frames since the vehicle wrote its pose
+    occ.elapsed += dt * 1000;
+    occ.frameAge++;
+
+    // --- Walking to a vehicle's door (occupancy 'approaching'): collision-aware, cancels on input ---
+    if (occ.phase === 'approaching' && occ.ride) {
+      const r = occ.ride;
+      const nowA = occ.elapsed;
+      const rawMag = Math.hypot(input.moveX + input.touchMoveX + pad.x, input.moveY + input.touchMoveY + pad.y);
+      if ((rawMag > 0.3 && nowA > 300) || occ.frameAge > 4 || !!wasted) {
+        abort(rawMag > 0.3 ? 'input' : wasted ? 'wasted' : 'no-frame');
+      } else {
+        _w.copy(r.stand).applyMatrix4(occ.frame);
+        const dx = _w.x - playerPosition.x;
+        const dz = _w.z - playerPosition.z;
+        const d = Math.hypot(dx, dz);
+        if (nowA < s.apStuckAt) s.apStuckAt = 0; // a new approach
+        if (nowA - s.apStuckAt > 1200) {
+          // no progress for a while (a wall, a crowd): give up rather than walk on the spot forever
+          if (s.apStuckAt && Math.hypot(playerPosition.x - s.apStuckX, playerPosition.z - s.apStuckZ) < 0.15 && d > 0.3) {
+            abort('stuck');
+            useEconomy.getState().toast("Can't reach the door from here", 'info');
+          }
+          s.apStuckAt = nowA;
+          s.apStuckX = playerPosition.x;
+          s.apStuckZ = playerPosition.z;
+        }
+        if (occ.phase === 'approaching') {
+          if (d > 0.16) {
+            s.speed = THREE.MathUtils.damp(s.speed, d > 4 ? RUN : WALK, 10, dt);
+            _move.set(dx / d, 0, dz / d);
+            let df = Math.atan2(dx, dz) - s.facing;
+            df = Math.atan2(Math.sin(df), Math.cos(df));
+            s.facing += df * Math.min(1, dt * 10);
+            _move.multiplyScalar(Math.min(s.speed * dt, d));
+          } else {
+            // at the door: turn to face it, then the boarding sequence takes over
+            _move.set(0, 0, 0);
+            s.speed = 0;
+            const want = frameYaw(occ.frame) + r.standYaw;
+            let df = want - s.facing;
+            df = Math.atan2(Math.sin(df), Math.cos(df));
+            s.facing += df * Math.min(1, dt * 9);
+            if (Math.abs(df) < 0.12) beginBoarding(r);
+          }
+        }
+      }
+    } else s.apStuckAt = 0;
+
     // fights: soft lock-on turns Abel toward his opponent while he swings
     if (performance.now() < playerAnim.faceUntil) {
       let d = playerAnim.faceTo - s.facing;
@@ -171,7 +275,7 @@ export function Player() {
     {
       const ground = heightAt(playerPosition.x, playerPosition.z);
       const depth = SEA_Y - ground;
-      const swim = ride.vehicle < 0 && !drive.active && depth > SWIM_DEPTH && coastWeight(playerPosition.x, playerPosition.z) > 0.5;
+      const swim = occ.phase === 'walking' && depth > SWIM_DEPTH && coastWeight(playerPosition.x, playerPosition.z) > 0.5;
       if (swim !== s.swimming) {
         s.swimming = swim;
         if (swim) {
@@ -180,6 +284,28 @@ export function Player() {
         }
       }
       if (swim) s.surface = waveHeight(playerPosition.x, playerPosition.z, oceanTime.value, depth);
+      // diving: hold C to go down, Space to come up; let go and he drifts back up. The seabed is
+      // the floor; no breath left: it hurts, and he is pushed up to the air (never stuck below)
+      if (swim) {
+        // out of breath: no diving again until he has caught his breath
+        if (diving.breath <= 0) diving.gasping = true;
+        else if (diving.breath > 0.6) diving.gasping = false;
+        const down = keyHeld('KeyC') && !locked && !diving.gasping;
+        const up = input.jump || pad.jump;
+        const floor = Math.max(0, s.surface - 0.5 - (ground + CAPSULE_HALF + CAPSULE_R + 0.2));
+        const rate = down ? 1.6 : up || diving.gasping ? -2.4 : -0.6;
+        diving.depth = THREE.MathUtils.clamp(diving.depth + rate * dt, 0, floor);
+        diving.seabed = floor;
+      } else diving.depth = 0;
+      diving.under = diving.depth > 0.6;
+      if (diving.under) {
+        diving.breath = Math.max(0, diving.breath - dt / 30);
+        if (diving.breath <= 0) useHealth.getState().damage(6 * dt, 'You ran out of breath');
+      } else diving.breath = Math.min(1, diving.breath + dt / 4);
+      if (diving.under !== s.wasUnder) {
+        s.wasUnder = diving.under;
+        if (!diving.under) splash();
+      }
     }
     playerAnim.swimming = s.swimming;
 
@@ -188,7 +314,7 @@ export function Player() {
     const fallVy = s.vy;
     if (s.swimming) {
       // capsule centre a little under the surface: head and shoulders out of the water
-      s.vy = THREE.MathUtils.clamp((s.surface - 0.5 - playerPosition.y) * 4, -3, 3);
+      s.vy = THREE.MathUtils.clamp((s.surface - 0.5 - diving.depth - playerPosition.y) * 4, -3, 3);
     } else if (s.grounded && s.vy <= 0) {
       s.vy = -1;
       if ((input.jump || pad.jump) && !locked) s.vy = JUMP_V;
@@ -243,15 +369,102 @@ export function Player() {
       jumped = true;
       rb.setTranslation({ x: seat.exitX, y: seat.exitY, z: seat.exitZ }, true);
       playerPosition.set(seat.exitX, seat.exitY, seat.exitZ);
-    } else if (ride.vehicle >= 0) {
-      // --- riding a matatu/nganya: follow the seat, no character controller ---
-      const heading = rideWorld(_ride);
-      const by = _ride.y + CAPSULE_HALF + CAPSULE_R + 0.02;
-      rb.setNextKinematicTranslation({ x: _ride.x, y: by, z: _ride.z });
-      playerPosition.set(_ride.x, by, _ride.z);
-      s.facing = heading;
+    } else if (occ.phase === 'boarding' || occ.phase === 'seated' || occ.phase === 'exiting') {
+      // --- in (or getting into / out of) a vehicle: pose from its rendered frame, no controller ---
+      jumped = true;
+      if (col.collisionGroups() !== 0) {
+        // no collision groups at all (membership 0): the capsule can't shove the vehicle it sits in
+        col.setCollisionGroups(0);
+        col.setSolverGroups(0);
+      }
+      const r = occ.ride!;
+      const now = performance.now();
+      if (occ.frameAge > 4 && occ.phase !== 'exiting') {
+        // the vehicle vanished under us (despawned, quality change): step off where we are
+        occ.exitWorld.set(playerPosition.x, heightAt(playerPosition.x, playerPosition.z), playerPosition.z);
+        occ.phase = 'exiting';
+        occ.elapsed = 1e6;
+      }
+      const elapsed = occ.elapsed;
+      const seatKey = r.board[r.board.length - 1]!;
+      let yaw = seatKey.yaw;
+      let clip = r.seatClip;
+      let keyIdx = -1;
+      let finished = false;
+      if (occ.phase === 'boarding') {
+        const res = samplePath(r.board, { p: r.stand, yaw: r.standYaw }, elapsed, _ride);
+        yaw = res.yaw;
+        clip = res.clip;
+        keyIdx = res.key;
+        s.pathKeys = r.board;
+        s.pathKey = res.key;
+        s.pathE = res.e;
+        s.pathYaw = res.yaw;
+        occ.door = res.door;
+        occ.progress = Math.min(1, elapsed / Math.max(1, r.board.reduce((a, k) => a + k.ms, 0)));
+        if (res.done) {
+          occ.phase = 'seated';
+          occ.since = now;
+          occ.elapsed = 0;
+          r.onSeated?.();
+        }
+      } else if (occ.phase === 'seated') {
+        _ride.copy(seatKey.p);
+        occ.progress = 1;
+        occ.door = 0;
+        s.pathKeys = null;
+      } else {
+        _seatFrom.p.copy(seatKey.p);
+        _seatFrom.yaw = seatKey.yaw;
+        const res = samplePath(r.exit, _seatFrom, elapsed, _ride);
+        yaw = res.yaw;
+        clip = res.clip;
+        keyIdx = res.key;
+        s.pathKeys = r.exit;
+        s.pathKey = res.key;
+        s.pathE = res.e;
+        s.pathYaw = res.yaw;
+        occ.door = res.door;
+        occ.progress = 1 - Math.min(1, elapsed / Math.max(1, r.exit.reduce((a, k) => a + k.ms, 0)));
+        finished = res.done;
+      }
+      // one sound per key (door, step, kickstand) as the path reaches it
+      if (keyIdx !== s.keyIndex) {
+        const keys = occ.phase === 'exiting' ? r.exit : r.board;
+        const k = keys[keyIdx];
+        if (k?.sound && keyIdx > s.keyIndex) playSfx(k.sound, playerPosition);
+        s.keyIndex = keyIdx;
+      }
+      if (occ.phase === 'seated') s.keyIndex = -1;
+      if (finished) {
+        // standing on the checked ground spot beside the vehicle: walking again
+        s.keyIndex = -1;
+        col.setCollisionGroups(0xffffffff);
+        col.setSolverGroups(0xffffffff);
+        const ex = occ.exitWorld;
+        const by = ex.y + CAPSULE_HALF + CAPSULE_R + 0.05;
+        rb.setTranslation({ x: ex.x, y: by, z: ex.z }, true);
+        playerPosition.set(ex.x, by, ex.z);
+        s.facing = frameYaw(occ.frame) + yaw;
+        s.yaw = s.facing + Math.PI;
+        playerAnim.riding = false;
+        occ.phase = 'walking';
+        occ.ride = null;
+        r.onExited?.();
+      } else {
+        _w.copy(_ride).applyMatrix4(occ.frame);
+        const by = _w.y + CAPSULE_HALF + CAPSULE_R + 0.02;
+        rb.setNextKinematicTranslation({ x: _w.x, y: by, z: _w.z });
+        playerPosition.set(_w.x, by, _w.z);
+        s.facing = frameYaw(occ.frame) + yaw;
+        // walking along the aisle / stepping out: the clip runs at the path's real speed
+        playerAnim.speed = occ.phase === 'seated' ? 0 : Math.hypot(_ride.x - s.poseX, _ride.z - s.poseZ) / Math.max(dt, 1e-3);
+        s.poseX = _ride.x;
+        s.poseZ = _ride.z;
+        playerAnim.riding = true;
+        playerAnim.rideClip = clip;
+      }
       s.vy = 0;
-      playerAnim.speed = 0;
       playerAnim.grounded = true;
     } else if (teleport.pending) {
       teleport.pending = false;
@@ -263,33 +476,10 @@ export function Player() {
       s.facing = teleport.facing;
       s.yaw = teleport.facing + Math.PI; // camera behind Abel
       s.vy = 0;
-    } else if (drive.active) {
-      // driving: Abel sits at the wheel; his capsule is switched off so it can't shove the car
-      // no collision groups at all (membership 0): it can't shove the car it sits in
-      if (col.collisionGroups() !== 0) {
-        col.setCollisionGroups(0);
-        col.setSolverGroups(0);
-      }
-      const by = drive.seat.y + CAPSULE_HALF + CAPSULE_R + 0.02;
-      rb.setNextKinematicTranslation({ x: drive.seat.x, y: by, z: drive.seat.z });
-      playerPosition.set(drive.seat.x, by, drive.seat.z);
-      s.facing = drive.heading;
-      s.vy = 0;
-    } else if (drive.justExited) {
-      drive.justExited = false;
-      jumped = true;
-      col.setCollisionGroups(0xffffffff);
-      col.setSolverGroups(0xffffffff);
-      rb.setTranslation({ x: drive.exit.x, y: drive.exit.y + 0.3, z: drive.exit.z }, true);
-      playerPosition.copy(drive.exit);
-    } else if (ride.justAlighted) {
-      ride.justAlighted = false;
-      jumped = true;
-      rb.setTranslation({ x: ride.exit.x, y: ride.exit.y + 0.3, z: ride.exit.z }, true);
-      playerPosition.copy(ride.exit);
     }
     // a teleport this frame (interior door, getting out of a car/matatu) must not be overwritten below
-    const riding = ride.vehicle >= 0 || drive.active || jumped;
+    const occupied = occ.phase === 'boarding' || occ.phase === 'seated' || occ.phase === 'exiting';
+    const riding = occupied || jumped;
     if (riding) _move.set(0, 0, 0);
     controller.computeColliderMovement(col, _move, rapier.QueryFilterFlags.EXCLUDE_SENSORS);
     const m = riding ? _zero : controller.computedMovement();
@@ -324,13 +514,13 @@ export function Player() {
     if (visual.current) {
       // swimming: pitch flat into a front crawl when moving, nearly upright when treading water;
       // keep the hips just under the surface whatever the tilt
-      const wantTilt = s.swimming ? (playerAnim.speed > 0.4 ? 1.3 : 0.2) : 0;
+      const wantTilt = s.swimming ? (playerAnim.speed > 0.4 || diving.under ? 1.3 : 0.2) : 0;
       s.tilt = THREE.MathUtils.damp(s.tilt, wantTilt, 4, dt);
       _q.setFromAxisAngle(_up, s.facing);
       _qTilt.setFromAxisAngle(_xAxis, s.tilt);
       visual.current.quaternion.copy(_q).multiply(_qTilt);
       if (s.swimming || s.tilt > 0.01) {
-        const hipsY = (s.swimming ? s.surface - 0.12 : ny - 0.85 + 1.0) - ny;
+        const hipsY = (s.swimming ? s.surface - 0.12 - diving.depth : ny - 0.85 + 1.0) - ny;
         const k = Math.min(1, s.tilt / 1.3);
         visual.current.position.set(
           -Math.sin(s.facing) * Math.sin(s.tilt),
@@ -340,7 +530,72 @@ export function Player() {
       } else {
         visual.current.position.set(0, -(CAPSULE_HALF + CAPSULE_R), 0);
       }
-      visual.current.visible = cameraMode === 'third';
+      if (occupied && occ.phase !== 'walking') {
+        // Attach to the vehicle as it will be RENDERED this frame: its full rotation (slopes,
+        // braking dive, body roll) and its interpolated physics pose, so Abel never trails the car,
+        // pokes through the roof on a hill or sits sideways. The capsule body is only a carrier.
+        const parent = visual.current.parent;
+        if (parent) {
+          occ.frame.decompose(_fp, _fq, _fs);
+          _q.setFromAxisAngle(_up, s.facing - frameYaw(occ.frame));
+          _fq.multiply(_q);
+          _m.compose(_w.copy(_ride).applyMatrix4(occ.frame), _fq, _fs.set(1, 1, 1));
+          parent.updateWorldMatrix(true, false);
+          _pm.copy(parent.matrixWorld).invert().multiply(_m);
+          _pm.decompose(visual.current.position, visual.current.quaternion, _fs);
+        }
+      }
+      visual.current.visible = cameraMode === 'third' && !MAPRENDER;
+    }
+
+    // --- hands (and on a boda, feet) on the controls: IK targets in Abel's own frame ---
+    {
+      let want = 0;
+      const r = occ.ride;
+      playerIK.footW[0] = 1;
+      playerIK.footW[1] = 1;
+      if ((occ.phase === 'boarding' || occ.phase === 'exiting') && r && s.pathKeys) {
+        // getting in / out: the path's feet (vehicle-local) into Abel's frame (his feet position on
+        // the path and his facing), one foot at a time
+        const feet = (playerIK.feet ??= [new THREE.Vector3(), new THREE.Vector3()]);
+        if (sampleFeet(s.pathKeys, s.pathKey, s.pathE, feet, playerIK.footW)) {
+          for (const f of feet) f.sub(_ride).applyAxisAngle(_up, -s.pathYaw);
+          playerIK.hands = null;
+          want = 1;
+        }
+      } else if (occ.phase === 'seated' && r && (r.kind === 'car' || r.kind === 'bike')) {
+        const seatK = r.board[r.board.length - 1]!;
+        const toAbel = (v: THREE.Vector3) => v.sub(seatK.p).applyAxisAngle(_up, -seatK.yaw);
+        const hands = (playerIK.hands ??= [new THREE.Vector3(), new THREE.Vector3()]);
+        if (r.kind === 'car') {
+          const c = CAR_DIMS[carKind(drive.piece)]?.wheel;
+          if (c) {
+            // 9 and 3 on the rim (r 0.18), the wheel leaning back 25 degrees, turned with the steering
+            const turn = -drive.steer * 7;
+            for (const [i, side] of [[0, 1], [1, -1]] as const) {
+              _ikv.set(side * 0.18 * Math.cos(turn), side * 0.18 * Math.sin(turn), 0).applyAxisAngle(_xAxis, -0.44);
+              hands[i]!.set(c[0] + _ikv.x, c[1] + _ikv.y - 0.03, c[2] + _ikv.z - 0.07);
+              toAbel(hands[i]!);
+            }
+            playerIK.feet = null;
+            want = 1;
+          }
+        } else {
+          // boda: grips measured on the model, turning about the steering head with the bars
+          for (const [i, side] of [[0, 1], [1, -1]] as const) {
+            _ikv.set(side * 0.27, 1.05, 0.17 - 0.36).applyAxisAngle(_up, bike.steer);
+            hands[i]!.set(_ikv.x, _ikv.y - 0.02, _ikv.z + 0.36 - 0.05);
+            toAbel(hands[i]!);
+          }
+          const feet = (playerIK.feet ??= [new THREE.Vector3(), new THREE.Vector3()]);
+          feet[0]!.set(0.19, 0.5, 0.02);
+          feet[1]!.set(-0.19, 0.5, 0.02);
+          toAbel(feet[0]!);
+          toAbel(feet[1]!);
+          want = 1;
+        }
+      }
+      playerIK.w = THREE.MathUtils.damp(playerIK.w, want, want ? 5 : 12, dt);
     }
 
     playerView.facing = s.facing;
@@ -348,9 +603,10 @@ export function Player() {
     playerView.lookZ = -Math.cos(s.yaw);
 
     // --- Camera ---
-    if (benchmark.running || cutscene) return; // the benchmark / a cutscene flies its own camera
-    if (seat.active) {
-      // in the theatre: a seat-height view over Abel's shoulder, onto the big screen
+    if (benchmark.running || cutscene || MAPRENDER) return; // the benchmark / a cutscene / the map camera
+    if (seat.active && seat.fixedCam) {
+      // in the theatre: a seat-height view over Abel's shoulder, onto the big screen (or the
+      // barber's mirror view: game/seating)
       camera.position.set(seat.camX, seat.camY, seat.camZ);
       camera.lookAt(seat.lookX, seat.lookY, seat.lookZ);
       return;
@@ -362,12 +618,44 @@ export function Player() {
       return;
     }
     const now = performance.now();
-    if (drive.active && cameraMode === 'third' && now - input.lastLookTime > 1200) {
-      // chase cam: swing in behind the car (faster at speed)
-      let d = drive.heading + Math.PI - s.yaw;
-      d = Math.atan2(Math.sin(d), Math.cos(d));
-      s.yaw += d * Math.min(1, dt * (1.5 + Math.abs(drive.speed) * 0.12));
-      s.pitch = THREE.MathUtils.damp(s.pitch, 0.18, 2, dt);
+    // vehicle camera: blend from the walking pivot to the vehicle's while boarding (no snap), and
+    // track the vehicle's real speed from its rendered frame
+    const vr = occ.ride;
+    const inVehicle = vr !== null && occ.phase !== 'walking' && occ.phase !== 'approaching';
+    // (getting in or out, the camera stays on Abel, as in GTA, so you see him open the door and climb
+    // in; it moves to the vehicle's chase camera once he is in the seat)
+    const wantBlend = inVehicle && occ.phase === 'seated' ? 1 : 0;
+    s.camBlend = THREE.MathUtils.damp(s.camBlend, wantBlend, 6, dt);
+    let vehYaw = 0;
+    if (inVehicle) {
+      const e = occ.frame.elements;
+      vehYaw = frameYaw(occ.frame);
+      const fx = e[12]!;
+      const fz = e[14]!;
+      const sp = Math.hypot(fx - s.lastFrameX, fz - s.lastFrameZ) / Math.max(dt, 1e-3);
+      s.vehSpeed = THREE.MathUtils.damp(s.vehSpeed, sp < 80 ? sp : s.vehSpeed, 6, dt);
+      s.lastFrameX = fx;
+      s.lastFrameZ = fz;
+      _vehPivot.set(fx, e[13]! + vr.cam.height, fz);
+    }
+    // riding as a passenger (matatu, nganya, bus): the camera is carried round with the vehicle,
+    // so it turns when the vehicle turns; any free look settles back behind it within ~half a second
+    if (inVehicle && vr.kind === 'transit') {
+      let dv = vehYaw - s.lastVehYaw;
+      dv = Math.atan2(Math.sin(dv), Math.cos(dv));
+      if (s.wasInVehicle && (occ.phase === 'seated' || occ.phase === 'boarding')) s.yaw += dv;
+    }
+    s.lastVehYaw = vehYaw;
+    s.wasInVehicle = inVehicle;
+    const holdLook = vr?.kind === 'transit' ? 550 : 1200;
+    if (inVehicle && occ.phase === 'seated' && cameraMode === 'third' && now - input.lastLookTime > holdLook) {
+      // chase cam: swing in behind the vehicle (passengers: always; drivers: when moving, faster at speed)
+      if (s.vehSpeed > 0.8 || vr.kind === 'transit') {
+        let d = vehYaw + Math.PI - s.yaw;
+        d = Math.atan2(Math.sin(d), Math.cos(d));
+        s.yaw += d * Math.min(1, dt * (vr.kind === 'transit' ? 3 : 1.2 + s.vehSpeed * 0.1));
+      }
+      s.pitch = THREE.MathUtils.damp(s.pitch, vr.cam.pitch, 2, dt);
     } else if (s.eating && cameraMode === 'third') {
       // three-quarter front view at head height
       let d = s.facing + 0.65 - s.yaw;
@@ -383,7 +671,18 @@ export function Player() {
     }
 
     if (cameraMode === 'first') {
-      camera.position.set(nx, ny - (CAPSULE_HALF + CAPSULE_R) + EYE_HEIGHT, nz);
+      if (inVehicle) {
+        // eyes in the seat, looking where the vehicle goes unless the player looks around
+        _w.copy(vr.board[vr.board.length - 1]!.p);
+        _w.y += vr.cam.eye;
+        _w.applyMatrix4(occ.frame);
+        camera.position.copy(_w);
+        if (now - input.lastLookTime > 1500) {
+          let d = vehYaw + Math.PI - s.yaw;
+          d = Math.atan2(Math.sin(d), Math.cos(d));
+          s.yaw += d * Math.min(1, dt * 3);
+        }
+      } else camera.position.set(nx, ny - (CAPSULE_HALF + CAPSULE_R) + EYE_HEIGHT, nz);
       _dir.set(-Math.sin(s.yaw) * Math.cos(s.pitch), -Math.sin(s.pitch), -Math.cos(s.yaw) * Math.cos(s.pitch));
       _target.copy(camera.position).add(_dir);
       camera.lookAt(_target);
@@ -391,13 +690,14 @@ export function Player() {
     }
 
     // Pull out when sprinting on open ground, in when near walls (handled by collision cast).
-    const wantDist = drive.active ? 6.8 + Math.abs(drive.speed) * 0.05 : riding ? 7.5 : s.eating ? 2.1 : 4.2 + (s.speed / SPRINT) * 1.6; // wide chase view when riding
+    const walkDist = s.eating ? 2.1 : 4.2 + (s.speed / SPRINT) * 1.6;
+    const wantDist = inVehicle ? THREE.MathUtils.lerp(walkDist, vr.cam.dist + s.vehSpeed * 0.05, s.camBlend) : walkDist;
     s.camDist = THREE.MathUtils.damp(s.camDist, wantDist, 3, dt);
 
-    // Over-the-shoulder pivot
-    if (drive.active) _target.set(drive.x, drive.y + 1.9, drive.z);
-    else if (s.swimming) _target.set(nx, s.surface + 0.7, nz).addScaledVector(_right, 0.3);
+    // Over-the-shoulder pivot (walking), the vehicle's pivot when in one, blended in between
+    if (s.swimming) _target.set(nx, s.surface + 0.7 - diving.depth * 0.95, nz).addScaledVector(_right, 0.3);
     else _target.set(nx, ny + (s.eating ? 0.55 : 0.65), nz).addScaledVector(_right, s.eating ? 0 : 0.45);
+    if (inVehicle) _target.lerp(_vehPivot, s.camBlend);
     _dir.set(
       Math.sin(s.yaw) * Math.cos(s.pitch),
       Math.sin(s.pitch),
@@ -407,7 +707,7 @@ export function Player() {
     // Camera collision: cast from the pivot toward the desired camera position.
     let dist = s.camDist;
     const hit = world.castRay(camRay, s.camDist, true, undefined, undefined, col, rb,
-      riding ? (c) => !vehicleColliders.has(c.handle) && c.parent()?.handle !== drive.bodyHandle : undefined);
+      inVehicle || riding ? (c) => !vehicleColliders.has(c.handle) && c.parent()?.handle !== drive.bodyHandle : undefined);
     if (hit) dist = Math.max(0.6, hit.timeOfImpact - 0.25);
 
     _camPos.copy(_target).addScaledVector(_dir, dist);
@@ -415,6 +715,18 @@ export function Player() {
     const lag = dist < s.camDist - 0.01 ? 1 : 1 - Math.exp(-14 * dt);
     camera.position.lerp(_camPos, lag);
     camera.lookAt(_target);
+    if (camOverride.on) {
+      // ?debug: a fixed shot for test films (tools/board-film.mjs close-ups)
+      camera.position.set(camOverride.x, camOverride.y, camOverride.z);
+      camera.lookAt(camOverride.lx, camOverride.ly, camOverride.lz);
+    }
+    // the camera under the sea surface: water fog and colour (world/Environment), muffled sound
+    const camUnder = s.swimming && camera.position.y < s.surface - 0.05;
+    diving.cameraUnder = camUnder;
+    if (camUnder !== s.camUnder) {
+      s.camUnder = camUnder;
+      setUnderwater(camUnder);
+    }
   });
 
   return (

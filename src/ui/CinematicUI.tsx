@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { cutsceneNow, useCutscene } from '../game/cutscene';
+import { cutsceneNow, cutsceneVoice, useCutscene } from '../game/cutscene';
+import { say, speakerFor, stopVoice } from '../systems/audio/voice';
 import { retryMission, useMissions } from '../game/missions';
 import { onKeyPress } from '../systems/input';
 import { chime } from '../systems/audio/stingers';
@@ -20,6 +21,34 @@ export function CinematicUI() {
   }, [active]);
   const now = active ? cutsceneNow() : null;
   const shot = now?.shot;
+  // each briefing line is SPOKEN as its shot starts (the shot waits for the speaker to finish)
+  useEffect(() => {
+    if (!active) {
+      if (cutsceneVoice.index >= 0) stopVoice();
+      cutsceneVoice.index = -1;
+      cutsceneVoice.speaking = false;
+      return;
+    }
+    if (!now || now.index === cutsceneVoice.index) return;
+    cutsceneVoice.index = now.index;
+    cutsceneVoice.held = 0;
+    const line = now.shot.line;
+    if (!line) {
+      cutsceneVoice.speaking = false;
+      return;
+    }
+    const idx = now.index;
+    cutsceneVoice.speaking = true;
+    say({
+      who: speakerFor(line.who),
+      name: line.who,
+      text: line.text,
+      subtitle: false, // the letterbox shows its own subtitle
+      onEnd: () => {
+        if (cutsceneVoice.index === idx) cutsceneVoice.speaking = false;
+      },
+    });
+  });
   return (
     <div className={`cinematic${active ? ' on' : ''}`} aria-hidden={!active}>
       <div className="lb lb-top" />

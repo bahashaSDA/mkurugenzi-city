@@ -87,6 +87,21 @@ export function prepareClips(clips: THREE.AnimationClip[]): THREE.AnimationClip[
     c.name = c.name.replace(/\.\d+$/, '');
     byName.set(c.name, c);
   }
+  // riding a boda: hands forward on the bars (the driving pose) over seated legs (the sitting pose)
+  const drv = byName.get('Driving_Loop');
+  const sit = byName.get('Sitting_Idle_Loop');
+  if (drv && sit) {
+    const r = composeUpperLower(drv, sit);
+    r.name = 'Riding_Loop';
+    byName.set('Riding_Loop', r);
+  }
+  // eating on a bench or a chair: the hand-to-mouth bites over seated legs
+  const eat = byName.get('Consume');
+  if (eat && sit) {
+    const r = composeUpperLower(eat, sit);
+    r.name = 'Sitting_Consume';
+    byName.set('Sitting_Consume', r);
+  }
   const idle = byName.get('Idle_Loop');
   if (idle) {
     for (const g of GESTURE_CLIPS) {

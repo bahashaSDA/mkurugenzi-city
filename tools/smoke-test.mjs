@@ -8,7 +8,9 @@
 import { chromium } from 'playwright';
 const SP = process.argv[2] ?? '.';
 const base = 'http://localhost:4173/';
-const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+// GPU=1: the real GPU (software rendering runs below 15 fps, where the game slows its clock)
+const GL = process.env.GPU ? ['--use-angle=d3d11', '--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
+const browser = await chromium.launch({ args: [...GL, '--ignore-gpu-blocklist'] });
 const errors = [];
 const results = [];
 
@@ -20,6 +22,8 @@ async function run(name, query, keys, ms, check) {
   const btn = page.getByRole('button', { name: 'Tap to enter' });
   await btn.waitFor({ timeout: 300000 });
   await btn.click();
+  // the curtain lifts once the game runs smoothly; Abel has landed by then
+  await page.locator('.splash2').waitFor({ state: 'detached', timeout: 60000 });
   await page.waitForTimeout(1500);
   const before = await page.evaluate(() => ({ ...window.__mk.playerPosition }));
   await page.evaluate(() => { window.__maxY = -1e9; const loop = () => { window.__maxY = Math.max(window.__maxY, window.__mk.playerPosition.y); requestAnimationFrame(loop); }; loop(); });

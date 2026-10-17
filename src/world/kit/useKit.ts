@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useModel } from '../../systems/characterModels';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { getKTX2Loader } from '../ktx2';
 import { useGame } from '../../app/store';
 
 // A "kit" GLB (built by blender/scripts/build_*_kit.py) holds many pieces, each as nodes
@@ -17,6 +16,26 @@ export interface KitPart {
   material: THREE.Material;
   /** Transform of this primitive relative to the piece origin (meshopt quantisation lives here). */
   local: THREE.Matrix4;
+  /** Vehicles (tools/split-wheels.mjs): this part is a wheel that spins about its axle. */
+  wheel?: KitWheel;
+  /** Vehicles (build_real_kit.py separate_doors): this part is a door (or its window). */
+  door?: KitDoor;
+}
+
+export interface KitDoor {
+  index: number;
+  kind: 'swing' | 'rear' | 'slide';
+  side: 1 | -1; // +1 left (+X, the kerb side in Kenya), -1 right (the driver's side)
+  front: boolean;
+  hinge: THREE.Vector3; // piece space
+  size: THREE.Vector3; // width (x), height (y), length (z)
+}
+
+export interface KitWheel {
+  index: number; // stable between LODs: front axle first, then +X (left) before -X
+  radius: number;
+  front: boolean;
+  center: THREE.Vector3; // axle centre, piece space (ground at y = 0)
 }
 
 export type KitCollider =
@@ -131,17 +150,29 @@ function prepareMaterial(m: THREE.Material) {
 
 export type Kit = Map<string, KitPiece>;
 
-export function useKit(url: string): Kit {
+const kitCache = new WeakMap<THREE.Object3D, Map<string, Kit>>();
+
+/**
+ * `keepMid`: keep LOD1 textured on the low tier too. Vehicles need it: their mid LOD is seen from
+ * ~40 m, where an untextured average-colour mesh reads as a blurry, unfinished vehicle.
+ */
+export function useKit(url: string, opts: { keepMid?: boolean } = {}): Kit {
   const gl = useThree((s) => s.gl);
   const tier = useGame((s) => s.tier);
-  const gltf = useGLTF(url, false, true, (loader) => {
-    const ktx2 = getKTX2Loader(gl); // shared with runtime materials (one worker pool)
-    // drei types its loader with three-stdlib; three's own KTX2Loader is used deliberately because
-    // it matches the basis transcoder copied from three into /public/basis.
-    loader.setKTX2Loader(ktx2 as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltf = useModel(url); // shared per-file cache, prefetched at boot (systems/characterModels)
 
   return useMemo(() => {
+    // the same kit is used by several systems (districts, interiors, street lights...): build it once
+    // per file, tier and option and share it (it was rebuilt for every caller: seconds of loading)
+    const cacheKey = `${tier}:${opts.keepMid ? 1 : 0}`;
+    let perScene = kitCache.get(gltf.scene);
+    if (!perScene) kitCache.set(gltf.scene, (perScene = new Map()));
+    const hit = perScene.get(cacheKey);
+    if (hit) return hit;
+    const built = buildKit();
+    perScene.set(cacheKey, built);
+    return built;
+    function buildKit(): Kit {
     const root = gltf.scene;
     root.updateMatrixWorld(true);
     const kit: Kit = new Map();
@@ -160,7 +191,19 @@ export function useKit(url: string): Kit {
           if (!(c as THREE.Mesh).isMesh) return;
           const mesh = c as THREE.Mesh;
           prepareMaterial(mesh.material as THREE.Material);
-          lod.push({ geometry: mesh.geometry, material: mesh.material as THREE.Material, local: mesh.matrixWorld.clone() });
+          const w = (mesh.userData.wheel !== undefined ? mesh.userData : mesh.parent?.userData) as
+            | { wheel?: number; radius: number; front: boolean; center: [number, number, number] }
+            | undefined;
+          const wheel = w && w.wheel !== undefined && w.center
+            ? { index: w.wheel, radius: w.radius, front: w.front, center: new THREE.Vector3(...w.center) }
+            : undefined;
+          const dd = (mesh.userData.door !== undefined ? mesh.userData : mesh.parent?.userData) as
+            | { door?: number; kind: KitDoor['kind']; side: number; front: boolean; hinge: [number, number, number]; size: [number, number, number] }
+            | undefined;
+          const door = dd && dd.door !== undefined && dd.hinge
+            ? { index: dd.door, kind: dd.kind, side: (dd.side > 0 ? 1 : -1) as 1 | -1, front: !!dd.front, hinge: new THREE.Vector3(...dd.hinge), size: new THREE.Vector3(...dd.size) }
+            : undefined;
+          lod.push({ geometry: mesh.geometry, material: mesh.material as THREE.Material, local: mesh.matrixWorld.clone(), wheel, door });
         });
         return;
       }
@@ -195,10 +238,12 @@ export function useKit(url: string): Kit {
     // colours) instead of one draw call per material. Alpha cards and glowing parts stay as they are.
     for (const p of kit.values()) {
       p.lods[2] = mergeFar(p.lods[2]!, gl);
-      if (tier === 'low') p.lods[1] = mergeFar(p.lods[1]!, gl); // phones: mid distance untextured too
+      if (tier === 'low' && !opts.keepMid) p.lods[1] = mergeFar(p.lods[1]!, gl); // phones: mid distance untextured too
     }
     return kit;
-  }, [gltf, gl, tier]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, [gltf, gl, tier, opts.keepMid]);
 }
 
 const farMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, metalness: 0.0, name: 'kit_far' });
@@ -242,7 +287,8 @@ function mergeFar(parts: KitPart[], gl: THREE.WebGLRenderer): KitPart[] {
   const geos: THREE.BufferGeometry[] = [];
   for (const part of parts) {
     const m = part.material as THREE.MeshStandardMaterial;
-    if (/_alpha|_glow|glass/.test(m.name) || !part.geometry.getAttribute('position')) {
+    // alpha cards, self-lit parts, glass and lamp lenses (lit at night) keep their own material
+    if (/_alpha|_glow|glass|_lens/.test(m.name) || !part.geometry.getAttribute('position')) {
       keep.push(part);
       continue;
     }

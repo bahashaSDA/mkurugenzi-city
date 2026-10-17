@@ -46,7 +46,12 @@ const PAVED = ROADS.filter((r) => r.kind !== 'murram');
 const TRACKS = ROADS.filter((r) => r.kind === 'murram');
 
 // ?testcourse: the collision course at (-600, 600) needs flat ground (it sits on the Kibera hill)
-const TEST_PAD = typeof location !== 'undefined' && new URLSearchParams(location.search).has('testcourse');
+let TEST_PAD = typeof location !== 'undefined' && new URLSearchParams(location.search).has('testcourse');
+/** The test-course pad, as the page has it (a Web Worker can't see the page's URL: world/terrainWorker). */
+export const testPad = () => TEST_PAD;
+export function setTestPad(on: boolean) {
+  TEST_PAD = on;
+}
 
 export const FIRE_HILL = { x: 340, z: 1210, r: 330, h: 42 };
 const EDGE0 = 1440;

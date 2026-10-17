@@ -2,18 +2,25 @@ import { useEffect, useState } from 'react';
 import { ITEMS, SHOPS } from '../game/catalog';
 import { useEconomy } from '../game/economy';
 import { usePrompt } from '../game/interactables';
-import { inputLock, onKeyPress, pressKey } from '../systems/input';
+import { inputLock, keyFor, keyName, onKeyPress, pressKey } from '../systems/input';
 import { useGame } from '../app/store';
-import { drive } from '../systems/driving/state';
-import { BigMap, MissionHud, Minimap } from './MapUI';
+import { drive, useService } from '../systems/driving/state';
+import { TANK } from '../game/stations';
+import { diving } from '../systems/player/playerState';
+import { bike } from '../systems/driving/Bike';
+import { BigMap, MissionHud, Minimap, NavDirector } from './MapUI';
 import { useInterior } from '../systems/interiors/rooms';
 import { CinematicUI, MissionBanner } from './CinematicUI';
 import { useCutscene } from '../game/cutscene';
 import { useTheatre } from '../game/theatre';
+import { RadioHud } from './RadioHud';
+import { WardrobePanel } from './WardrobePanel';
+import { SecretsList } from './SecretsList';
 
 /** Contextual prompt, KSh wallet, fullness, bag, shop counter and toasts. */
 export function GameUI() {
   const prompt = usePrompt((s) => s.current);
+  const otherPrompt = usePrompt((s) => s.other);
   const money = useEconomy((s) => s.money);
   const fullness = useEconomy((s) => s.fullness);
   const area = useEconomy((s) => s.area);
@@ -61,20 +68,36 @@ export function GameUI() {
 
       {area && <div className="area-name">{area}</div>}
       <Speedo />
+      <FuelGauge />
+      <RadioHud />
       <div className="fade" style={{ opacity: fading ? 1 : 0 }} />
+      <NavDirector />
       <Minimap />
       <MissionHud />
       <MissionBanner />
       <CinematicUI />
       <BigMap />
 
+      <ServicePrompt />
+      <Underwater />
       {prompt && !shop && (
-        <button className="prompt" onClick={() => pressKey(prompt.key ?? 'KeyE')}>
-          <kbd>{prompt.key === 'KeyF' ? 'F' : 'E'}</kbd> {prompt.label}
-        </button>
+        <div className="prompts">
+          <button className="prompt" onClick={() => pressKey(prompt.key ?? 'KeyE')}>
+            <kbd>{keyName(keyFor(prompt.key ?? 'KeyE'))}</kbd> {prompt.label}
+          </button>
+          {otherPrompt && otherPrompt.label && (
+            <button className="prompt prompt-small" onClick={() => pressKey(otherPrompt.key ?? 'KeyE')}>
+              <kbd>{keyName(keyFor(otherPrompt.key ?? 'KeyE'))}</kbd> {otherPrompt.label}
+            </button>
+          )}
+        </div>
       )}
 
-      {def && (
+      {def && (def.id === 'boutique' || def.id === 'kinyozi') && (
+        <WardrobePanel mode={def.id === 'kinyozi' ? 'hair' : 'outfits'} title={def.title} greeting={def.greeting} extras={def.items} />
+      )}
+
+      {def && def.id !== 'boutique' && def.id !== 'kinyozi' && (
         <div className="panel shop-panel" role="dialog" aria-label={def.title}>
           <header>
             <h2>{def.title}</h2>
@@ -141,6 +164,7 @@ export function GameUI() {
               );
             })}
           </ul>
+          <SecretsList />
           <footer>
             <button onClick={() => setBag(false)}>Close</button>
           </footer>
@@ -183,7 +207,7 @@ export function GameUI() {
 function Speedo() {
   const [kmh, setKmh] = useState<number | null>(null);
   useEffect(() => {
-    const id = setInterval(() => setKmh(drive.active ? Math.round(Math.abs(drive.speed) * 3.6) : null), 150);
+    const id = setInterval(() => setKmh(drive.active ? Math.round(Math.abs(drive.speed) * 3.6) : bike.active ? Math.round(Math.abs(bike.speed) * 3.6) : null), 150);
     return () => clearInterval(id);
   }, []);
   if (kmh === null) return null;
@@ -192,5 +216,53 @@ function Speedo() {
       <b>{kmh}</b>
       <small>km/h</small>
     </div>
+  );
+}
+
+/** In the car at a petrol station: what E does there (fill up / repair) and the price. */
+function ServicePrompt() {
+  const label = useService((s) => s.label);
+  const busy = useService((s) => s.busy);
+  if (!label) return null;
+  return (
+    <button className="prompt" disabled={busy} onClick={() => pressKey('KeyE')}>
+      {!busy && <kbd>E</kbd>} {label}
+    </button>
+  );
+}
+
+/** Fuel gauge under the speedometer (cars only). */
+function FuelGauge() {
+  const [f, setF] = useState<number | null>(null);
+  useEffect(() => {
+    const id = setInterval(() => setF(drive.active ? drive.fuel / TANK : null), 300);
+    return () => clearInterval(id);
+  }, []);
+  if (f === null) return null;
+  return (
+    <div className="fuel" aria-label={`Fuel ${Math.round(f * 100)}%`}>
+      <span>FUEL</span>
+      <div className="wallet-bar"><span style={{ width: `${Math.round(f * 100)}%`, background: f < 0.12 ? '#ff5a3c' : '#3fd17f' }} /></div>
+    </div>
+  );
+}
+
+/** Under the sea: the water's colour over the view, and the breath bar while he holds his breath. */
+function Underwater() {
+  const [st, setSt] = useState({ under: false, breath: 1, show: false });
+  useEffect(() => {
+    const id = setInterval(() => setSt({ under: diving.cameraUnder, breath: diving.breath, show: diving.under || diving.breath < 0.999 }), 120);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <>
+      {st.under && <div className="underwater" aria-hidden />}
+      {st.show && (
+        <div className="breath" aria-label={`Breath ${Math.round(st.breath * 100)}%`}>
+          <span>BREATH</span>
+          <div className="wallet-bar"><span style={{ width: `${Math.round(st.breath * 100)}%`, background: st.breath < 0.25 ? '#ff5a3c' : '#5fd0ff' }} /></div>
+        </div>
+      )}
+    </>
   );
 }

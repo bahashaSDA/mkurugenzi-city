@@ -1,0 +1,191 @@
+{
+ "city_day": {
+  "source": "city_day.webm",
+  "start_s": 390.0,
+  "seconds": 150,
+  "mode": "busy",
+  "score": 6.88
+ },
+ "city_day_b": {
+  "source": "city_day.webm",
+  "start_s": 108.0,
+  "seconds": 150,
+  "mode": "steady",
+  "score": 18.91
+ },
+ "city_night": {
+  "source": "city_night_full.webm",
+  "start_s": 238.0,
+  "seconds": 150,
+  "mode": "steady",
+  "score": 9.51
+ },
+ "suburb_morning": {
+  "source": "suburb_full.webm",
+  "start_s": 204.0,
+  "seconds": 150,
+  "mode": "steady",
+  "score": 6.0
+ },
+ "birds_amboseli": {
+  "source": "birds_amboseli_full.webm",
+  "start_s": 2124.0,
+  "seconds": 150,
+  "mode": "steady",
+  "score": 7.64
+ },
+ "birds_laikipia": {
+  "source": "birds_laikipia_full.webm",
+  "start_s": 182.0,
+  "seconds": 150,
+  "mode": "steady",
+  "score": 8.92
+ },
+ "wind": {
+  "source": "wind_full.webm",
+  "start_s": 254.0,
+  "seconds": 120,
+  "mode": "steady",
+  "score": 6.27
+ },
+ "night_insects": {
+  "source": "night_tsavo_full.webm",
+  "start_s": 218.0,
+  "seconds": 150,
+  "mode": "insects",
+  "score": 5.03
+ },
+ "night_insects_b": {
+  "source": "night_tsavo_full.webm",
+  "start_s": 3096.0,
+  "seconds": 150,
+  "mode": "insects",
+  "score": 5.86
+ },
+ "dusk": {
+  "source": "dusk_full.webm",
+  "start_s": 3120.0,
+  "seconds": 120,
+  "mode": "insects",
+  "score": -12.85
+ },
+ "sea_diani": {
+  "source": "sea_diani_full.webm",
+  "start_s": 5608.0,
+  "seconds": 120,
+  "mode": "steady",
+  "score": 33.22
+ },
+ "market": {
+  "source": "kenya_mix_full.webm",
+  "start_s": 2.0,
+  "seconds": 58,
+  "mode": "busy",
+  "score": 52.28
+ },
+ "hadada_0": {
+  "source": "Bostrychia_hagedash_call.flac",
+  "start_s": 0.0,
+  "seconds": 1.31
+ },
+ "hadada_1": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_20s,_2022-09-25_06h43,_Pretoria,_a.mp3",
+  "start_s": 13.5,
+  "seconds": 5.0
+ },
+ "hadada_2": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_20s,_2022-09-25_06h43,_Pretoria,_a.mp3",
+  "start_s": 5.5,
+  "seconds": 5.0
+ },
+ "hadada_3": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_20s,_2022-09-25_06h43,_Pretoria,_a.mp3",
+  "start_s": 0.25,
+  "seconds": 5.0
+ },
+ "hadada_4": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_in_Pta,_2022-05-24_06h53,_a.mp3",
+  "start_s": 12.75,
+  "seconds": 5.0
+ },
+ "hadada_5": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_in_Pta,_2022-05-24_06h53,_a.mp3",
+  "start_s": 7.5,
+  "seconds": 5.0
+ },
+ "hadada_6": {
+  "source": "Bostrychia_hagedash_hagadash,_roepe_in_Pta,_2022-05-24_06h53,_a.mp3",
+  "start_s": 2.25,
+  "seconds": 5.0
+ },
+ "rooster_0": {
+  "source": "Rooster_crowing.ogg",
+  "start_s": 0.0,
+  "seconds": 3.84
+ },
+ "rooster_1": {
+  "source": "Young_rooster_crowing.ogg",
+  "start_s": 0.0,
+  "seconds": 2.31
+ },
+ "rooster_2": {
+  "source": "Medium_rooster_crowing.ogg",
+  "start_s": 1.0,
+  "seconds": 4.5
+ },
+ "bulbul_0": {
+  "source": "Pycnonotus_cafer_-_Red-vented_Bulbul_XC129368.ogg",
+  "start_s": 68.5,
+  "seconds": 2.5
+ },
+ "bulbul_1": {
+  "source": "Pycnonotus_cafer_-_Red-vented_Bulbul_XC129368.ogg",
+  "start_s": 78.25,
+  "seconds": 2.5
+ },
+ "bulbul_2": {
+  "source": "Pycnonotus_cafer_-_Red-vented_Bulbul_XC129368.ogg",
+  "start_s": 73.5,
+  "seconds": 2.5
+ },
+ "bulbul_3": {
+  "source": "Pycnonotus_cafer_-_Red-vented_Bulbul_XC129368.ogg",
+  "start_s": 95.0,
+  "seconds": 2.5
+ },
+ "wagtail_0": {
+  "source": "Motacilla_aguimp_-_African_Pied_Wagtail_XC366687.mp3",
+  "start_s": 56.0,
+  "seconds": 3.0
+ },
+ "wagtail_1": {
+  "source": "Motacilla_aguimp_-_African_Pied_Wagtail_XC366687.mp3",
+  "start_s": 48.5,
+  "seconds": 3.0
+ },
+ "wagtail_2": {
+  "source": "Motacilla_aguimp_-_African_Pied_Wagtail_XC366687.mp3",
+  "start_s": 2.25,
+  "seconds": 3.0
+ },
+ "cricket_0": {
+  "source": "Field_cricket_unedited.ogg",
+  "start_s": 0.0,
+  "seconds": 4.0
+ },
+ "cricket_1": {
+  "source": "Field_cricket_unedited.ogg",
+  "start_s": 4.5,
+  "seconds": 4.0
+ },
+ "cricket_2": {
+  "source": "Ringing_cricket_winding_down.ogg",
+  "start_s": 13.0,
+  "seconds": 4.0
+ },
+ "cricket_3": {
+  "source": "Ringing_cricket_winding_down.ogg",
+  "start_s": 28.5,
+  "seconds": 4.0
+ }
+}

@@ -1,22 +1,26 @@
 import { useEffect, useRef } from 'react';
+import { LITE_DPR, lite } from './lite';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGame } from '../app/store';
-import { BUDGETS, DPR_MIN, FRAME_HITCH_MS, type Tier } from './budgets';
+import { BUDGETS, DPR_MIN, FRAME_HITCH_MS } from './budgets';
 
 // Shared live stats (written in the render loop, read by the DOM overlay; no React re-renders).
 export const perfStats = { fps: 0, frameMs: 0, calls: 0, tris: 0, geos: 0, texs: 0, hitches: 0, heapMB: 0 };
 
-const TIER_DOWN: Record<Tier, Tier> = { high: 'mid', mid: 'low', low: 'low' };
 
 /**
  * Collects renderer stats and runs adaptive quality (SPEC 10.8):
- * FPS under target for 3 s → lower DPR in 0.25 steps, then drop a tier.
+ * FPS under target for 3 s → lower DPR in 0.25 steps (down to DPR_MIN). The tier is picked while
+ * loading (app/Game Ready), never changed automatically in play.
+ * Not judged in the first 20 s of play (streaming in, first sights), and a second that contained a
+ * one-off stall (> 300 ms) doesn't count: a hitch is not a slow machine (a tier change itself
+ * rebuilds the world and every shader, so it must never be triggered by one).
  * FPS comfortably above target for 10 s → raise DPR back up to the tier max.
  */
 export function PerfMonitor() {
   const gl = useThree((s) => s.gl);
   const setDpr = useThree((s) => s.setDpr);
-  const acc = useRef({ frames: 0, time: 0, below: 0, above: 0, lastNow: 0 });
+  const acc = useRef({ frames: 0, time: 0, below: 0, above: 0, lastNow: 0, worst: 0, playingSince: 0, dprDrops: 0 });
 
   useFrame((_, dt) => {
     const a = acc.current;
@@ -25,6 +29,7 @@ export function PerfMonitor() {
       const ms = now - a.lastNow;
       perfStats.frameMs = ms;
       if (ms > FRAME_HITCH_MS) perfStats.hitches++;
+      a.worst = Math.max(a.worst, ms);
     }
     a.lastNow = now;
     a.frames++;
@@ -44,9 +49,13 @@ export function PerfMonitor() {
     if (mem) perfStats.heapMB = mem.usedJSHeapSize / 1048576;
     a.frames = 0;
     a.time = 0;
+    const stalled = a.worst > 300;
+    a.worst = 0;
 
     const g = useGame.getState();
-    if (g.quality !== 'auto' || g.phase !== 'playing') return;
+    if (g.phase !== 'playing') a.playingSince = 0;
+    else if (!a.playingSince) a.playingSince = now;
+    if (g.quality !== 'auto' || g.phase !== 'playing' || now - a.playingSince < 20000 || stalled) return;
     const budget = BUDGETS[g.tier];
     if (perfStats.fps < budget.targetFps - 2) {
       a.below++;
@@ -57,18 +66,19 @@ export function PerfMonitor() {
     } else {
       a.below = a.above = 0;
     }
-    if (a.below >= 3) {
+    if (a.below >= 3 && g.dpr > DPR_MIN + 0.01) {
       a.below = 0;
-      if (g.dpr > DPR_MIN + 0.01) {
-        const d = Math.max(DPR_MIN, g.dpr - 0.25);
-        g.setDpr(d);
-        setDpr(d);
-      } else if (g.tier !== 'low') {
-        g.setTier(TIER_DOWN[g.tier]);
-      }
+      const d = Math.max(DPR_MIN, g.dpr - 0.25);
+      g.setDpr(d);
+      setDpr(d);
+    } else if (a.below >= 3) {
+      // the tier itself is chosen while loading (app/Game Ready: measured frames, behind the
+      // splash); in play only the resolution adapts: a tier change rebuilds the world and froze
+      // the game for 7-9 s. Choosing a tier by hand (the quality menu) still works.
+      a.below = 0;
     } else if (a.above >= 10) {
       a.above = 0;
-      const max = Math.min(budget.dprMax, window.devicePixelRatio);
+      const max = Math.min(lite.on ? LITE_DPR : budget.dprMax, window.devicePixelRatio);
       if (g.dpr < max - 0.01) {
         const d = Math.min(max, g.dpr + 0.25);
         g.setDpr(d);

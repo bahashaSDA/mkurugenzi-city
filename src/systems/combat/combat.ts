@@ -1,4 +1,5 @@
 import { playerAnim } from '../player/AbelModel';
+import { occ } from '../vehicles/occupancy';
 import { playerPosition, playerView } from '../player/playerState';
 import { input } from '../input';
 import { drive } from '../driving/state';
@@ -74,6 +75,11 @@ export function addCombatant(init: Partial<Combatant> & { x: number; z: number }
 export function removeCombatant(id: number) {
   combatants.delete(id);
 }
+/** (Re-)register a combatant: effects mount twice in React dev, so the mount puts it back. */
+export function keepCombatant(c: Combatant) {
+  combatants.set(c.id, c);
+  return () => removeCombatant(c.id);
+}
 
 // ------------------------------------------------------------------ Abel's attacks
 const PUNCHES: { clip: string; ms: number; impact: number; dmg: number; reach: number }[] = [
@@ -89,7 +95,7 @@ const combo = { i: 0, last: 0, busyUntil: 0 };
 const pending: { at: number; dmg: number; reach: number }[] = [];
 
 function canFight() {
-  return !drive.active && ride.vehicle < 0 && !playerAnim.swimming && !playerAnim.down && !useHealth.getState().wasted && !useCutscene.getState().active;
+  return !drive.active && ride.vehicle < 0 && occ.phase === 'walking' && !playerAnim.swimming && !playerAnim.down && !useHealth.getState().wasted && !useCutscene.getState().active;
 }
 
 /** Nearest opponent in front (within the cone) or, failing that, anyone close: soft lock-on. */

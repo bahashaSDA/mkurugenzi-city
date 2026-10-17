@@ -7,9 +7,11 @@ import { KiberaDrains } from '../kibera/Drains';
 import { KIBERA_POLE_LINES } from '../kibera/layout';
 import { Cables } from '../../world/Cables';
 import { getHubLayout } from './layout';
+import { heightAt } from '../../world/heights';
 import { useInteractables, type Interactable } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
 import { SHOPS } from '../../game/catalog';
+import { registerSpot, serve, setGreetings, type ServiceSpot } from '../../systems/npc/Attendants';
 import { KIBERA_HALLS } from '../kibera/layout';
 import { loadContent, onlyAvailable } from '../../content/episodes';
 
@@ -47,29 +49,42 @@ function hallInteractables(): Interactable[] {
   }));
 }
 
-// Which kit pieces are shops (piece -> shop id) and how far in front of the piece you stand.
-const SHOP_OF: Record<string, [string, number]> = {
-  kiosk_duka: ['kiosk', 1.9],
-  kiosk_pesa: ['kiosk', 1.9],
+// Which kit pieces are shops: shop id, where the customer stands (in front), and where the
+// attendant works (piece-local forward offset, from the kit geometry: inside the kiosk window,
+// behind the stall table, on the bench of a ground stall, inside the chips counter ring).
+const SHOP_OF: Record<string, { shop: string; front: number; staff: number; model: ServiceSpot['model']; name: string; pose?: 'sit' }> = {
+  kiosk_duka: { shop: 'kiosk', front: 1.9, staff: 0.05, model: 'auntie', name: 'Mama Wanjiku' },
+  kiosk_pesa: { shop: 'kiosk', front: 1.9, staff: 0.05, model: 'office', name: 'Agent' },
   // shop_hoteli / shop_butchery / shop_boutique: walk in (interiors) and buy at the counter
-  chips_booth: ['chips', 2.4],
-  market_stall: ['market', 2.0],
-  market_stall_b: ['market', 2.0],
+  chips_booth: { shop: 'chips', front: 2.4, staff: -0.15, model: 'hustler', name: 'Chipo Express' },
+  market_stall: { shop: 'market', front: 2.0, staff: -0.95, model: 'mama_mboga', name: 'Mama Mboga' },
+  market_stall_b: { shop: 'market', front: 2.0, staff: -1.05, model: 'mama_mboga', name: 'Mama Mboga', pose: 'sit' },
 };
 
 function shopInteractables(placements: ReturnType<typeof getHubLayout>): Interactable[] {
   return placements.flatMap((p, i) => {
     const def = SHOP_OF[p.piece];
     if (!def) return [];
-    const [shop, d] = def;
     return [{
       id: `shop-${i}`,
-      x: p.x + Math.sin(p.rotY) * d,
-      z: p.z + Math.cos(p.rotY) * d,
+      x: p.x + Math.sin(p.rotY) * def.front,
+      z: p.z + Math.cos(p.rotY) * def.front,
       radius: 1.8,
-      label: `Buy at ${SHOPS[shop]!.title}`,
-      use: () => useEconomy.getState().openShop(shop),
+      label: `Buy at ${SHOPS[def.shop]!.title}`,
+      use: () => serve(`hub-${i}`),
     }];
+  });
+}
+
+/** The person behind each hub counter. */
+function shopStaff(placements: ReturnType<typeof getHubLayout>): ServiceSpot[] {
+  return placements.flatMap((p, i) => {
+    const def = SHOP_OF[p.piece];
+    if (!def) return [];
+    const x = p.x + Math.sin(p.rotY) * def.staff;
+    const z = p.z + Math.cos(p.rotY) * def.staff;
+    const female = def.model === 'auntie' || def.model === 'mama_mboga' || def.model === 'young_woman';
+    return [{ id: `hub-${i}`, x, z, y: p.y ?? heightAt(x, z), facing: p.rotY, model: def.model, name: def.name, who: female ? 'attendant_f' : 'attendant_m', shop: def.shop, pose: def.pose }];
   });
 }
 
@@ -96,6 +111,11 @@ export function Hub({ render = true }: { render?: boolean }) {
   const placements = useMemo(() => getHubLayout(), []);
   const shops = useMemo(() => [...shopInteractables(placements), ...hallInteractables()], [placements]);
   useInteractables(shops);
+  useEffect(() => {
+    const offs = shopStaff(placements).map(registerSpot);
+    setGreetings(Object.fromEntries(Object.values(SHOPS).map((d) => [d.id, d.greeting])));
+    return () => offs.forEach((f) => f());
+  }, [placements]);
   const hubPlacements = useMemo(() => placements.filter((p) => hubKit.has(p.piece)), [placements, hubKit]);
   const streetPlacements = useMemo(() => placements.filter((p) => streetKit.has(p.piece)), [placements, streetKit]);
   const marketPlacements = useMemo(() => placements.filter((p) => marketKit.has(p.piece)), [placements, marketKit]);

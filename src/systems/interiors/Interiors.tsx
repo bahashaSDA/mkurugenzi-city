@@ -13,7 +13,20 @@ import { loadContent, onlyAvailable } from '../../content/episodes';
 import { playerPosition, teleport } from '../player/playerState';
 import { drive } from '../driving/state';
 import { ride } from '../vehicles/state';
-import { INTERIOR_DEPTH, ROOMS, useInterior, type Door, type RoomType } from './rooms';
+import { INTERIOR_DEPTH, ROOMS, ROOM_SEATS, SCHOOL_PEOPLE, useInterior, type Door, type RoomType } from './rooms';
+import { claimSeat, registerSeat, releaseSeat } from '../../game/seating';
+import { registerSpot, serve, type ServiceSpot } from '../npc/Attendants';
+import { findSecret } from '../../game/collectibles';
+import { rig } from '../../world/LightRig';
+
+/** Who works the counter in each kind of shop. */
+const STAFF: Record<string, { model: ServiceSpot['model']; name: string; female: boolean }> = {
+  hoteli: { model: 'mama_mboga', name: 'Mama Chai', female: true },
+  butchery: { model: 'worker', name: 'Butcher', female: false },
+  boutique: { model: 'young_woman', name: 'Boutique attendant', female: true },
+  kiosk: { model: 'elder', name: 'Mzee Duka', female: false },
+  kinyozi: { model: 'worker', name: 'Barber Kevo', female: false },
+};
 
 // GTA-style interiors: E at (almost) any door fades to black and puts Abel inside a furnished
 // room; E at the room's door takes him back out. Only the room you are in exists.
@@ -29,7 +42,8 @@ const ROOM_OF: Record<string, [RoomType, string, string?]> = {
   shop_butchery: ['int_shop', 'Nyama Bora Butchery', 'butchery'],
   shop_boutique: ['int_shop', 'Utafraaaia Boutique', 'boutique'],
   shop_hardware: ['int_shop', 'the duka', 'kiosk'],
-  shop_barber: ['int_shop', 'the duka', 'kiosk'],
+  shop_barber: ['int_kinyozi', 'Kinyozi Fresh Cuts', 'kinyozi'],
+  school_block: ['int_school', "Freddie's School"],
   shop_electronics: ['int_shop', 'the duka', 'kiosk'],
   shop_mshop: ['int_shop', 'the duka', 'kiosk'],
   house_bungalow_a: ['int_house', 'home'],
@@ -182,7 +196,11 @@ function ActiveRoom({ door, kit }: { door: Door; kit: Kit }) {
       id: `room-${i}`, x: origin[0] + sp.x, z: origin[2] + sp.z, y, radius: 1.4, label: sp.label, key: 'KeyE',
       use: () => {
         const eco = useEconomy.getState();
-        if (sp.kind === 'shop' && door.shop) eco.openShop(door.shop);
+        if (sp.kind === 'shop' && door.shop) serve(`room-${door.x},${door.z}`);
+        else if (sp.kind === 'read' && sp.text) eco.toast(sp.text, 'info');
+        else if (sp.kind === 'collect' && sp.item) {
+          if (!findSecret(sp.item)) eco.toast('The old class photo. One face is circled in red.', 'info');
+        }
         else if (sp.kind === 'tv') {
           // the home TV plays a real Mkurugenzi episode (YouTube embed, like the video halls)
           void loadContent()
@@ -206,6 +224,59 @@ function ActiveRoom({ door, kit }: { door: Door; kit: Kit }) {
     }));
     spots.push({ id: 'room-exit', x: origin[0], z: origin[2] + room.depth / 2 - 0.35, y, radius: 1.3, label: 'Leave', key: 'KeyE', use: () => exit(door) });
     const offs = spots.map(register);
+    // the person behind the counter (positions from blender/scripts/build_interior_kit.py: the duka
+    // counter runs across the room at z -1.6 with the soda fridge behind it; the hoteli counter runs
+    // along the east wall at x 3.3)
+    const staff = door.shop ? STAFF[door.shop] : undefined;
+    if (staff && (door.room === 'int_shop' || door.room === 'int_hoteli' || door.room === 'int_kinyozi')) {
+      // the barber stands beside his chair, ready to work (faces the chair and the mirror)
+      const [lx, lz, facing] = door.room === 'int_hoteli' ? [3.78, 0.3, -Math.PI / 2] : door.room === 'int_kinyozi' ? [0.68, -1.25, Math.PI] : [-1.0, -2.2, 0];
+      offs.push(
+        registerSpot({
+          id: `room-${door.x},${door.z}`, x: origin[0] + lx, y: origin[1], z: origin[2] + lz, facing,
+          model: staff.model, name: staff.name, who: staff.female ? 'attendant_f' : 'attendant_m', shop: door.shop!,
+        }),
+      );
+    }
+    // the room's seats (hoteli benches, the barber chair and waiting bench)
+    for (const st of ROOM_SEATS[door.room] ?? []) {
+      offs.push(registerSeat({
+        id: `${door.x},${door.z}:${st.id}`, x: origin[0] + st.x, y: origin[1], z: origin[2] + st.z, facing: st.facing,
+        exit: { x: origin[0] + st.ex, y: origin[1], z: origin[2] + st.ez }, kind: st.kind,
+        label: st.id === 'barber-chair' ? 'Sit in the barber chair' : undefined,
+        // sitting in the chair is asking for a cut: the barber comes over with his styles
+        onSit: st.id === 'barber-chair' && door.shop ? () => serve(`room-${door.x},${door.z}`) : undefined,
+      }));
+    }
+    // the school's people: the teacher at the board, the receptionist, pupils at their desks (their
+    // seats are taken, the rest are free for Abel)
+    if (door.room === 'int_school') {
+      for (const p of SCHOOL_PEOPLE) {
+        offs.push(registerSpot({
+          id: `school-${door.x},${door.z}-${p.id}`, x: origin[0] + p.x, y: origin[1], z: origin[2] + p.z, facing: p.facing,
+          model: p.model, pose: p.pose, name: p.name, who: p.who, shop: '', greet: p.greet,
+        }));
+        if (p.seat) {
+          const id = `${door.x},${door.z}:${p.seat}`;
+          claimSeat(id);
+          offs.push(() => releaseSeat(id));
+        }
+      }
+    }
+    // the room's lamps: the rig's two permanent point lights (world/LightRig), moved here and lit
+    // (a light added on entering would recompile every material in view)
+    const [bulb, window_] = rig.rooms;
+    if (bulb && window_) {
+      bulb.position.set(origin[0], origin[1] + 2.2, origin[2]);
+      bulb.intensity = 14;
+      window_.position.set(origin[0], origin[1] + 1.6, origin[2] + room.depth / 2 - 1);
+      window_.intensity = 4;
+      offs.push(() => {
+        bulb.intensity = 0;
+        window_.intensity = 0;
+        bulb.position.y = window_.position.y = -500;
+      });
+    }
     return () => offs.forEach((f) => f());
   }, [door, origin, room]);
 
@@ -216,8 +287,6 @@ function ActiveRoom({ door, kit }: { door: Door; kit: Kit }) {
         {def.lods[0]!.map((p, i) => (
           <mesh key={i} geometry={p.geometry} material={p.material} matrix={p.local} matrixAutoUpdate={false} receiveShadow castShadow={false} />
         ))}
-        <pointLight position={[0, 2.2, 0]} intensity={14} distance={12} decay={1.6} color="#ffd9a0" />
-        <pointLight position={[0, 1.6, room.depth / 2 - 1]} intensity={4} distance={8} decay={1.6} color="#dbe8ff" />
       </group>
       <RigidBody type="fixed" colliders={false} position={origin}>
         {def.colliders.map((c, i) =>

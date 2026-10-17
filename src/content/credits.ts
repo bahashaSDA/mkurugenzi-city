@@ -32,3 +32,28 @@ export const MODEL_CREDITS: Credit[] = [
   { what: 'Tree', title: 'Coconut Palm', author: 'evolveduk', licence: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/coconut-palm-26e787f2ff2e4c0fb004c3b0210805a3' },
   { what: 'Tree', title: 'Realistic Palm Tree Free', author: 'Next Spring', licence: 'CC BY 4.0', url: 'https://sketchfab.com/3d-models/realistic-palm-tree-free-39052ea764c945858449e699318efa53' },
 ];
+
+// Sound. The matatu mixes and the ambience beds were extracted from YouTube with the owner's
+// permission (the owner states they hold the rights); confirm those rights cover a public release.
+// Bird and insect one-shots are from Wikimedia Commons: each file page names its author and licence.
+// Voices are generated offline with Piper TTS (tools/gen-voices.py).
+export const AUDIO_CREDITS: Credit[] = [
+  { what: 'Matatu mix', title: 'Nganya Drive Mix Vol 2', author: 'DJ Mysticc', licence: 'used with permission', url: 'https://youtu.be/irTMtQPJQg0' },
+  { what: 'Matatu mix', title: 'Nganya Vibes 01', author: 'DJ Pasamiz', licence: 'used with permission', url: 'https://youtu.be/DR_j_q9OVYA' },
+  { what: 'Matatu mix', title: 'Nganya Vibes 02', author: 'DJ Pasamiz', licence: 'used with permission', url: 'https://youtu.be/-jhwGyHPnPY' },
+  { what: 'Ambience', title: 'Nairobi street, day', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/MIh3We_xJO8' },
+  { what: 'Ambience', title: 'Nairobi night', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/UM9AT5U7WEc' },
+  { what: 'Ambience', title: 'Market', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/7EEOCB3urRg' },
+  { what: 'Ambience', title: 'Suburban morning', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/qv3_rQ1GEL8' },
+  { what: 'Ambience', title: 'Amboseli birds', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/mS11b7dSuxI' },
+  { what: 'Ambience', title: 'Laikipia birds', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/Rav4yNVBYmA' },
+  { what: 'Ambience', title: 'Wind', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/sFEUL523ERg' },
+  { what: 'Ambience', title: 'Tsavo night', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/bsuYcwlzr2w' },
+  { what: 'Ambience', title: 'Diani sea', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/HBIS_aHxr60' },
+  { what: 'Ambience', title: 'Dusk', author: 'YouTube', licence: 'used with permission', url: 'https://youtu.be/pjsDqXcreDw' },
+  { what: 'Hadada ibis', title: 'Bostrychia hagedash (3 recordings)', author: 'Wikimedia Commons', licence: 'see file page', url: 'https://commons.wikimedia.org/wiki/File:Bostrychia_hagedash_call.flac' },
+  { what: 'Rooster', title: 'Rooster crowing (3 recordings)', author: 'Wikimedia Commons', licence: 'see file page', url: 'https://commons.wikimedia.org/wiki/File:Rooster_crowing.ogg' },
+  { what: 'Songbirds', title: 'Red-vented Bulbul XC129368, African Pied Wagtail XC366687', author: 'Wikimedia Commons / xeno-canto', licence: 'see file page', url: 'https://commons.wikimedia.org/wiki/File:Motacilla_aguimp_-_African_Pied_Wagtail_XC366687.mp3' },
+  { what: 'Crickets', title: 'Field cricket; Ringing cricket winding down', author: 'Wikimedia Commons', licence: 'see file page', url: 'https://commons.wikimedia.org/wiki/File:Field_cricket_unedited.ogg' },
+  { what: 'Voices', title: 'Piper TTS (sw_CD lanfrica, en_GB alan, en_GB southern/northern English)', author: 'Rhasspy / OpenSLR 83', licence: 'CC BY-SA 4.0 and others', url: 'https://huggingface.co/rhasspy/piper-voices' },
+];

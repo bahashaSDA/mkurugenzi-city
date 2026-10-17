@@ -54,7 +54,11 @@ export const useTheatre = create<TheatreState>((set, get) => ({
 }));
 
 /** Where Abel sits (set by the theatre, read by the player controller). Feet position, facing. */
-export const seat = { active: false, x: 0, y: 0, z: 0, facing: 0, camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0, exitX: 0, exitY: 0, exitZ: 0 };
+export const seat = {
+  active: false, x: 0, y: 0, z: 0, facing: 0, exitX: 0, exitY: 0, exitZ: 0,
+  /** a fixed view while seated (the theatre screen, the barber's mirror); false: the normal camera */
+  fixedCam: true, camX: 0, camY: 0, camZ: 0, lookX: 0, lookY: 0, lookZ: 0,
+};
 
 /** 0 outside, 1 inside a big building: the sky light dims like your eyes adjusting. */
 export const indoor = { target: 0, value: 0 };

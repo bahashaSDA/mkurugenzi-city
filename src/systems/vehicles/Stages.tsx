@@ -3,8 +3,10 @@ import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { register } from '../../game/interactables';
+import { registerSeat } from '../../game/seating';
 import { onKeyPress } from '../input';
 import { routeSamples } from './routes';
+import { nearRoad } from '../../config/roads';
 import { hail } from './Vehicles';
 
 // Matatu stages: a roadside shelter (posts, mabati roof, bench, stage sign) at every stop on the
@@ -88,22 +90,43 @@ function buildShelters(spots: StageSpot[]) {
   return { shelters, signMesh };
 }
 
-export function Stages() {
-  const spots = useMemo<StageSpot[]>(() => {
+/** Every stage shelter (one per stop, merged within 8 m): name, kerbside position, facing. */
+let stageCache: StageSpot[] | null = null;
+export function stageSpots(): StageSpot[] {
+  if (stageCache) return stageCache;
+  const r = (() => {
     const out: StageSpot[] = [];
     for (const rs of Object.values(routeSamples())) {
       for (const { s, stop } of rs.stops) {
         const i = Math.floor(s / rs.step);
         const h = rs.heading[i]!;
-        // kerb side = left of travel: (cos h, -sin h)
-        const x = rs.x[i]! + Math.cos(h) * 4.2;
-        const z = rs.z[i]! - Math.sin(h) * 4.2;
+        // kerb side = left of travel: (cos h, -sin h). The shelter stands on the pavement: step out
+        // from the lane until its whole 2 m roof is clear of every road (a fixed offset put it on
+        // the tarmac of wider roads)
+        // at a junction corner the kerb is hemmed in by another road: slide along the kerb too
+        let x = 0;
+        let z = 0;
+        search: for (const along of [0, -6, 6, -12, 12, -18, 18])
+          for (let off = 3; off < 16; off += 0.25) {
+            const px = rs.x[i]! + Math.sin(h) * along + Math.cos(h) * off;
+            const pz = rs.z[i]! + Math.cos(h) * along - Math.sin(h) * off;
+            if (!nearRoad(px, pz, 1.15)) {
+              x = px;
+              z = pz;
+              break search;
+            }
+          }
         if (out.some((o) => Math.hypot(o.x - x, o.z - z) < 8)) continue;
         out.push({ name: stop.name, x, z, y: rs.y[i]!, rotY: h - Math.PI / 2 }); // open side faces the road
       }
     }
     return out;
-  }, []);
+  })();
+  return (stageCache = r);
+}
+
+export function Stages() {
+  const spots = useMemo(() => stageSpots(), []);
   const merged = useMemo(() => buildShelters(spots), [spots]);
 
   useEffect(() => {
@@ -111,6 +134,16 @@ export function Stages() {
       register({ id: `stage-${i}`, x: p.x, z: p.z, radius: 4, label: `Wave down a matatu (${p.name})`, key: 'KeyE', use: hail }),
     );
     offs.push(onKeyPress('KeyH', hail));
+    // the shelter bench seats three, facing the road (bench at local z -0.55, 0.45 m high)
+    spots.forEach((p, i) => {
+      const c = Math.cos(p.rotY);
+      const sn = Math.sin(p.rotY);
+      const at = (lx: number, lz: number) => ({ x: p.x + lx * c + lz * sn, y: p.y, z: p.z - lx * sn + lz * c });
+      for (const lx of [-1, 0, 1]) {
+        const hip = at(lx, -0.5);
+        offs.push(registerSeat({ id: `stage-${i}-${lx}`, ...hip, facing: p.rotY, exit: at(lx, 0.25), kind: 'bench', label: `Sit and wait (${p.name})` }));
+      }
+    });
     return () => offs.forEach((f) => f());
   }, [spots]);
 

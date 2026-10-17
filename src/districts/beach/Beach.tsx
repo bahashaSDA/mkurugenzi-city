@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
+import { registerSpot, serve } from '../../systems/npc/Attendants';
 import { KitInstances, type Placement } from '../../world/kit/KitInstances';
 import { useKit } from '../../world/kit/useKit';
 import { REAL_TREES_KIT_URL } from '../hub/Hub';
@@ -9,7 +10,6 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { COAST_ROAD_X, shoreX } from '../../config/coast';
 import { heightAt } from '../../world/heights';
 import { register } from '../../game/interactables';
-import { useEconomy } from '../../game/economy';
 import { playerPosition } from '../../systems/player/playerState';
 import { oceanTime, waveHeight } from '../../world/Ocean';
 import { place } from '../../game/places';
@@ -120,8 +120,9 @@ export function Beach() {
       const roof = new THREE.Mesh(new THREE.ConeGeometry(4.3, 1.8, 4, 1), new THREE.MeshStandardMaterial({ color: '#b8995c', roughness: 1 }));
       roof.position.y = 3.4;
       roof.rotation.y = Math.PI / 4;
+      // the counter stands out from the hut wall (z 1.7) with a service gap for the attendant
       const counter = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.0, 0.6), new THREE.MeshStandardMaterial({ color: '#7a5a3a', roughness: 0.8 }));
-      counter.position.set(0, 0.5, 2.0);
+      counter.position.set(0, 0.5, 2.6);
       const board = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.05), new THREE.MeshStandardMaterial({ map: sign, emissive: '#ffffff', emissiveMap: sign, emissiveIntensity: 0.35 }));
       board.position.set(0, 2.45, 1.72);
       for (const m of [wall, roof, counter]) {
@@ -152,9 +153,13 @@ export function Beach() {
   // kiosk counters sell cold drinks
   useEffect(() => {
     const offs = plan.kiosks.map((k, i) =>
-      register({ id: `beach-kiosk-${i}`, x: k.x + 2.6, z: k.z, radius: 2.6, label: 'Buy a cold drink (Makuti Kiosk)', key: 'KeyE', use: () => useEconomy.getState().openShop('beach') }),
+      register({ id: `beach-kiosk-${i}`, x: k.x + 3.45, z: k.z, radius: 2.6, label: 'Buy a cold drink (Makuti Kiosk)', key: 'KeyE', use: () => serve(`beach-${i}`) }),
     );
-    return () => offs.forEach((f) => f());
+    // the attendant in the gap between the hut and the counter, facing the sea and the customers
+    const staff = plan.kiosks.map((k, i) =>
+      registerSpot({ id: `beach-${i}`, x: k.x + 2.0, z: k.z, y: heightAt(k.x + 2.0, k.z), facing: Math.PI / 2, model: 'young_woman', name: 'Makuti Kiosk', who: 'attendant_f', shop: 'beach' }),
+    );
+    return () => [...offs, ...staff].forEach((f) => f());
   }, [plan]);
 
   const palmPlacements = useMemo<Placement[]>(
@@ -175,7 +180,11 @@ export function Beach() {
       ))}
       <RigidBody type="fixed" colliders={false}>
         {plan.kiosks.map((k, i) => (
-          <CuboidCollider key={i} args={[1.7, 1.3, 2.5]} position={[k.x, heightAt(k.x, k.z) + 1.3, k.z]} />
+          <group key={i}>
+            <CuboidCollider args={[1.7, 1.3, 2.5]} position={[k.x, heightAt(k.x, k.z) + 1.3, k.z]} />
+            {/* the counter (people lean on it, they don't walk through it) */}
+            <CuboidCollider args={[0.3, 0.5, 2.6]} position={[k.x + 2.6, heightAt(k.x + 2.6, k.z) + 0.5, k.z]} />
+          </group>
         ))}
       </RigidBody>
     </>

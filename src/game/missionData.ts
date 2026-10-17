@@ -1,4 +1,5 @@
-import { drive } from '../systems/driving/state';
+import { drive, ownVehicle } from '../systems/driving/state';
+import { occ } from '../systems/vehicles/occupancy';
 import { ride } from '../systems/vehicles/state';
 import { place, type Place } from './places';
 import type { GameEvent } from './events';
@@ -88,12 +89,14 @@ const tripTimer = (to: string, d: number, speed = 13) => (from: { x: number; z: 
   Math.round(25 + (dist(from, place(to)) / speed) * (1.9 - 0.6 * d));
 
 const go = (where: string, text = `Go to {${where}}.`, r = 8): Step => ({ text, at: near(where, r) });
-const getCar = (): Step => ({ text: 'Get a {car} (F at the driver door of any parked car).', done: () => drive.active, needCar: true });
+// seated in your own vehicle (a car, or a boda boda: both get you there)
+const inVehicle = () => ownVehicle() && occ.phase === 'seated';
+const getCar = (): Step => ({ text: 'Get a {car} (F near any parked car).', done: () => drive.active && occ.phase === 'seated', needCar: true });
 const driveTo = (where: string, d: number, text = `Drive to {${where}}.`, timed = true): Step => ({
   text,
   at: near(where, 14),
   needCar: true,
-  done: () => drive.active,
+  done: inVehicle,
   timer: timed ? tripTimer(where, d) : undefined,
 });
 const use = (where: string, action: string, text: string, r = 6): Step => ({ text, at: near(where, r), action });
@@ -115,7 +118,7 @@ const watchHall = (where: string): Step => ({
   done: (e) => e?.type === 'watch',
 });
 const rideMatatu = (to: string, _stop: string, sx: number, sz: number): Step[] => [
-  { text: 'Board a {matatu} at the stage (F).', at: near('the matatu stage', 12), done: () => ride.vehicle >= 0 },
+  { text: 'Board a {matatu} at the stage (F).', at: near('the matatu stage', 12), done: () => ride.vehicle >= 0 && occ.phase === 'seated' },
   { text: `Get off at {${to}}.`, at: () => ({ x: sx, z: sz, r: 60 }), done: (e) => e?.type === 'alight' && Math.hypot(e.x - sx, e.z - sz) < 70 },
 ];
 const fight = (where: string, count: number, d: number, who: string, text: string): Step => ({
@@ -161,7 +164,7 @@ const raceLegs = (points: string[], d: number): Step[] =>
     text: i === points.length - 1 ? `Final checkpoint: {${p}}!` : `Checkpoint ${i + 1}: {${p}}.`,
     at: near(p, 18),
     needCar: true,
-    done: () => drive.active,
+    done: inVehicle,
     timer: tripTimer(p, d, 16),
   }));
 

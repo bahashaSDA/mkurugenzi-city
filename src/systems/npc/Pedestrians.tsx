@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import { CapsuleCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { useGame } from '../../app/store';
-import { getKTX2Loader } from '../../world/ktx2';
 import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 import { playerPosition } from '../player/playerState';
 import { getHubLayout, KERB_E, KERB_W, MARKET } from '../../districts/hub/layout';
@@ -16,7 +14,10 @@ import { register } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
 import { useMissions } from '../../game/missions';
 import { emit } from '../../game/events';
-import { addCombatant, fightBrain, removeCombatant, type Combatant } from '../combat/combat';
+import { say } from '../audio/voice';
+import { pickTalk, STREET_BARKS, STREET_TALK, streetVoice } from '../../game/streetTalk';
+import { addCombatant, fightBrain, keepCombatant, type Combatant } from '../combat/combat';
+import { useCharacterModels } from '../characterModels';
 
 /** One-shot clips (fights): play once and hold the last pose. */
 export const ONE_SHOT = new Set(['Yes', 'Knockdown', 'GetUp', 'Punch_R', 'Punch_L', 'Punch_Cross', 'Kick']);
@@ -217,24 +218,12 @@ const budget = { frame: -1, n: 0 };
 
 const _toPlayer = new THREE.Vector3();
 
-// Talking to people (E): a name and a line, Sheng/Swahili as you'd hear it in the mtaa.
-const NAMES = ['Wanjiru', 'Otieno', 'Kevo', 'Akinyi', 'Mzee Kamau', 'Shiko', 'Brayo', 'Mama Atieno', 'Njeri', 'Baraka', 'Wambui', 'Juma'];
-const LINES = [
-  'Mkurugenzi! Ile story ya jana ilinibamba sana!',
-  'Makosa Ni Yangu ilinifanya nilie, si uongo.',
-  'Utafraaaia! Hiyo sasa ni slogan yangu.',
-  'Leo mat zimejaa. Ukienda stage, panda ile nganya ya Route 46.',
-  'Boss, unajua video hall ya Kibera inaonyesha stories zako kila jioni?',
-  'Niko na story pia. Siku moja nitakuambia, utaitengeneza movie.',
-  'Chipo Express wako na chips masala moto. Jaribu!',
-  'Untying Kantai bado iko kwa kichwa yangu, aki.',
-  'Wakurugenzi tuko pamoja!',
-  'Sasa Mkurugenzi! Uko poa? Mambo ya podcast?',
-  'Usinunue soda kwa kiosk ya mwisho, iko warm. Haha!',
-  'Hiyo flat cap ni fire, boss. Iko wapi yangu?',
-  'Nimeona ile hoodie ya Black Excellence. Lazima ninunue!',
-  'Ukipita Rocky Ridge jioni, sunset huko ni kama movie.',
-];
+// Talking to people (E) and passers-by: Nairobi Sheng (src/game/streetTalk), voiced. Names
+// match the person's model (a woman gets a woman's name and voice).
+const NAMES_F = ['Wanjiru', 'Akinyi', 'Shiko', 'Mama Atieno', 'Njeri', 'Wambui'];
+const NAMES_M = ['Otieno', 'Kevo', 'Mzee Kamau', 'Brayo', 'Baraka', 'Juma'];
+/** One passer-by remark at a time across the whole street, every 7-16 s at most. */
+const bark = { next: performance.now() + 6000 };
 const CASTING = ['Audition? Mimi? Sawa, nitakuja!', 'Wueh! Nitakuwa kwa movie ya Mkurugenzi? Niko ready!', 'Sema siku na saa, nitafika na rafiki yangu.'];
 
 function Person({ agent, world, source }: { agent: Agent; world: World; source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] } }) {
@@ -259,10 +248,15 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
   }, [source, tier]);
 
   const st = useRef({ cur: '', x: agent.x, z: agent.z, rotY: agent.rotY, pause: 0, nodUntil: 0, t: Math.random() * 10, talkUntil: 0, shadow: true, detail: true, fighting: false, clipUntil: 0 });
-  const name = useMemo(() => NAMES[Math.floor(Math.random() * NAMES.length)]!, []);
+  const female = /lady|mama|auntie|woman/.test(variantsFor(tier)[agent.variant] ?? '');
+  const name = useMemo(() => {
+    const pool = female ? NAMES_F : NAMES_M;
+    return pool[Math.floor(Math.random() * pool.length)]!;
+  }, [female]);
+  const voice = streetVoice(name, female);
   // fights: every pedestrian can be hit, fight back, run, fall and get up
   const fighter = useMemo<Combatant>(() => addCombatant({ x: agent.x, z: agent.z, tag: 'street', hp: 55 + Math.random() * 40, name }), [agent, name]);
-  useEffect(() => () => removeCombatant(fighter.id), [fighter]);
+  useEffect(() => keepCombatant(fighter), [fighter]);
   const talk = useMemo(
     () => ({
       id: `npc-${Math.random().toString(36).slice(2)}`, x: 1e9, z: 1e9, radius: 0, label: 'Talk', key: 'KeyE' as const, priority: 1,
@@ -271,8 +265,12 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
         s.talkUntil = s.t + 5;
         const area = useEconomy.getState().area.toLowerCase();
         const casting = useMissions.getState().active === 'casting' && area.includes('market');
-        const pool = casting ? CASTING : LINES;
-        useMissions.getState().say(name, pool[Math.floor(Math.random() * pool.length)]!, 4500);
+        const pos = { x: s.x, y: heightAt(s.x, s.z) + 1.6, z: s.z };
+        if (casting) say({ who: voice, name, text: CASTING[Math.floor(Math.random() * CASTING.length)]!, pos });
+        else {
+          const l = pickTalk(STREET_TALK);
+          say({ who: voice, name, text: l.sw, en: l.en, pos });
+        }
         emit({ type: 'talk', npc: 0, area });
         talk.radius = 0; // one chat per person per encounter
         setTimeout(() => (talk.radius = 1.9), 20000);
@@ -330,6 +328,17 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
     const cam = state.camera.position;
     const camD = Math.hypot(s.x - cam.x, s.z - cam.z);
     const far = camD > ANIMATE_DIST;
+    // a passing remark, in Sheng, when Abel walks by (one voice on the street at a time)
+    const now = performance.now();
+    if (now > bark.next && !far && s.t > s.talkUntil && fighter.state === 'calm') {
+      const dP = Math.hypot(s.x - playerPosition.x, s.z - playerPosition.z);
+      if (dP > 2.5 && dP < 11) {
+        bark.next = now + 7000 + Math.random() * 9000;
+        const l = pickTalk(STREET_BARKS);
+        say({ who: voice, name, text: l.sw, en: l.en, pos: { x: s.x, y: heightAt(s.x, s.z) + 1.6, z: s.z }, subtitle: false });
+        s.talkUntil = s.t + 2.5;
+      }
+    }
     g.visible = !far;
     const wantShadow = camD < SHADOW_DIST && tier !== 'low';
     const wantDetail = camD < DETAIL_DIST;
@@ -470,12 +479,9 @@ function Person({ agent, world, source }: { agent: Agent; world: World; source: 
 }
 
 export function Pedestrians() {
-  const gl = useThree((s) => s.gl);
   const tier = useGame((s) => s.tier);
   const urls = useMemo(() => variantsFor(tier).map((v) => `/models/npc_${v}.glb`), [tier]);
-  const gltfs = useGLTF(urls, false, true, (loader) => {
-    loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltfs = useCharacterModels(urls);
   const world = useMemo(() => buildWorld(), []);
   const agents = useMemo(() => planAgents(POOL[tier], world, VARIANT_COUNT[tier][0], VARIANT_COUNT[tier][1]), [tier, world]);
   return (

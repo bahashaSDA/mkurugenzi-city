@@ -42,26 +42,46 @@ GLASS = r"(glass|windscreen|windshield|vidrio)"
 # forward ('-y' | '+y' | '-x' | '+x' as found in the import), paint variants (linear RGB) or None
 MODELS = {
     "vehicles": {
+        # passenger door behind the front axle (kerb side): its window is an island, the panel under
+        # it is cut from the body side
         "rv_nganya": dict(file="isuzu_nqr__kenyan_nganya", length=7.6, tris=30000, atlas=2048, forward="-y", glass=r"^window",
+                          door_islands=[((-1.22, -0.28, 0.3, 2.1), 0.7, "swing", (1,), (0.36, 1.14))],
                           variants=[None, None, None], liveries=["rliv_nganya_0", "rliv_nganya_1", "rliv_nganya_2"]),
+        # EU (left-hand drive) Crafter mirrored to a Kenyan right-hand drive: steering wheel on the
+        # right, sliding door on the LEFT (kerb) side; its doors are cut out with hinges
         "rv_matatu": dict(file="volkswagen_crafter", length=5.95, tris=24000, planar=False, per_part=True, atlas=2048, forward="-y",
-                          variants=[None, None, None], liveries=["rliv_matatu_0", "rliv_matatu_1", "rliv_matatu_2"]),
+                          variants=[None, None, None], liveries=["rliv_matatu_0", "rliv_matatu_1", "rliv_matatu_2"], mirror=True,
+                          doors=[(r"_driveDoor_", "swing"), (r"_passengerDoor_", "swing"), (r"_sideDoor_", "slide"),
+                                 (r"_backLeftDoor_", "rear"), (r"_backRightDoor_", "rear")]),
+        # EU Golf mirrored to right-hand drive (Kenya); four doors and the boot cut out with hinges
         "rv_car": dict(file="volkswagen_golf_gti_2025", length=4.28, tris=18000, atlas=2048, forward="+y", paint=r"rojo", clearcoat=r"rojo|material_atlas", weld=False,
-                       strip=r"airbag|lighter_dark_grey|carpet|roofliner|brake_rotor",
+                       strip=r"airbag|lighter_dark_grey|carpet|roofliner|brake_rotor", mirror=True,
+                       doors=[(r"Door_FL", "swing"), (r"Door_FR", "swing"), (r"Door_RL", "swing"), (r"Door_RR", "swing")],
                        variants=[(0.5, 0.01, 0.01), (0.8, 0.8, 0.8), (0.12, 0.13, 0.15), (0.02, 0.06, 0.25)]),
+        # the sliding door (left / kerb side only) is its own islands: cut out so it rolls open at stops
         "rv_hiace": dict(file="toyota_hiace_2005_clean", length=5.38, tris=16000, atlas=2048, forward="+y", paint="auto", livery_nx=0.4,
+                         door_islands=[((-0.72, 0.84, 0.18, 2.1), 0.7, "slide", (1,), (0.24, 1.36))],
                          variants=[None, None, None], liveries=["rliv_matatu_0", "rliv_matatu_1", "rliv_matatu_2"]),
         "rv_ma3": dict(file="tulaga_ma3_minibus", length=7.4, tris=26000, atlas=2048, forward="-y", variants=None),
+        # front passenger door (kerb side), painted on the flat side: cut out as a panel
         "rv_bus": dict(file="stagecoach_bus_kenya", length=10.5, tris=26000, atlas=2048, forward="-y", paint="auto",
+                       door_islands=[((-4.58, -3.7, 0.3, 2.62), 1.0, "swing", (1,), (0.5, 2.56))],
                        variants=[None, None], liveries=["rliv_bus_0", "rliv_bus_1"]),
         "rv_probox": dict(file="toyota_probox", length=4.2, tris=16000, atlas=2048, forward="-y", paint=r"^body1$", recalc=True,
                           variants=[(0.8, 0.8, 0.8), (0.55, 0.56, 0.58), (0.8, 0.8, 0.8)]),
-        "rv_corolla": dict(file="toyota_corolla_e180", length=4.62, tris=18000, atlas=2048, forward="-y", paint=r"main_paint", weld=False,
+        # its doors are separate mesh islands (skin, trim, frame, glass, mirror) inside one object:
+        # door_islands cuts them out by region (y0, y1, z0, z1 in the baked frame; both sides)
+        "rv_corolla": dict(file="toyota_corolla_e180", length=4.62, tris=18000, atlas=2048, forward="-y", paint=r"main_paint", weld=False, mirror=True,
+                           door_islands=[((-1.02, 0.26, 0.22, 1.43), 0.52, "swing"), ((0.16, 1.38, 0.22, 1.43), 0.52, "swing")],
                            variants=[(0.55, 0.56, 0.58), (0.02, 0.02, 0.025), (0.8, 0.8, 0.8)]),
+        # FJ40-style two-door: each door (skin, lining, frame, window) is its own set of islands
         "rv_cruiser": dict(file="toyota_land_cruiser", length=4.2, tris=18000, atlas=2048, forward="-y", paint="auto",
+                           door_islands=[((-0.52, 0.47, 0.6, 2.0), 0.68, "swing")],
                            variants=[(0.8, 0.8, 0.8), (0.12, 0.2, 0.1), (0.5, 0.05, 0.03)]),
-        "rv_graffiti": dict(file="graffiti_safari_matatu", length=5.1, tris=40000, weld=False, planar=False, atlas=2048, forward="+y", variants=None),
-        "rv_boda": dict(file="motorcycle_boda", length=2.0, tris=6000, atlas=1024, forward="-x", variants=None),
+        # forward="+x": this source faces -X; with the rotation table below "+x" is what turns it to -Y
+        # (shipped as "+y" it came out sideways and 2x size; tools/fix-vehicle-facing.mjs patched the GLB)
+        "rv_graffiti": dict(file="graffiti_safari_matatu", length=5.1, tris=40000, weld=False, planar=False, atlas=2048, forward="+x", variants=None),
+        "rv_boda": dict(file="motorcycle_boda", length=2.0, tris=6000, atlas=1024, forward="+x", variants=None),  # was "-x": baked tail-first
     },
     # trees: leaf cards keep their alpha textures (renamed foliage_*_alpha: alpha-test + wind in the
     # game), bark is decimated, far LODs thin the leaf cards instead of collapsing them
@@ -158,12 +178,123 @@ def reduce_parts(meshes, target, exterior=PAINT, weld=True):
     log(f"  per-part reduce {total} -> ~{int(target)} tris over {len(meshes)} parts")
 
 
-def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True, texfix=None, recalc=False):
+def tag_doors(meshes, doors):
+    """Mark every face of a door part (by its object name) with a 'door' face attribute (1-based
+    index into the config's door list). It survives the join, decimation and the glass split, so
+    the baked doors can be cut out again afterwards (separate_doors)."""
+    n = 0
+    for o in meshes:
+        k = next((i + 1 for i, (rx, _) in enumerate(doors) if re.search(rx, o.get("chain", o.name))), 0)
+        a = o.data.attributes.get("door") or o.data.attributes.new("door", "INT", "FACE")
+        for d in a.data:
+            d.value = k
+        n += k > 0
+    log(f"  door parts tagged: {n}")
+
+
+def tag_door_islands(ob, regions):
+    """Doors modelled as loose islands inside one mesh: an island whose bounds fit inside a door
+    region (y0, y1, z0, z1, all of it outboard of |x| = xin) on one side is that door. Tags faces
+    like tag_doors (1-based index) and returns the door list for separate_doors. Each region is used
+    on both sides; doors come out in the order right-front, left-front, right-rear, left-rear..."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    bm.faces.ensure_lookup_table()
+    seen, islands = set(), []
+    for f in bm.faces:
+        if f.index in seen:
+            continue
+        stack, isl = [f], []
+        seen.add(f.index)
+        while stack:
+            g = stack.pop()
+            isl.append(g.index)
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h.index not in seen:
+                        seen.add(h.index)
+                        stack.append(h)
+        vs = {v for i in isl for v in bm.faces[i].verts}
+        islands.append((isl, [min(v.co[k] for v in vs) for k in range(3)], [max(v.co[k] for v in vs) for k in range(3)]))
+    doors, value = [], [0] * len(bm.faces)
+    panels = []  # (k, side, y0, y1, pz0, pz1, xin): door skins that are part of the body shell
+    for region in regions:
+        (y0, y1, z0, z1), xin, kind = region[:3]
+        sides = region[3] if len(region) > 3 else (-1, 1)
+        panel = region[4] if len(region) > 4 else None
+        for side in sides:  # right (driver, -X) first
+            k = len(doors) + 1
+            n = 0
+            for isl, lo, hi in islands:
+                inside = lo[1] >= y0 and hi[1] <= y1 and lo[2] >= z0 and hi[2] <= z1
+                outboard = lo[0] >= xin if side > 0 else hi[0] <= -xin
+                if inside and outboard and not any(value[i] for i in isl):
+                    for i in isl:
+                        value[i] = k
+                    n += 1
+            doors.append((None, kind))
+            log(f"  door {k - 1} ({'left' if side > 0 else 'right'}): {n} islands")
+            if panel:
+                panels.append((k, side, y0, y1, panel[0], panel[1], xin))
+    bm.free()
+    a = ob.data.attributes.get("door") or ob.data.attributes.new("door", "INT", "FACE")
+    for i, d in enumerate(a.data):
+        d.value = value[i]
+    for k, side, y0, y1, pz0, pz1, xin in panels:
+        cut_door_panel(ob, k, side, y0, y1, pz0, pz1, xin)
+    return doors
+
+
+def cut_door_panel(ob, k, side, y0, y1, z0, z1, xin):
+    """A door skin that is part of one big body-side shell: slice the side faces (outer skin and inner
+    lining) along
+    the door's seams (front and rear edge, sill, window line) and tag the rectangle between them."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    lay = bm.faces.layers.int.get("door")
+
+    def side_faces():
+        out = []
+        for f in bm.faces:
+            c = f.calc_center_median()
+            # both skins of the side (outer, and the inner lining facing the cabin)
+            if c.x * side > xin and abs(f.normal.x) > 0.55 and y0 - 0.4 < c.y < y1 + 0.4 and z0 - 0.4 < c.z < z1 + 0.4:
+                out.append(f)
+        return out
+
+    for co, no in (((0, y0, 0), (0, 1, 0)), ((0, y1, 0), (0, 1, 0)), ((0, 0, z0), (0, 0, 1)), ((0, 0, z1), (0, 0, 1))):
+        fs = side_faces()
+        if not fs:
+            break
+        edges = list({e for f in fs for e in f.edges})
+        verts = list({v for f in fs for v in f.verts})
+        bmesh.ops.bisect_plane(bm, geom=fs + edges + verts, plane_co=co, plane_no=no)
+    n = 0
+    for f in side_faces():
+        c = f.calc_center_median()
+        if y0 < c.y < y1 and z0 < c.z < z1 and f[lay] == 0:
+            f[lay] = k
+            n += 1
+    bm.to_mesh(ob.data)
+    bm.free()
+    ob.data.update()
+    log(f"  door {k - 1}: panel cut from the body side, {n} faces")
+
+
+def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True, texfix=None, recalc=False, doors=None):
     """Import a GLB, bake every transform into the mesh data, join into one object."""
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=path)
     objs = [o for o in bpy.data.objects if o not in before]
     meshes = [o for o in objs if o.type == "MESH" and len(o.data.polygons)]
+    for o in meshes:
+        # the names of the object and all its parents (Sketchfab meshes are often "Object_12" under a
+        # named node like "Ext_Door_FL#Car_Paint"): door tagging matches on this
+        chain, p = [o.name], o.parent
+        while p:
+            chain.append(p.name)
+            p = p.parent
+        o["chain"] = " / ".join(chain)
     for o in meshes:
         mw = o.matrix_world.copy()
         o.parent = None
@@ -197,6 +328,8 @@ def import_joined(path, target=None, strip=r"airbag", exterior=PAINT, weld=True,
             bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
             bm.to_mesh(o.data)
             bm.free()
+    if doors:
+        tag_doors(meshes, doors)
     if strip:
         keep = strip_parts(meshes, strip)
         for o in meshes:
@@ -249,6 +382,11 @@ def normalise(ob, cfg):
     rot = {"-y": 0.0, "+y": math.pi, "-x": -math.pi / 2, "+x": math.pi / 2}[cfg["forward"]]
     if rot:
         ob.data.transform(Matrix.Rotation(rot, 4, "Z"))
+    if cfg.get("mirror"):
+        # left-hand-drive source -> Kenyan right-hand drive: mirror across the centre line
+        ob.data.transform(Matrix.Scale(-1, 4, (1, 0, 0)))
+        ob.data.flip_normals()
+        log("  mirrored to right-hand drive")
     xs = [v.co.x for v in ob.data.vertices]
     ys = [v.co.y for v in ob.data.vertices]
     zs = [v.co.z for v in ob.data.vertices]
@@ -300,10 +438,17 @@ def clean(ob, planar=True):
     surface) and dissolve flat panels, before the real decimation."""
     bm = bmesh.new()
     bm.from_mesh(ob.data)
+    door = bm.faces.layers.int.get("door")
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0008)
+    if door is not None:
+        # a door's outline is a seam: never dissolve a door and the body into one face
+        for e in bm.edges:
+            vals = {f[door] for f in e.link_faces}
+            if len(vals) > 1:
+                e.seam = True
     if planar:
         bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(1.5), use_dissolve_boundaries=False,
-                                 verts=bm.verts, edges=bm.edges, delimit={"MATERIAL", "UV"})
+                                 verts=bm.verts, edges=bm.edges, delimit={"MATERIAL", "UV", "SEAM"})
         bmesh.ops.triangulate(bm, faces=bm.faces, quad_method="BEAUTY", ngon_method="EAR_CLIP")
     bm.to_mesh(ob.data)
     bm.free()
@@ -677,16 +822,74 @@ def box_collider(ob, base, lift=0.25):
     return col
 
 
+def separate_doors(ob, glass, name, cfg, root):
+    """Cut each tagged door out of the LOD0 body (and its window out of the glass) as its own
+    object under LOD0, with its hinge in the extras (three.js frame: x, z_b, -y_b):
+      swing  side doors: vertical hinge on the door's front edge, outer face
+      rear   barn doors at the back: vertical hinge on the outer edge
+      slide  sliding door: no hinge; it pops out and runs back along the body
+    LOD1/LOD2 are copied before this, so far away the doors are still there (closed)."""
+    made = 0
+    for i, (_, kind) in enumerate(cfg["doors"]):
+        k = i + 1
+        parts = []
+        for src, suffix in ((ob, ""), (glass, "_glass")):
+            if not src or "door" not in src.data.attributes:
+                continue
+            vals = [d.value for d in src.data.attributes["door"].data]
+            if k not in vals:
+                continue
+            dup = src.copy()
+            dup.data = src.data.copy()
+            dup.name = f"{name}_door_{i}{suffix}_L0"
+            bpy.context.scene.collection.objects.link(dup)
+            for o, keep in ((src, False), (dup, True)):
+                bm = bmesh.new()
+                bm.from_mesh(o.data)
+                lay = bm.faces.layers.int.get("door")
+                dead = [f for f in bm.faces if (f[lay] == k) != keep]
+                bmesh.ops.delete(bm, geom=dead, context="FACES")
+                loose = [v for v in bm.verts if not v.link_faces]
+                bmesh.ops.delete(bm, geom=loose, context="VERTS")
+                bm.to_mesh(o.data)
+                bm.free()
+            parts.append(dup)
+        if not parts:
+            continue
+        vs = [v.co for p in parts for v in p.data.vertices]
+        lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
+        hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
+        c = (lo + hi) / 2
+        side = 1 if c.x > 0 else -1  # +X is the left side (kerb side in Kenya)
+        if kind == "rear":
+            hinge = Vector((hi.x if side > 0 else lo.x, hi.y, c.z))
+        else:
+            hinge = Vector((hi.x if side > 0 else lo.x, lo.y, c.z))  # front edge (forward is -Y)
+        for p in parts:
+            p.parent = root
+            p["door"] = i
+            p["kind"] = kind
+            p["side"] = side
+            p["front"] = bool(c.y < 0)
+            p["hinge"] = [hinge.x, hinge.z, -hinge.y]  # three.js frame
+            p["size"] = [hi.x - lo.x, hi.z - lo.z, hi.y - lo.y]
+        made += 1
+        log(f"  door {i} ({kind}, {'left' if side > 0 else 'right'}, {'front' if c.y < 0 else 'rear'}): {sum(len(p.data.polygons) for p in parts)} faces")
+    return made
+
+
 def build_piece(base, cfg, variant, rgb, store):
     """Build one variant in the current (fresh) scene and save it as a .blend-free GLB part."""
     path = os.path.join(SRC, cfg["file"] + ".glb")
     reset()
     ob = import_joined(path, cfg["tris"] if cfg.get("per_part", True) else None, cfg.get("strip", r"airbag"),
                        cfg.get("clearcoat", cfg.get("paint", PAINT)) if cfg.get("paint") != "auto" else PAINT, cfg.get("weld", True),
-                       cfg.get("texfix"), cfg.get("recalc", False))
+                       cfg.get("texfix"), cfg.get("recalc", False), cfg.get("doors"))
     if cfg.get("drop_ground"):
         drop_ground(ob)
     normalise(ob, cfg)
+    if cfg.get("door_islands"):
+        cfg = dict(cfg, doors=tag_door_islands(ob, cfg["door_islands"]))
     paint = cfg.get("paint", PAINT)
     if paint == "auto":
         paint = auto_paint(ob)
@@ -726,7 +929,9 @@ def build_piece(base, cfg, variant, rgb, store):
             ob.name = f"{name}_body_L0"
             if glass:
                 glass.name = f"{name}_glass_L0"
-    box_collider(ob, name, cfg.get("col_lift", 0.25))
+    box_collider(ob, name, cfg.get("col_lift", 0.25))  # from the whole body, doors included
+    if cfg.get("doors"):
+        separate_doors(ob, glass, name, cfg, bpy.data.objects[f"{name}_LOD0"])
     # export this variant on its own; the kit is merged by tools/merge-kit.mjs
     part = os.path.join(CACHE, f"{name}.glb")
     bpy.ops.export_scene.gltf(filepath=part, export_format="GLB", export_extras=True, export_yup=True, export_apply=True,

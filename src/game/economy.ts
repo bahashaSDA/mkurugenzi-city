@@ -69,6 +69,7 @@ function save(s: Saved) {
 }
 
 let toastId = 1;
+const lastBuy = { at: 0, item: '' };
 
 /** What Abel holds while eating/drinking, and for how long (a meal takes several bites). */
 export type Prop = 'bottle' | 'cup' | 'fruit' | 'snack' | 'plate' | '';
@@ -123,7 +124,16 @@ export const useEconomy = create<EconomyState>((set, get) => ({
   },
   buy: (itemId, eatNow) => {
     const item = ITEMS[itemId];
-    if (!item || !get().spend(item.price, item.name)) return false;
+    if (!item) return false;
+    // one purchase per click: a double-click or key repeat must not buy (and charge) twice
+    const now = performance.now();
+    if (now - lastBuy.at < 350 && lastBuy.item === itemId) return false;
+    lastBuy.at = now;
+    lastBuy.item = itemId;
+    if (!get().spend(item.price, item.name)) {
+      emit({ type: 'buyFailed', item: itemId });
+      return false;
+    }
     emit({ type: 'buy', item: itemId });
     if (eatNow && item.fullness > 0) return get().consume(itemId) || true;
     set((s) => ({ inventory: { ...s.inventory, [itemId]: (s.inventory[itemId] ?? 0) + (eatNow ? 0 : 1) } }));

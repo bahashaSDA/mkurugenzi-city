@@ -14,7 +14,7 @@ export interface Road {
 export const ROADS: Road[] = [
   // The avenue with the shopping street (kerbs drawn by Roads.tsx), now running the full length
   { id: 'avenue', kind: 'tarmac', width: 8, pts: [[14, 330], [14, -300]] },
-  { id: 'expressway', kind: 'highway', width: 20, pts: [[-1560, -312], [-1100, -312], [-300, -312], [300, -312], [1100, -312], [1430, -312]] },
+  { id: 'expressway', kind: 'highway', width: 20, pts: [[-1440, -312], [-1100, -312], [-300, -312], [300, -312], [1100, -312], [1430, -312]] },
   { id: 'kibera-road', kind: 'tarmac', width: 7, pts: [[-145, 330], [-145, -300]] },
   { id: 'stage-road', kind: 'tarmac', width: 7, pts: [[-145, 150], [-40, 150], [10, 150]] },
   { id: 'north-street', kind: 'tarmac', width: 7, pts: [[-145, -150], [10, -150]] },
@@ -52,6 +52,27 @@ export const ROADS: Road[] = [
   // Storyteller's Fire on the southern hills
   { id: 'hill-road', kind: 'tarmac', width: 7, pts: [[300, 330], [300, 700], [360, 980]] },
   { id: 'fire-track', kind: 'murram', width: 4.5, pts: [[360, 980], [330, 1080], [380, 1150], [340, 1210]] },
+];
+
+/**
+ * Where vehicles turn round (GTA/real-road rule: no U-turn through a median or across a narrow
+ * road). Roundabouts close both ends of the expressway (the median stops short of them) and paved
+ * turning circles finish the dead-end roads that matatu routes run up and back. r = paved radius;
+ * island = raised centre (roundabouts) that traffic drives around, clockwise (Kenya keeps left).
+ */
+export interface Turnaround {
+  x: number;
+  z: number;
+  r: number;
+  island: number;
+}
+export const TURNAROUNDS: Turnaround[] = [
+  // expressway west end: before the map-edge hills rise (it used to climb them at a 32% grade)
+  { x: -1428, z: -312, r: 17, island: 6 },
+  { x: 1418, z: -312, r: 17, island: 6 }, // expressway east end (meets the coast road)
+  { x: -1100, z: -1306, r: 11, island: 0 }, // Utafraaaia Drive, top of the estate
+  { x: -1050, z: 1006, r: 11, island: 0 }, // Shule Road, past Freddie's School
+  { x: 1100, z: 266, r: 11, island: 0 }, // Studio Link, south end
 ];
 
 /** Towns: level ground, a name for the HUD and map, and the area that counts as "in town". */

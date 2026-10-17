@@ -1,7 +1,8 @@
-// Original procedural club music for the nganyas (no samples, no copyright): an amapiano /
-// gengetone-flavoured groove synthesised with WebAudio: kick, log-drum bass with pitch glide,
-// sub bass, shakers, hats, claps and detuned chord stabs, through a bass-boosted, compressed bus.
-// Several "mixes" (tempo, key, pattern) rotate every ~90 s like a DJ set.
+// Original procedural music (no samples, no copyright), synthesised with WebAudio: kick, log-drum
+// bass with pitch glide, sub bass, shakers, hats, claps, detuned chord stabs, Rhodes pads, a
+// marimba/pluck lead and vinyl crackle, through a tone-shaped, compressed bus. Each "mix" (tempo,
+// key, patterns) plays ~90 s like a DJ set. The nganya sound systems play the amapiano set with the
+// bass cranked; the car radio's music stations (systems/audio/radio) each have their own set.
 
 let ctx: AudioContext | null = null;
 
@@ -28,7 +29,7 @@ if (typeof window !== 'undefined') {
   window.addEventListener('keydown', unlock);
 }
 
-interface MixDef {
+export interface MixDef {
   bpm: number;
   root: number; // MIDI note of the key root
   chords: number[][]; // semitone offsets per bar
@@ -37,7 +38,26 @@ interface MixDef {
   clap: number[];
   hat: number[];
   name: string;
+  /** optional lead line: 16 steps per bar, semitone offsets above root+24 (-99 = rest), 1-4 bars */
+  lead?: number[][];
+  leadType?: 'marimba' | 'pluck' | 'flute';
+  /** soft sustained Rhodes-style chords instead of short stabs */
+  pad?: boolean;
+  /** shaker 16ths (default on) */
+  shaker?: boolean;
+  /** sustained sub bass under each bar (short by default: a long sub note is the 'drone') */
+  subLen?: number;
 }
+
+/** How a sound system sounds: bass shelf (dB), saturation, overall level. */
+export interface Tone {
+  bass: number;
+  drive: number;
+  level: number;
+  crackle?: boolean;
+}
+
+export const NGANYA_TONE: Tone = { bass: 9, drive: 1.8, level: 0.55 };
 
 const R = -99;
 export const MIXES: MixDef[] = [
@@ -67,7 +87,7 @@ export const MIXES: MixDef[] = [
   },
 ];
 
-const midi = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
+export const midi = (n: number) => 440 * Math.pow(2, (n - 69) / 12);
 
 let noiseBuf: AudioBuffer | null = null;
 function noise(c: AudioContext) {
@@ -90,9 +110,18 @@ export class SoundSystem {
   private mixIndex: number;
   private mixStarted = 0;
   private alive = true;
+  private mixes: MixDef[];
+  private crackleSrc: AudioBufferSourceNode | null = null;
+  /** Called when the set moves on to the next mix (radio 'now playing'). */
+  onMix?: (name: string) => void;
 
-  constructor(private c: AudioContext, seed: number) {
-    this.mixIndex = seed % MIXES.length;
+  /**
+   * `mixes` and `tone` default to the nganya set. `offsetS` starts the set part-way through (radio
+   * stations keep playing while you're tuned elsewhere, like GTA).
+   */
+  constructor(private c: AudioContext, seed: number, mixes: MixDef[] = MIXES, tone: Tone = NGANYA_TONE, offsetS = 0) {
+    this.mixes = mixes;
+    this.mixIndex = (seed + Math.floor(offsetS / 90)) % mixes.length;
     this.output = c.createGain();
     this.output.gain.value = 0;
     const comp = c.createDynamicsCompressor();
@@ -100,31 +129,52 @@ export class SoundSystem {
     comp.ratio.value = 6;
     comp.attack.value = 0.004;
     comp.release.value = 0.18;
-    // "loud nganya speakers": heavy low shelf + slight saturation
+    // speaker character: low shelf + saturation ("loud nganya speakers" by default)
     this.bassBus = c.createBiquadFilter();
     this.bassBus.type = 'lowshelf';
     this.bassBus.frequency.value = 90;
-    this.bassBus.gain.value = 9;
+    this.bassBus.gain.value = tone.bass;
     const shaper = c.createWaveShaper();
     const curve = new Float32Array(1024);
     for (let i = 0; i < 1024; i++) {
       const x = (i / 1023) * 2 - 1;
-      curve[i] = Math.tanh(x * 1.8);
+      curve[i] = Math.tanh(x * tone.drive) / Math.tanh(tone.drive);
     }
     shaper.curve = curve;
     this.bus = c.createGain();
-    this.bus.gain.value = 0.55;
+    this.bus.gain.value = tone.level;
     this.bus.connect(this.bassBus);
     this.bassBus.connect(shaper);
     shaper.connect(comp);
     comp.connect(this.output);
+    if (tone.crackle) this.crackle();
     this.nextTime = c.currentTime + 0.1;
-    this.mixStarted = c.currentTime;
+    this.mixStarted = c.currentTime - (offsetS % 90);
     this.timer = window.setInterval(() => this.schedule(), 25);
   }
 
   get mixName() {
-    return MIXES[this.mixIndex]!.name;
+    return this.mixes[this.mixIndex]!.name;
+  }
+
+  /** vinyl/radio crackle bed (lo-fi stations) */
+  private crackle() {
+    const c = this.c;
+    const len = c.sampleRate * 3;
+    const b = c.createBuffer(1, len, c.sampleRate);
+    const d = b.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() < 0.0009 ? (Math.random() * 2 - 1) * 0.9 : 0) + (Math.random() * 2 - 1) * 0.012;
+    const src = c.createBufferSource();
+    src.buffer = b;
+    src.loop = true;
+    const hp = c.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 1200;
+    const g = c.createGain();
+    g.gain.value = 0.18;
+    src.connect(hp).connect(g).connect(this.output);
+    src.start();
+    this.crackleSrc = src;
   }
 
   setVolume(v: number, t = 0.3) {
@@ -137,7 +187,7 @@ export class SoundSystem {
   private schedule() {
     if (!this.alive) return;
     const c = this.c;
-    const mix = MIXES[this.mixIndex]!;
+    const mix = this.mixes[this.mixIndex]!;
     const stepDur = 60 / mix.bpm / 4;
     while (this.nextTime < c.currentTime + 0.12) {
       this.playStep(mix, this.step % 16, Math.floor(this.step / 16) % mix.chords.length, this.nextTime);
@@ -145,8 +195,9 @@ export class SoundSystem {
       this.step++;
     }
     if (c.currentTime - this.mixStarted > 90) {
-      this.mixIndex = (this.mixIndex + 1) % MIXES.length; // DJ moves to the next mix
+      this.mixIndex = (this.mixIndex + 1) % this.mixes.length; // DJ moves to the next mix
       this.mixStarted = c.currentTime;
+      this.onMix?.(this.mixName);
     }
   }
 
@@ -158,9 +209,18 @@ export class SoundSystem {
     if (mix.log[s] !== R) this.logDrum(midi(mix.root + mix.log[s]!), t);
     if (mix.clap[s]) this.clap(t);
     if (mix.hat[s]) this.hat(t, 0.08);
-    this.hat(t, 0.025, 9000); // shaker 16ths
-    if (s === 0 || s === 6 || s === 10) this.chord(mix.chords[bar]!.map((o) => midi(mix.root + 24 + o)), t, s === 0 ? 0.5 : 0.18);
-    if (s === 0) this.sub(midi(mix.root + mix.chords[bar]![0]! - 12), t, (60 / mix.bpm) * 4);
+    if (mix.shaker !== false) this.hat(t, 0.025, 9000); // shaker 16ths
+    const chord = mix.chords[bar]!.map((o) => midi(mix.root + 24 + o));
+    if (mix.pad) {
+      if (s === 0) this.pad(chord, t, (60 / mix.bpm) * 4);
+    } else if (s === 0 || s === 6 || s === 10) this.chord(chord, t, s === 0 ? 0.5 : 0.18);
+    // the sub bass under each bar: short and decaying (a whole-bar sustained sub is a drone)
+    if (s === 0) this.sub(midi(mix.root + mix.chords[bar]![0]! - 12), t, (60 / mix.bpm) * (mix.subLen ?? 1.5));
+    if (mix.lead) {
+      const line = mix.lead[bar % mix.lead.length]!;
+      const n = line[s]!;
+      if (n !== R) this.lead(midi(mix.root + 24 + n), t, mix.leadType ?? 'marimba', 60 / mix.bpm);
+    }
     void c;
   }
 
@@ -205,12 +265,89 @@ export class SoundSystem {
     const g = c.createGain();
     o.frequency.value = f;
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(0.32, t + 0.05);
-    g.gain.setValueAtTime(0.32, t + dur - 0.1);
-    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    g.gain.linearRampToValueAtTime(0.24, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g).connect(this.bus);
     o.start(t);
-    o.stop(t + dur);
+    o.stop(t + dur + 0.02);
+  }
+
+  /** soft Rhodes-style chord: sine + a little bell, slow attack, long release */
+  private pad(fs: number[], t: number, len: number) {
+    const c = this.c;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.07, t + 0.08);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len * 0.98);
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 1800;
+    lp.connect(g).connect(this.bus);
+    for (const f of fs) {
+      const o = c.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const tine = c.createOscillator();
+      tine.type = 'sine';
+      tine.frequency.value = f * 4.01;
+      const tg = c.createGain();
+      tg.gain.setValueAtTime(0.25, t);
+      tg.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      o.connect(lp);
+      tine.connect(tg).connect(lp);
+      o.start(t);
+      tine.start(t);
+      o.stop(t + len);
+      tine.stop(t + 0.45);
+    }
+  }
+
+  /** lead voices: marimba (Kenyan benga/afro-house), nylon pluck, breathy flute */
+  private lead(f: number, t: number, type: 'marimba' | 'pluck' | 'flute', beat: number) {
+    const c = this.c;
+    const g = c.createGain();
+    g.connect(this.bus);
+    if (type === 'flute') {
+      const o = c.createOscillator();
+      o.type = 'triangle';
+      o.frequency.value = f;
+      const vib = c.createOscillator();
+      vib.frequency.value = 5.2;
+      const vg = c.createGain();
+      vg.gain.value = f * 0.006;
+      vib.connect(vg).connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.09, t + 0.06);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + beat * 0.9);
+      o.connect(g);
+      o.start(t);
+      vib.start(t);
+      o.stop(t + beat);
+      vib.stop(t + beat);
+      return;
+    }
+    const o = c.createOscillator();
+    o.type = type === 'pluck' ? 'sawtooth' : 'sine';
+    o.frequency.value = f;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(type === 'pluck' ? 3000 : 2400, t);
+    lp.frequency.exponentialRampToValueAtTime(400, t + 0.25);
+    const over = c.createOscillator(); // marimba's woody overtone
+    over.type = 'sine';
+    over.frequency.value = f * 3.9;
+    const og = c.createGain();
+    og.gain.setValueAtTime(type === 'marimba' ? 0.35 : 0, t);
+    og.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.16, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + (type === 'pluck' ? 0.35 : 0.5));
+    o.connect(lp).connect(g);
+    over.connect(og).connect(g);
+    o.start(t);
+    over.start(t);
+    o.stop(t + 0.55);
+    over.stop(t + 0.12);
   }
 
   private hat(t: number, vol: number, hp = 7000) {
@@ -267,6 +404,11 @@ export class SoundSystem {
   dispose() {
     this.alive = false;
     clearInterval(this.timer);
+    try {
+      this.crackleSrc?.stop(this.c.currentTime + 0.5);
+    } catch {
+      /* not started */
+    }
     this.output.gain.setTargetAtTime(0, this.c.currentTime, 0.1);
     setTimeout(() => this.output.disconnect(), 600);
   }

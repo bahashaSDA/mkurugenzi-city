@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { LITE_REACH, lite } from '../../perf/lite';
+import { kitLodScale } from '../../perf/MapRender';
 import { useFrame } from '@react-three/fiber';
 import { ConvexHullCollider, CuboidCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
@@ -123,9 +125,10 @@ export function KitInstances({ kit, placements, render = true, reach = 1 }: { ki
     s.t = 0;
     s.x = _camPos.x;
     s.z = _camPos.z;
-    const cull = CULL_DIST[tier] * reach;
-    const d0 = (LOD_DIST[tier][0] * reach) ** 2;
-    const d1 = (LOD_DIST[tier][1] * reach) ** 2;
+    const k = reach * kitLodScale.value * (lite.on ? LITE_REACH : 1);
+    const cull = CULL_DIST[tier] * k;
+    const d0 = (LOD_DIST[tier][0] * k) ** 2;
+    const d1 = (LOD_DIST[tier][1] * k) ** 2;
     const dc = cull * cull;
 
     for (const [piece, { matrices, xz }] of byPiece) {

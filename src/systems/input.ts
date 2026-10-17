@@ -18,6 +18,85 @@ export const input = {
 const keys = new Set<string>();
 const pressListeners = new Map<string, Set<() => void>>();
 
+// ---- key bindings (Part 19.3): every action keeps its own code inside the game ('KeyF' = get in or
+// out of a vehicle...); the player chooses which physical key sends it. Keys not bound to anything
+// pass straight through, a key moved to another action stops sending its old one. Saved per browser.
+export const ACTIONS: { code: string; label: string; group: string }[] = [
+  { code: 'KeyW', label: 'Forward / throttle', group: 'Move' },
+  { code: 'KeyS', label: 'Back / brake, reverse', group: 'Move' },
+  { code: 'KeyA', label: 'Left / steer left', group: 'Move' },
+  { code: 'KeyD', label: 'Right / steer right', group: 'Move' },
+  { code: 'ShiftLeft', label: 'Sprint', group: 'Move' },
+  { code: 'Space', label: 'Jump / handbrake / swim up', group: 'Move' },
+  { code: 'KeyC', label: 'Dive (while swimming)', group: 'Move' },
+  { code: 'KeyE', label: 'Use, talk, sit, enter', group: 'Act' },
+  { code: 'KeyF', label: 'Get in / out of a vehicle, board', group: 'Act' },
+  { code: 'KeyH', label: 'Horn / wave down a matatu', group: 'Act' },
+  { code: 'KeyQ', label: 'Kick', group: 'Act' },
+  { code: 'KeyG', label: 'Guard', group: 'Act' },
+  { code: 'KeyV', label: 'Camera (first person)', group: 'View' },
+  { code: 'KeyM', label: 'Map', group: 'View' },
+  { code: 'KeyI', label: 'Bag', group: 'View' },
+  { code: 'Comma', label: 'Radio: previous station', group: 'Radio' },
+  { code: 'Period', label: 'Radio: next station', group: 'Radio' },
+  { code: 'KeyR', label: 'Radio on / off', group: 'Radio' },
+  { code: 'Minus', label: 'Radio volume down', group: 'Radio' },
+  { code: 'Equal', label: 'Radio volume up', group: 'Radio' },
+];
+const BIND_KEY = 'mk.keys.v1';
+/** action code -> physical key code (only the ones the player changed) */
+export const bindings: Record<string, string> = (() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BIND_KEY) || '{}') as Record<string, unknown>;
+    const out: Record<string, string> = {};
+    for (const [a, k] of Object.entries(raw)) if (ACTIONS.some((x) => x.code === a) && typeof k === 'string') out[a] = k;
+    return out;
+  } catch {
+    return {};
+  }
+})();
+/** The physical key that sends an action. */
+export const keyFor = (action: string) => bindings[action] ?? action;
+/** What a physical key sends (null: nothing, it was moved to another action). */
+function translate(physical: string): string | null {
+  for (const a of ACTIONS) if (keyFor(a.code) === physical) return a.code;
+  if (ACTIONS.some((a) => a.code === physical)) return null; // its action now lives on another key
+  return physical;
+}
+/** Bind an action to a key; the action that had that key takes this one's old key (a swap). */
+export function bindKey(action: string, physical: string) {
+  const old = keyFor(action);
+  const other = ACTIONS.find((a) => a.code !== action && keyFor(a.code) === physical);
+  if (other) bindings[other.code] = old;
+  bindings[action] = physical;
+  for (const a of ACTIONS) if (bindings[a.code] === a.code) delete bindings[a.code];
+  try {
+    localStorage.setItem(BIND_KEY, JSON.stringify(bindings));
+  } catch {
+    /* storage blocked: lasts this session */
+  }
+  keys.clear();
+}
+export function resetKeys() {
+  for (const k of Object.keys(bindings)) delete bindings[k];
+  try {
+    localStorage.removeItem(BIND_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+/** The controls screen is waiting for a key: the next press binds instead of playing. */
+export const capture: { fn: ((code: string) => void) | null } = { fn: null };
+/** Readable name of a key code ("KeyF" -> "F"). */
+export function keyName(code: string): string {
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  return ({ Space: 'Space', ShiftLeft: 'Left Shift', ShiftRight: 'Right Shift', Comma: ',', Period: '.', Minus: '-', Equal: '=', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', ControlLeft: 'Left Ctrl', AltLeft: 'Left Alt', Tab: 'Tab' } as Record<string, string>)[code] ?? code;
+}
+
+/** Is this (action) key held down right now? */
+export const keyHeld = (code: string) => keys.has(code);
+
 /** One-shot key press (not held): E interact, F enter/exit vehicle, etc. */
 export function onKeyPress(code: string, fn: () => void) {
   const set = pressListeners.get(code) ?? new Set();
@@ -61,14 +140,25 @@ let mouseGuard = false;
 
 export function attachInput(canvas: HTMLElement): () => void {
   const down = (e: KeyboardEvent) => {
-    if (e.code === 'KeyV' && !e.repeat) onVKey.forEach((fn) => fn());
-    if (!e.repeat) pressListeners.get(e.code)?.forEach((fn) => fn());
-    if (e.code === 'Space') e.preventDefault();
-    keys.add(e.code);
+    if (capture.fn) {
+      // the controls screen: this key is the new binding (Escape cancels)
+      e.preventDefault();
+      const fn = capture.fn;
+      capture.fn = null;
+      if (e.code !== 'Escape') fn(e.code);
+      return;
+    }
+    const code = translate(e.code);
+    if (code === 'Space' || e.code === 'Space') e.preventDefault();
+    if (!code) return;
+    if (code === 'KeyV' && !e.repeat) onVKey.forEach((fn) => fn());
+    if (!e.repeat) pressListeners.get(code)?.forEach((fn) => fn());
+    keys.add(code);
     recompute();
   };
   const up = (e: KeyboardEvent) => {
-    keys.delete(e.code);
+    const code = translate(e.code);
+    if (code) keys.delete(code);
     recompute();
   };
   const blur = () => {

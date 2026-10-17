@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useModel } from '../characterModels';
 import * as THREE from 'three';
-import { getKTX2Loader } from '../../world/ktx2';
 import { NATIVE_SPEED, prepareCharacter, prepareClips } from '../characters';
 import type { Prop } from '../../game/economy';
+import { applyPlayerIK, type Limbs } from './ik';
+import { AbelWardrobe } from './wardrobe';
+import { seat } from '../../game/theatre';
+import { lookNow, useWardrobe } from '../../game/wardrobe';
+
+/** ?debug: what Abel is wearing right now (systems/player/wardrobe). */
+export const abelLook = { current: null as AbelWardrobe | null };
 
 // Abel (temporary MPFB2 stand-in until the approved capture-session likeness, SPEC 5.5).
 // Locomotion + standing idle: CMU motion capture (real people), retargeted in Blender (mocap.py).
@@ -35,9 +41,7 @@ const IDLE_VARIANTS = ['Idle_FoldArms_Loop', 'Idle_TalkingPhone_Loop', 'Idle_Tal
 
 export function AbelModel() {
   const gl = useThree((s) => s.gl);
-  const gltf = useGLTF(ABEL_URL, false, true, (loader) => {
-    loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltf = useModel(ABEL_URL);
   const group = useRef<THREE.Group>(null);
 
   const { mixer, actions } = useMemo(() => {
@@ -47,7 +51,7 @@ export function AbelModel() {
     for (const clip of prepareClips(gltf.animations)) {
       const name = clip.name;
       const a = mixer.clipAction(clip);
-      if (!name.endsWith('_Loop') && name !== 'Consume') { // Consume repeats: bite after bite
+      if (!name.endsWith('_Loop') && name !== 'Consume' && name !== 'Sitting_Consume') { // eating repeats: bite after bite
         a.setLoop(THREE.LoopOnce, 1);
         a.clampWhenFinished = true;
       }
@@ -59,8 +63,26 @@ export function AbelModel() {
   // food and drink props in Abel's hands (GTA-style: you see what he is eating)
   const props = useMemo(() => makeProps(gltf.scene), [gltf]);
   const spine = useMemo(() => gltf.scene.getObjectByName('spine_03') ?? gltf.scene.getObjectByName('spine_02'), [gltf]);
+  // hands and feet on the controls (systems/player/ik)
+  const limbs = useMemo<Limbs | null>(() => {
+    const g = (n: string) => gltf.scene.getObjectByName(n);
+    const arm = (s: string) => [g(`upperarm_${s}`), g(`lowerarm_${s}`), g(`hand_${s}`)];
+    const leg = (s: string) => [g(`thigh_${s}`), g(`calf_${s}`), g(`foot_${s}`)];
+    const all = [...arm('l'), ...arm('r'), ...leg('l'), ...leg('r')];
+    if (all.some((b) => !b)) return null;
+    return {
+      root: gltf.scene,
+      arms: [arm('l') as [THREE.Object3D, THREE.Object3D, THREE.Object3D], arm('r') as [THREE.Object3D, THREE.Object3D, THREE.Object3D]],
+      legs: [leg('l') as [THREE.Object3D, THREE.Object3D, THREE.Object3D], leg('r') as [THREE.Object3D, THREE.Object3D, THREE.Object3D]],
+    };
+  }, [gltf]);
 
   const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10, combatUntil: 0 });
+  // outfit, haircut and cap from the wardrobe (shop previews included)
+  const wardrobe = useMemo(() => new AbelWardrobe(gltf.scene, gl), [gltf, gl]);
+  useEffect(() => {
+    abelLook.current = wardrobe;
+  }, [wardrobe]);
 
   useEffect(() => {
     const idle = actions.get('Idle_Loop');
@@ -73,12 +95,18 @@ export function AbelModel() {
 
   useFrame((_, dt) => {
     const s = st.current;
+    const look = lookNow(useWardrobe.getState());
+    wardrobe.set(look.outfit, look.hair, look.cap);
     const { speed, grounded, vy } = playerAnim;
     let want: string;
     if (playerAnim.down) want = performance.now() < playerAnim.combatUntil ? playerAnim.combat || 'Knockdown' : 'Down_Loop';
     else if (playerAnim.combat && performance.now() < playerAnim.combatUntil) want = playerAnim.combat;
     else if (playerAnim.swimming) want = 'Swim_Loop';
-    else if (playerAnim.riding) want = playerAnim.rideClip || 'Sitting_Idle_Loop';
+    else if (playerAnim.riding) {
+      // on a seat (not a vehicle): eating plays the seated bites, food in hand
+      const eatingSeated = seat.active && playerAnim.action === 'Consume' && performance.now() < playerAnim.actionUntil;
+      want = eatingSeated ? 'Sitting_Consume' : playerAnim.rideClip || 'Sitting_Idle_Loop';
+    }
     else if (playerAnim.action && performance.now() < playerAnim.actionUntil) want = playerAnim.action;
     else if (!grounded && vy > 1.5) want = 'Jump_Start';
     else if (!grounded) want = 'Jump_Loop';
@@ -120,7 +148,8 @@ export function AbelModel() {
     // flinch when hit: a quick lean back of the upper spine on top of whatever clip is playing
     const since = performance.now() - playerAnim.hitAt;
     if (since < 320 && spine) spine.rotation.x -= Math.sin((since / 320) * Math.PI) * 0.35;
-    const eating = s.current === 'Consume';
+    if (limbs) applyPlayerIK(limbs);
+    const eating = s.current === 'Consume' || s.current === 'Sitting_Consume';
     for (const [k, o] of props) o.visible = eating && (playerAnim.prop === k || (k === 'fork' && playerAnim.prop === 'plate'));
   });
 

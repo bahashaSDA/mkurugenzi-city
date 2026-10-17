@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { lite } from '../perf/lite';
+
+const liteFrame = { n: 0 };
 import { useFrame, useThree } from '@react-three/fiber';
 import { Environment as EnvMap, Sky } from '@react-three/drei';
 import * as THREE from 'three';
@@ -9,6 +12,11 @@ import { dayOfYear, sunDirection } from './sun';
 import { advanceClock, clock, daylight, lightsOn } from './clock';
 import { glowMaterials, nightWindowUniforms } from './kit/useKit';
 import { indoor, screenLight } from '../game/theatre';
+import { weather } from './weather';
+import { diving } from '../systems/player/playerState';
+
+const _grey = new THREE.Color();
+const fogBase = { near: 0, far: 0 };
 
 // Lighting through a full GTA-style day (world/clock.ts: 48 real minutes per day).
 //  * Real Nairobi sun path (sun.ts); a cool moon takes over the same shadow-casting light at night.
@@ -138,6 +146,14 @@ export function Environment() {
   }, []);
 
   useFrame((state, dt) => {
+    // lite (perf/lite): the sun's shadow map is redrawn every 4th frame (most of its cost; turning
+    // shadows off would change every shader and mean a full recompile)
+    if (light.current) {
+      const sh = light.current.shadow;
+      sh.autoUpdate = !lite.on;
+      // every frame while loading: the priming frames must draw (and compile) the shadow pass too
+      if (lite.on && (useGame.getState().phase !== 'playing' || liteFrame.n++ % 4 === 0)) sh.needsUpdate = true;
+    }
     advanceClock(Math.min(dt, 0.25));
     // indoors (the Grand Theatre): sky light fades like eyes adjusting, warm house light instead
     indoor.value += (indoor.target - indoor.value) * Math.min(1, dt * 2.5);
@@ -158,29 +174,44 @@ export function Environment() {
     const skyMat = sky.current?.material as THREE.ShaderMaterial | undefined;
     if (skyMat?.uniforms) {
       skyMat.uniforms.sunPosition!.value.copy(_sun).multiplyScalar(100);
-      skyMat.uniforms.turbidity!.value = _air.turbidity;
-      skyMat.uniforms.rayleigh!.value = _air.rayleigh;
+      // weather: haze and grey (world/weather)
+      skyMat.uniforms.turbidity!.value = _air.turbidity + weather.cloud * 9;
+      skyMat.uniforms.rayleigh!.value = _air.rayleigh * (1 - 0.6 * weather.cloud);
       skyMat.uniforms.mieCoefficient!.value = _air.mie;
     }
     (nightDome.material as THREE.ShaderMaterial).uniforms.uNight!.value = night * 0.92;
-    (stars.material as THREE.PointsMaterial).opacity = night * 0.9;
+    (stars.material as THREE.PointsMaterial).opacity = night * 0.9 * (1 - weather.cloud);
     const cam = state.camera.position;
     stars.position.copy(cam);
     nightDome.position.copy(cam);
     moon.position.copy(cam).addScaledVector(_moon, 2000);
     moon.lookAt(cam);
-    (moon.material as THREE.MeshBasicMaterial).opacity = night;
+    (moon.material as THREE.MeshBasicMaterial).opacity = night * (1 - 0.9 * weather.cloud);
 
     // fog and exposure
     const fog = scene.fog as THREE.Fog | null;
-    if (fog) fog.color.copy(_fog);
+    if (fog) {
+      // cloud greys the haze; rain closes it in
+      fog.color.copy(_fog).lerp(_grey.setRGB(0.5 * day + 0.05, 0.52 * day + 0.06, 0.55 * day + 0.07), weather.cloud * 0.65);
+      if (fogBase.far === 0) Object.assign(fogBase, { near: fog.near, far: fog.far });
+      fog.near = fogBase.near * (1 - 0.7 * weather.rain);
+      fog.far = fogBase.far * (1 - 0.6 * weather.rain);
+      // under the sea: a few metres of green-blue water, darker with depth and at night
+      if (diving.cameraUnder) {
+        const lit = (0.35 + 0.65 * day) * Math.max(0.35, 1 - diving.depth / 12);
+        fog.color.setRGB(0.06 * lit, 0.32 * lit, 0.36 * lit);
+        fog.near = 0.5;
+        fog.far = 22;
+      }
+    }
 
     const l = light.current;
     if (l) {
       const elev = Math.max(0, _sun.y);
       // sun: fades in over the first ~8 degrees; the moon is a fifth of a sunny day at most
       const sunI = 2.6 * Math.min(1, elev / 0.14);
-      l.intensity = (sunUp ? sunI : 0.32 * night) * (1 - inside * 0.92);
+      // clouds: the sun goes soft (most of its light becomes sky light, below)
+      l.intensity = (sunUp ? sunI : 0.32 * night) * (1 - inside * 0.92) * (1 - 0.72 * weather.cloud);
       l.color.copy(_sunCol);
       const texel = (budget.shadowDistance * 2) / budget.shadowMapSize;
       const sx = Math.round(playerPosition.x / texel) * texel;
@@ -190,7 +221,7 @@ export function Environment() {
       l.target.updateMatrixWorld();
     }
     if (hemi.current) {
-      hemi.current.intensity = (0.06 + 0.22 * night) * (1 - inside) + inside * 0.55;
+      hemi.current.intensity = (0.06 + 0.22 * night + 0.35 * weather.cloud * day) * (1 - inside) + inside * 0.55;
       hemi.current.color.set(inside > 0.5 ? '#ffd9a8' : '#5a6f9e');
     }
     scene.environmentIntensity = (0.12 + 0.75 * day) * (1 - inside * 0.8);

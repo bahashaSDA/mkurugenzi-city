@@ -43,6 +43,9 @@ export const useCutscene = create<CutsceneState>((set, get) => ({
   stop: () => set({ active: false, shots: [], onEnd: null }),
 }));
 
+/** The line being voiced: a shot holds on its last frame until its speaker has finished. */
+export const cutsceneVoice = { index: -1, speaking: false, held: 0 };
+
 /** Which shot is playing and how far through it (0..1). Ends the cutscene when time is up. */
 export function cutsceneNow(): { shot: Shot; t: number; index: number } | null {
   const s = useCutscene.getState();
@@ -51,6 +54,13 @@ export function cutsceneNow(): { shot: Shot; t: number; index: number } | null {
   for (let i = 0; i < s.shots.length; i++) {
     const shot = s.shots[i]!;
     if (e < shot.seconds) return { shot, t: e / shot.seconds, index: i };
+    // still talking: hold this shot (up to 8 s extra) instead of cutting the speaker off
+    if (cutsceneVoice.index === i && cutsceneVoice.speaking && cutsceneVoice.held < 8) {
+      const over = e - shot.seconds;
+      cutsceneVoice.held += over;
+      s.startedAt += over * 1000;
+      return { shot, t: 1, index: i };
+    }
     e -= shot.seconds;
   }
   s.skip();

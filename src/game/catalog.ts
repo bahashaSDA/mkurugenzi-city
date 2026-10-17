@@ -73,7 +73,9 @@ export const SHOPS: Record<string, ShopDef> = {
   chips: { id: 'chips', title: 'Chipo Express kibanda', greeting: 'Chips moto moto!', items: ['chips', 'chips_masala', 'smokie', 'mutura', 'soda'] },
   butchery: { id: 'butchery', title: 'Nyama Bora Butchery', greeting: 'Nyama choma iko tayari.', items: ['nyama', 'soda'] },
   beach: { id: 'beach', title: 'Makuti Beach Kiosk', greeting: 'Karibu pwani! Soda iko baridi kabisa.', items: ['soda', 'water', 'juice', 'chai', 'chips', 'crisps'] },
-  boutique: { id: 'boutique', title: 'Utafraaaia Boutique', greeting: 'Wakurugenzi! Merch mpya iko.', items: ['cap', 'tee', 'tee_plain', 'hoodie', 'quarterzip', 'jacket', 'sweatsuit', 'tote', 'socks'] },
+  // clothes are outfits Abel wears (game/wardrobe, ui/WardrobePanel); the rest of the range is bag items
+  boutique: { id: 'boutique', title: 'Utafraaaia Boutique', greeting: 'Wakurugenzi! Merch mpya iko.', items: ['tote', 'socks'] },
+  kinyozi: { id: 'kinyozi', title: 'Kinyozi Fresh Cuts', greeting: 'Karibu! Unataka style gani leo?', items: [] },
 };
 
 export const FARES = { matatu: 50, nganya: 80, bus: 40 } as const;

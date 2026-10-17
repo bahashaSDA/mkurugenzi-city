@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import { CapsuleCollider, RigidBody, type RapierRigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { onKeyPress, input } from '../input';
 import { playerAnim } from '../player/AbelModel';
 import { playerPosition } from '../player/playerState';
-import { getKTX2Loader } from '../../world/ktx2';
 import { heightAt } from '../../world/heights';
 import { prepareCharacter, prepareClips } from '../characters';
 import { ONE_SHOT } from '../npc/Pedestrians';
-import { addCombatant, combatants, fightBrain, flee, playerAttack, removeCombatant, startFight, updateCombat, useStreetSpawns, type Combatant } from './combat';
+import { addCombatant, combatants, fightBrain, flee, playerAttack, keepCombatant, startFight, updateCombat, useStreetSpawns, type Combatant } from './combat';
+import { useCharacterModels } from '../characterModels';
 
 /** Attack keys, the combat clock, and Abel's guard stance. */
 export function CombatDirector() {
@@ -43,10 +42,7 @@ const FIGHTER_VARIANTS = ['hustler', 'worker', 'office', 'young_woman'].map((v) 
 
 /** Mission opponents: spawned around a spot, hostile once Abel comes close; knock-outs count. */
 export function MissionFighters({ x, z, count, toughness, onDone }: { x: number; z: number; count: number; toughness: number; onDone?: () => void }) {
-  const gl = useThree((s) => s.gl);
-  const gltfs = useGLTF(FIGHTER_VARIANTS, false, true, (loader) => {
-    loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltfs = useCharacterModels(FIGHTER_VARIANTS);
   const spots = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {
@@ -68,11 +64,8 @@ export function MissionFighters({ x, z, count, toughness, onDone }: { x: number;
 
 /** People an event threw into the street (a carjacked driver): angry or scared. */
 export function StreetBrawlers() {
-  const gl = useThree((s) => s.gl);
   const list = useStreetSpawns((s) => s.list);
-  const gltfs = useGLTF(FIGHTER_VARIANTS, false, true, (loader) => {
-    loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltfs = useCharacterModels(FIGHTER_VARIANTS);
   return (
     <>
       {list.map((p, i) => (
@@ -118,7 +111,7 @@ function Fighter({ x, z, source, toughness, tag = 'mission', mood = 'fight' }: F
     }
     return c;
   }, [x, z, toughness, tag, mood]);
-  useEffect(() => () => removeCombatant(me.id), [me]);
+  useEffect(() => keepCombatant(me), [me]);
   const st = useRef({ cur: '', clipUntil: 0 });
   const play = (name: string, restart: boolean) => {
     const s = st.current;

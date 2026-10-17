@@ -7,9 +7,12 @@ export const VEHICLES_KIT_URL = '/models/vehicles_kit.glb';
 export const REAL_VEHICLES_KIT_URL = '/models/real_vehicles_kit.glb';
 export const REAL_VEHICLES2_KIT_URL = '/models/real_vehicles2_kit.glb'; // Hiace, Ma3, buses, Corolla, graffiti matatu, boda
 
+const MID = { keepMid: true };
+
 export function useVehicleKit(): Kit {
-  const procedural = useKit(VEHICLES_KIT_URL);
-  const real = useKit(REAL_VEHICLES_KIT_URL);
-  const real2 = useKit(REAL_VEHICLES2_KIT_URL);
+  // vehicles keep a textured mid LOD on every tier (see useKit keepMid)
+  const procedural = useKit(VEHICLES_KIT_URL, MID);
+  const real = useKit(REAL_VEHICLES_KIT_URL, MID);
+  const real2 = useKit(REAL_VEHICLES2_KIT_URL, MID);
   return useMemo(() => new Map([...procedural, ...real, ...real2]), [procedural, real, real2]);
 }

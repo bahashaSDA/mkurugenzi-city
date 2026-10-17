@@ -1,6 +1,7 @@
 // Tiny game event bus: systems announce what the player did, missions listen.
 export type GameEvent =
   | { type: 'buy'; item: string }
+  | { type: 'buyFailed'; item: string } // couldn't afford it (the attendant says so)
   | { type: 'consume'; item: string }
   | { type: 'watch'; video: string }
   | { type: 'talk'; npc: number; area: string }

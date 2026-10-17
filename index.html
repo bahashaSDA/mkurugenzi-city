@@ -8,7 +8,8 @@
     <meta name="description" content="Explore Mkurugenzi City, an open-world tribute to Kenyan storyteller Abel Mutua and the Wakurugenzi." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+    <!-- fonts load without blocking the page (a render-blocking stylesheet held everything ~1 s) -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
   </head>
   <body>
     <div id="root"></div>

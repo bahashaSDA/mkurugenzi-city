@@ -1,11 +1,10 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import { Html, useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { useKTX2 } from '../../world/useKTX2';
-import { getKTX2Loader } from '../../world/ktx2';
 import { useGame } from '../../app/store';
 import { playerPosition } from '../../systems/player/playerState';
 import { register } from '../../game/interactables';
@@ -14,6 +13,7 @@ import { indoor, screenLight, seat, useTheatre } from '../../game/theatre';
 import { variantsFor } from '../../systems/npc/Pedestrians';
 import { bakeSeated, type BakedPart } from './audience';
 import { groundY, insideTheatre, PRICE, rowY, rowZ, seats, TH } from './layout';
+import { useCharacterModels } from '../../systems/characterModels';
 
 // The Mkurugenzi Grand Theatre, CBD. Walk in through the glass lobby, buy a ticket at the booth,
 // take the corridor to the hall, find Row J and watch an episode on the big screen with a full
@@ -338,7 +338,7 @@ function TheatreBuilding() {
           useTheatre.getState().sit();
           if (!useTheatre.getState().seated) return;
           Object.assign(seat, {
-            active: true, x: mySeat.x, y: y0 + rowY(9) + 0.02, z: mySeat.z, facing: Math.PI,
+            active: true, fixedCam: true, x: mySeat.x, y: y0 + rowY(9) + 0.02, z: mySeat.z, facing: Math.PI,
             camX: mySeat.x + 0.55, camY: y0 + rowY(9) + 1.55, camZ: mySeat.z + 1.15,
             lookX: TH.cx, lookY: y0 + TH.screen.y - 1, lookZ: TH.cz + TH.screen.z,
             // back out into the centre-block aisle
@@ -414,11 +414,8 @@ function TheatreBuilding() {
 
 // ------------------------------------------------------------------ the full house
 function Audience({ tier }: { tier: 'low' | 'mid' | 'high' }) {
-  const gl = useThree((s) => s.gl);
   const urls = useMemo(() => variantsFor(tier).map((v) => `/models/npc_${v}.glb`), [tier]);
-  const gltfs = useGLTF(urls, false, true, (loader) => {
-    loader.setKTX2Loader(getKTX2Loader(gl) as unknown as Parameters<typeof loader.setKTX2Loader>[0]);
-  });
+  const gltfs = useCharacterModels(urls);
   const [baked, setBaked] = useState<BakedPart[][] | null>(null);
   useEffect(() => {
     let alive = true;
