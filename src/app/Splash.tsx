@@ -28,23 +28,88 @@ export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }
   const [subs, setSubs] = useState<number | null>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const [sound, setSound] = useState(false);
+  // the browser refused sound before a gesture (most do on a first visit): only then is the
+  // "Tap for sound" button shown; otherwise his voice starts on its own
+  const [blocked, setBlocked] = useState(false);
   // YouTube's player API over postMessage (enablejsapi=1): unmute / volume on a user gesture
   const yt = (func: string, args: unknown[] = []) => frame.current?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args }), '*');
+  const gestured = useRef(false);
   const soundOn = () => {
+    gestured.current = true;
     if (sound) return;
     yt('unMute');
     yt('setVolume', [80]);
     yt('playVideo');
     setSound(true);
   };
+  // Sound without a tap where the browser allows it (Chrome does for returning visitors and sites
+  // the person has played sound on): the video starts muted (always allowed), then asks to unmute
+  // and listens to the player. Unmuted and playing: sound is on. Paused or still muted: the browser
+  // said no, so it plays on silently (never a frozen frame) until the first touch, click or key.
   useEffect(() => {
-    // the first tap / click / key anywhere on the splash gives him his voice
-    const on = () => soundOn();
-    window.addEventListener('pointerdown', on, { once: true });
-    window.addEventListener('keydown', on, { once: true });
+    if (!video || !VIDEO_OK) return;
+    let tried = 0;
+    let decided = false;
+    const known: { playerState?: number; muted?: boolean } = {};
+    const onMsg = (e: MessageEvent) => {
+      if (e.source !== frame.current?.contentWindow || typeof e.data !== 'string') return;
+      let d: { event?: string; info?: { playerState?: number; muted?: boolean } };
+      try {
+        d = JSON.parse(e.data);
+      } catch {
+        return;
+      }
+      if (!d.info || decided) return;
+      // the player reports fields piecemeal (state in one message, muted in another): merge them
+      if (d.info.playerState !== undefined) known.playerState = d.info.playerState;
+      if (d.info.muted !== undefined) known.muted = d.info.muted;
+      const info = known;
+      if (info.playerState === 1 && tried === 0) {
+        tried = 1;
+        yt('unMute');
+        yt('setVolume', [80]);
+        yt('playVideo');
+        // a strict browser takes the unmute and then PAUSES the video: judge the settled state
+        setTimeout(() => {
+          decided = true;
+          if (known.playerState === 1 && known.muted === false) setSound(true);
+          else fallBack();
+        }, 1400);
+        return;
+      }
+    };
+    // muted, playing on, waiting for the first touch / click / key
+    const fallBack = () => {
+      yt('mute');
+      yt('playVideo');
+      setSound(false);
+      setBlocked(true);
+    };
+    // ...and if the pause arrives late, step back to that
+    const late = (e: MessageEvent) => {
+      if (!decided || e.source !== frame.current?.contentWindow || typeof e.data !== 'string' || !e.data.includes('"playerState":2')) return;
+      if (!gestured.current) fallBack();
+    };
+    window.addEventListener('message', late);
+    window.addEventListener('message', onMsg);
+    // ask the player to report its state (YouTube's iframe protocol)
+    const hello = setInterval(() => frame.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 'mk-splash', channel: 'widget' }), '*'), 500);
+    const stop = setTimeout(() => clearInterval(hello), 15000);
     return () => {
-      window.removeEventListener('pointerdown', on);
-      window.removeEventListener('keydown', on);
+      window.removeEventListener('message', onMsg);
+      window.removeEventListener('message', late);
+      clearInterval(hello);
+      clearTimeout(stop);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video]);
+  useEffect(() => {
+    // the first touch / click / key anywhere on the splash gives him his voice (if it isn't on yet)
+    const on = () => soundOn();
+    const evs = ['pointerdown', 'keydown', 'touchstart', 'click'] as const;
+    for (const ev of evs) window.addEventListener(ev, on, { once: true, capture: true });
+    return () => {
+      for (const ev of evs) window.removeEventListener(ev, on, { capture: true });
     };
   });
 
@@ -162,7 +227,7 @@ export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }
 
       <header className="sp-top">
         <span>Wakurugenzi, karibuni</span>
-        {video && VIDEO_OK && (
+        {video && VIDEO_OK && blocked && !sound && (
           <button className={`sp-sound${sound ? ' on' : ''}`} onClick={soundOn} aria-label={sound ? 'Sound on' : 'Tap for sound'}>
             {sound ? '🔊 Sound on' : '🔇 Tap for sound'}
           </button>
