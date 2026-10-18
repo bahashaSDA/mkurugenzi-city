@@ -22,6 +22,10 @@ export interface CarDims {
   power: number; // engine force per driven wheel, N
 }
 
+/** Footwell floor height per car piece (vehicle-local y), from the model's body underside; set when
+ *  a ride is built (Driving). The seated driver's feet are planted there, on the pedals. */
+export const FOOT_Y = new Map<string, number>();
+
 // mirrored from blender/scripts/build_vehicles_kit.py CARS (Blender y -> three z = -y)
 export const CAR_DIMS: Record<string, CarDims> = {
   saloon: { L: 4.6, W: 1.7, H: 1.47, r: 0.31, wb: 2.7, track: 0.71, seat: [-0.4, -0.06, 0.05], maxSpeed: 42, power: 1900 },

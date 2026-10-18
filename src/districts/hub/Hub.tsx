@@ -1,4 +1,6 @@
-import { Suspense, useEffect, useMemo } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { clock, lightsOn } from '../../world/clock';
 import { useFrame } from '@react-three/fiber';
 import { KitInstances, type Placement } from '../../world/kit/KitInstances';
 import { useGame } from '../../app/store';
@@ -47,6 +49,59 @@ function hallInteractables(): Interactable[] {
       if (ep) useEconomy.getState().openVideo(ep.youtubeId, ep.title);
     },
   }));
+}
+
+/** A soft radial glow (white centre to clear edge), tinted by the material. */
+function glowTexture(): THREE.Texture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, 'rgba(255,255,255,1)');
+  r.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+  r.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = r;
+  g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/**
+ * The video halls at night: a bare bulb over the door washing the plank front, the chalk schedule
+ * and the lane in warm light (emissive + additive glow, no real light: the light count never
+ * changes after loading). Without it a hall was a black box after dark.
+ */
+function HallLamps() {
+  const parts = useMemo(() => {
+    const tex = glowTexture();
+    const bulb = new THREE.MeshBasicMaterial({ color: '#ffe2b0', toneMapped: false, transparent: true });
+    const wash = new THREE.MeshBasicMaterial({ map: tex, color: '#ffb866', transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+    const pool = wash.clone();
+    pool.color.set('#ff9f4a');
+    return { bulb, wash, pool, sphere: new THREE.SphereGeometry(0.07, 10, 8), wall: new THREE.PlaneGeometry(4.2, 3.0), ground: new THREE.PlaneGeometry(6, 5) };
+  }, []);
+  const halls = useMemo(() => KIBERA_HALLS.map((h) => ({ ...h, y: heightAt(h.x, h.z + 2), gy: heightAt(h.x, h.z + 4) })), []);
+  const last = useRef(-1);
+  useFrame(() => {
+    const on = lightsOn(clock.hours);
+    if (Math.abs(on - last.current) < 0.01) return;
+    last.current = on;
+    parts.bulb.opacity = 0.25 + 0.75 * on;
+    parts.wash.opacity = 0.5 * on;
+    parts.pool.opacity = 0.42 * on;
+  });
+  return (
+    <>
+      {halls.map((h, i) => (
+        <group key={i} position={[h.x, h.y, h.z]}>
+          <mesh geometry={parts.sphere} material={parts.bulb} position={[0, 2.4, 2.2]} />
+          <mesh geometry={parts.wall} material={parts.wash} position={[0, 1.55, 2.04]} renderOrder={2} />
+          <mesh geometry={parts.ground} material={parts.pool} position={[0, h.gy - h.y + 0.05, 3.9]} rotation-x={-Math.PI / 2} renderOrder={2} />
+        </group>
+      ))}
+    </>
+  );
 }
 
 // Which kit pieces are shops: shop id, where the customer stands (in front), and where the
@@ -148,6 +203,7 @@ export function Hub({ render = true }: { render?: boolean }) {
       {render && <Cables placements={placements} lines={KIBERA_POLE_LINES} />}
       {render && <KiberaDrains />}
       {render && <WindClock />}
+      {render && <HallLamps />}
     </>
   );
 }

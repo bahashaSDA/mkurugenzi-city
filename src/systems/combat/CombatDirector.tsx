@@ -9,8 +9,20 @@ import { playerPosition } from '../player/playerState';
 import { heightAt } from '../../world/heights';
 import { prepareCharacter, prepareClips } from '../characters';
 import { ONE_SHOT } from '../npc/Pedestrians';
-import { addCombatant, combatants, fightBrain, flee, playerAttack, keepCombatant, startFight, updateCombat, useStreetSpawns, type Combatant } from './combat';
+import { addCombatant, combatants, fightBrain, flee, playerAttack, keepCombatant, mugging, startFight, updateCombat, useStreetSpawns, type Combatant, type StreetMood } from './combat';
 import { useCharacterModels } from '../characterModels';
+import { KIBERA } from '../../world/heights';
+import { KIBERA_ALLEYS } from '../../districts/kibera/layout';
+import { ROADS } from '../../config/roads';
+import { occ } from '../vehicles/occupancy';
+import { ride } from '../vehicles/state';
+import { bike, drive } from '../driving/state';
+import { useHealth } from '../../game/health';
+import { useCutscene } from '../../game/cutscene';
+import { useEconomy } from '../../game/economy';
+import { playerView } from '../player/playerState';
+import { clock, lightsOn } from '../../world/clock';
+import { say } from '../audio/voice';
 
 /** Attack keys, the combat clock, and Abel's guard stance. */
 export function CombatDirector() {
@@ -22,7 +34,9 @@ export function CombatDirector() {
     ];
     return () => offs.forEach((f) => f());
   }, []);
-  useFrame(() => {
+  const mug = useRef({ inside: 0, next: 50 + Math.random() * 40 });
+  useFrame((_, rawDt) => {
+    muggings(mug.current, Math.min(rawDt, 0.1));
     updateCombat();
     useStreetSpawns.getState().prune();
     // raise the guard when asked, or automatically while someone is squaring up nearby
@@ -36,6 +50,89 @@ export function CombatDirector() {
     playerAnim.guard = input.guard || threat;
   });
   return null;
+}
+
+// ------------------------------------------------------------------ Kibera muggings
+// Walk Kibera's lanes on foot and sooner or later a couple of guys come up an alley for your
+// wallet (more often after dark). Fight them off, or lose part of your cash: knock down the one
+// who ran with it to get it back. Never in a vehicle, indoors, in a cutscene or right after one.
+
+/** walkable spots in Kibera: alley centre lines and the murram lanes */
+const KIBERA_WALKS: [number, number, number, number][] = [];
+function kiberaWalks() {
+  if (KIBERA_WALKS.length) return KIBERA_WALKS;
+  for (const [x, z0, z1] of KIBERA_ALLEYS) KIBERA_WALKS.push([x, z0, x, z1]);
+  for (const rd of ROADS) {
+    if (rd.kind !== 'murram' || !rd.id.startsWith('kibera')) continue;
+    for (let i = 0; i < rd.pts.length - 1; i++) KIBERA_WALKS.push([...rd.pts[i]!, ...rd.pts[i + 1]!] as [number, number, number, number]);
+  }
+  return KIBERA_WALKS;
+}
+
+/** A spot on a lane 12-22 m from Abel, preferably behind him (they come up on you). */
+function ambushSpot(): { x: number; z: number } | null {
+  let best: { x: number; z: number; score: number } | null = null;
+  const fx = Math.sin(playerView.facing);
+  const fz = Math.cos(playerView.facing);
+  for (const [ax, az, bx, bz] of kiberaWalks()) {
+    const len = Math.hypot(bx - ax, bz - az);
+    for (let t = 0; t <= len; t += 3) {
+      const x = ax + ((bx - ax) * t) / len;
+      const z = az + ((bz - az) * t) / len;
+      const d = Math.hypot(x - playerPosition.x, z - playerPosition.z);
+      if (d < 12 || d > 22) continue;
+      const behind = -((x - playerPosition.x) * fx + (z - playerPosition.z) * fz) / d; // 1 = right behind
+      const score = behind + Math.random() * 0.6;
+      if (!best || score > best.score) best = { x, z, score };
+    }
+  }
+  return best;
+}
+
+function muggings(st: { inside: number; next: number }, dt: number) {
+  const p = playerPosition;
+  const inKibera = p.x > KIBERA.x0 && p.x < KIBERA.x1 && p.z > KIBERA.z0 && p.z < KIBERA.z1;
+  const onFoot = occ.phase === 'walking' && !drive.active && !bike.active && ride.vehicle < 0 && !playerAnim.swimming;
+  const outdoors = Math.abs(p.y - heightAt(p.x, p.z)) < 6; // interiors sit 60 m under their door
+  // an active mugging ends when the gang is gone (down or fled) or Abel got well away
+  if (mugging.active) {
+    let left = 0;
+    for (const c of combatants.values()) if (c.mugger && c.state !== 'down' && Math.hypot(c.x - p.x, c.z - p.z) < 45) left++;
+    if (!left && performance.now() - mugging.startedAt > 4000) {
+      mugging.active = false;
+      mugging.robbed = false;
+      st.next = 240 + Math.random() * 180; // a few minutes before the next one
+      st.inside = 0;
+    }
+    return;
+  }
+  if (!inKibera || !onFoot || !outdoors || useCutscene.getState().active || useHealth.getState().wasted) return;
+  // after dark the lanes are twice as dangerous
+  st.inside += dt * (1 + lightsOn(clock.hours));
+  if (mugging.force) {
+    mugging.force = false;
+    st.inside = st.next;
+  }
+  if (st.inside < st.next) return;
+  if (useEconomy.getState().money < 50) {
+    st.inside = st.next - 30; // nothing worth taking: try again later
+    return;
+  }
+  const at = ambushSpot();
+  if (!at) return;
+  const n = Math.random() < 0.35 ? 3 : 2;
+  const add = useStreetSpawns.getState().add;
+  for (let i = 0; i < n; i++) add(at.x + (i - (n - 1) / 2) * 1.2, at.z + (i % 2) * 0.9, 'mug');
+  mugging.active = true;
+  mugging.robbed = false;
+  mugging.startedAt = performance.now();
+  const l = [
+    { sw: 'Wewe! Toa pesa yote, haraka!', en: 'You! Hand over all the money, quick!' },
+    { sw: 'Simama hapo. Leta simu na wallet!', en: 'Stop right there. Phone and wallet!' },
+    { sw: 'Mkurugenzi, leo umeingia mtaa mbaya. Toa!', en: 'Mkurugenzi, wrong lane today. Pay up!' },
+  ][Math.floor(Math.random() * 3)]!;
+  say({ who: 'man3', name: 'Mugger', text: l.sw, en: l.en, pos: { x: at.x, y: heightAt(at.x, at.z) + 1.6, z: at.z } });
+  useEconomy.getState().toast('Muggers! Fight back (R punch, Q kick, hold guard) or run', 'info');
 }
 
 const FIGHTER_VARIANTS = ['hustler', 'worker', 'office', 'young_woman'].map((v) => `/models/npc_${v}.glb`);
@@ -81,7 +178,7 @@ interface FighterProps {
   source: { scene: THREE.Object3D; animations: THREE.AnimationClip[] };
   toughness: number;
   tag?: 'mission' | 'street';
-  mood?: 'flee' | 'fight';
+  mood?: StreetMood;
 }
 
 function Fighter({ x, z, source, toughness, tag = 'mission', mood = 'fight' }: FighterProps) {
@@ -106,7 +203,12 @@ function Fighter({ x, z, source, toughness, tag = 'mission', mood = 'fight' }: F
   const me = useMemo<Combatant>(() => {
     const c = addCombatant({ x, z, tag, hp: 70 * toughness, toughness });
     if (tag === 'street') {
-      if (mood === 'fight') startFight(c);
+      if (mood === 'mug') {
+        c.mugger = true;
+        c.hp = 60;
+        c.maxHp = 60;
+        startFight(c);
+      } else if (mood === 'fight') startFight(c);
       else flee(c, 14000);
     }
     return c;

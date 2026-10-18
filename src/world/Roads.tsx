@@ -49,6 +49,8 @@ export function RoadNetwork() {
   // shader needs the width), with V in metres / ROAD_UNIT so one material fits any length.
   const meshes = useMemo(() => {
     const out: { geometry: THREE.BufferGeometry; material: THREE.Material; key: string }[] = [];
+    // the road ahead is seen at a grazing angle: anisotropic filtering keeps it crisp into the distance
+    for (const t of [c, n, r, mc, mn, mr]) if (t) t.anisotropy = 8;
     const murramMat = new THREE.MeshStandardMaterial({
       map: mc!, normalMap: mn!, roughnessMap: mr!, roughness: 1, color: new THREE.Color(1.05, 0.8, 0.66),
       polygonOffset: true, polygonOffsetFactor: -1,

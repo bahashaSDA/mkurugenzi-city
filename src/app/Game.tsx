@@ -43,6 +43,7 @@ import { HealthUI } from '../ui/HealthUI';
 import { Ocean } from '../world/Ocean';
 import { CutsceneCamera } from '../game/CutsceneCamera';
 import { CombatDirector, StreetBrawlers } from '../systems/combat/CombatDirector';
+import { mugging } from '../systems/combat/combat';
 import { Theatre } from '../districts/theatre/Theatre';
 import { BeachWhenNear } from '../districts/beach/Beach';
 import { GameLogic } from '../game/GameLogic';
@@ -74,6 +75,7 @@ import { setWeather, weather } from '../world/weather';
 import { junctions, lightAt } from '../world/junctions';
 import { Secrets } from '../game/Secrets';
 import { Bubbles } from '../systems/player/Bubbles';
+import { SwimFx } from '../systems/player/SwimFx';
 import { diving } from '../systems/player/playerState';
 import { useSecrets, findSecret, SECRETS, secretSpot } from '../game/collectibles';
 import { stations } from '../game/stations';
@@ -97,7 +99,7 @@ if (params.has('debug')) {
   // Read-only handles for automated tests and console debugging.
   (window as unknown as { __mk: object }).__mk = {
     playerPosition, perfStats, useGame, content: { loadContent, isAvailable }, ride, vehicles, usePrompt, useEconomy, drive, useParking, useMissions,
-    useCutscene, useHealth, useTheatre, seat, combatants, playerAttack, playerAnim, clock, occ, bike, camOverride, playerIK, useBodas, useRadio, radio, teleport, useNav, doorOf, recordMix, audioContext, sayLine: say, missingVoice, speakerFor, MISSIONS, heightAt, surfaceAt, ROADS, tyreFxStats, useWardrobe, abelLook, seatingDebug, useStories, useSecrets, findSecret, passengerStats, diving, weather, setWeather, junctions, lightAt, stations, bindKey, resetKeys, useService, secretSpots: () => SECRETS.map((s) => ({ id: s.id, ...secretSpot(s) })),
+    useCutscene, useHealth, useTheatre, seat, combatants, playerAttack, playerAnim, clock, occ, bike, camOverride, playerIK, useBodas, useRadio, radio, teleport, useNav, doorOf, recordMix, audioContext, sayLine: say, missingVoice, speakerFor, MISSIONS, heightAt, surfaceAt, ROADS, tyreFxStats, useWardrobe, abelLook, seatingDebug, useStories, useSecrets, findSecret, passengerStats, diving, weather, setWeather, junctions, lightAt, stations, bindKey, resetKeys, useService, mugging, secretSpots: () => SECRETS.map((s) => ({ id: s.id, ...secretSpot(s) })),
   };
 }
 
@@ -348,6 +350,7 @@ const World = memo(function World({ onReady, onBench }: { onReady: () => void; o
               <TyreFx />
               <Secrets />
               <Bubbles />
+              <SwimFx />
             </Suspense>
             <MissionWorld />
             {!minimal && <Theatre />}
@@ -393,11 +396,13 @@ const World = memo(function World({ onReady, onBench }: { onReady: () => void; o
   );
 });
 
-/** A frame never advances the game more than 1/15 s. Physics catches up in fixed 1/60 s steps (up
- *  to 0.5 s per frame), so on a slow phone one slow frame meant ~30 physics steps, which made the
- *  next frame slower still: a spiral down to 3 fps (measured, 4x CPU throttle). Now a very slow
- *  device plays in slight slow motion instead, like most games. */
-const MAX_FRAME_S = 1 / 15;
+/** A frame never advances the game more than 1/20 s. Physics takes exactly one step per rendered
+ *  frame (timeStep="vary"): with fixed 1/60 s steps a 75/120/144 Hz screen had frames with no step,
+ *  where the player read back a stale position and lost that frame's movement, and interpolated
+ *  bodies trailed the camera by a step: the "lagging" walk and choppy driving. One step per frame
+ *  keeps every pose and the camera in lockstep; the cap keeps the step stable on a slow device
+ *  (it plays in slight slow motion instead of spiralling down, like most games). */
+const MAX_FRAME_S = 1 / 20;
 function FrameClamp() {
   const clock = useThree((s) => s.clock);
   useEffect(() => {
@@ -426,7 +431,7 @@ function PhysicsDebug() {
 function PhysicsRoot({ children }: { children: ReactNode }) {
   const playing = useGame((s) => s.phase === 'playing');
   return (
-    <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60} paused={!playing} updatePriority={-100}>
+    <Physics gravity={[0, -9.81, 0]} timeStep="vary" paused={!playing} updatePriority={-100}>
       {params.has('debug') && <PhysicsDebug />}
       <ColliderStreaming />
       {children}

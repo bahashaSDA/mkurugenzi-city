@@ -134,6 +134,8 @@ export function buildTownsLayout(): Placement[] {
   trees(out, avenue, 24, 2.5, 7);
   place(out, 'church', -200, -1300, 0);
   place(out, 'petrol_station', 120, -820, Math.PI);
+  // the hub's own station, just off South Road (flat, open ground): the others are 800 m+ away
+  place(out, 'petrol_station', 80, 348, Math.PI);
 
   // ---------------------------------------------------------------- Wakurugenzi Arena
   place(out, 'arena', 1185, -1140, 0, 'Wakurugenzi Arena');

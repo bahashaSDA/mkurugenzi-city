@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { loadContent } from '../content/episodes';
 import { useGame } from './store';
 
 // Cinematic loader (owner brief): a full-bleed Mkurugenzi episode playing behind the title (it starts
@@ -73,13 +74,13 @@ export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }
   // background: the featured video, or one of the latest episodes, a minute in (past the intro)
   useEffect(() => {
     let alive = true;
-    fetch('/content/content.json')
-      .then((r) => r.json())
-      .then((c: { featuredVideo?: string; episodes?: { youtubeId: string }[]; stats?: { youtubeSubscribers?: number } }) => {
+    loadContent()
+      .then((c) => {
         if (!alive) return;
         const pool = [c.featuredVideo, ...(c.episodes ?? []).slice(0, 6).map((e) => e.youtubeId)].filter(Boolean) as string[];
         setVideo({ id: pool[Math.floor(Math.random() * pool.length)] ?? FALLBACK_VIDEO, start: 45 + Math.floor(Math.random() * 120) });
-        if (c.stats?.youtubeSubscribers) setSubs(c.stats.youtubeSubscribers);
+        const subs = (c.stats as { youtubeSubscribers?: number } | undefined)?.youtubeSubscribers;
+        if (subs) setSubs(subs);
       })
       .catch(() => alive && setVideo({ id: FALLBACK_VIDEO, start: 60 }));
     return () => {
@@ -150,6 +151,7 @@ export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }
             onLoad={() => sound && setTimeout(() => (yt('unMute'), yt('setVolume', [80])), 300)}
             title="Mkurugenzi"
             allow="autoplay; encrypted-media"
+            referrerPolicy="strict-origin-when-cross-origin"
             tabIndex={-1}
           />
         )}

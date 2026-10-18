@@ -15,9 +15,13 @@ export interface Station {
   pumps: { x: number; z: number }[];
   /** the workshop bay in front of the shop */
   bay: { x: number; z: number };
+  /** the canopy: centre and rotation (anywhere under it counts as at the pumps) */
+  x: number;
+  z: number;
+  rotY: number;
 }
 
-const NAMES = ['CBD Total Energies', 'Arena Rubis', 'Studios Shell', 'Estate Ola', "Freddie's Town Kobil"];
+const NAMES = ['CBD Total Energies', 'South Road Total', 'Arena Rubis', 'Studios Shell', 'Estate Ola', "Freddie's Town Kobil"];
 let cache: Station[] | null = null;
 export function stations(): Station[] {
   if (cache) return cache;
@@ -33,16 +37,37 @@ export function stations(): Station[] {
       name: NAMES[out.length % NAMES.length]!,
       pumps: [at(-5, 1.8), at(-5, -1.8), at(5, 1.8), at(5, -1.8)],
       bay: at(0, -6.5),
+      x: p.x,
+      z: p.z,
+      rotY: p.rotY,
     });
   }
   return (cache = out);
 }
 
-/** The service a car standing at (x, z) can get here, if any. */
+/** The service a car standing at (x, z) can get here, if any. Anywhere on the forecourt under the
+ *  canopy (16 x 11 m) is "at the pumps"; the bay in front of the shop is the garage. */
 export function serviceAt(x: number, z: number): { kind: 'fuel' | 'repair'; station: Station } | null {
   for (const st of stations()) {
-    if (st.pumps.some((p) => Math.hypot(p.x - x, p.z - z) < 2.6)) return { kind: 'fuel', station: st };
     if (Math.hypot(st.bay.x - x, st.bay.z - z) < 3.5) return { kind: 'repair', station: st };
+    const dx = x - st.x;
+    const dz = z - st.z;
+    const c = Math.cos(st.rotY);
+    const s = Math.sin(st.rotY);
+    const lx = dx * c - dz * s;
+    const lz = dx * s + dz * c;
+    if (Math.abs(lx) < 9 && Math.abs(lz) < 5.5) return { kind: 'fuel', station: st };
+    if (st.pumps.some((p) => Math.hypot(p.x - x, p.z - z) < 3)) return { kind: 'fuel', station: st };
   }
   return null;
+}
+
+/** The nearest station to (x, z) and how far it is (m). */
+export function nearestStation(x: number, z: number): { station: Station; d: number } | null {
+  let best: { station: Station; d: number } | null = null;
+  for (const st of stations()) {
+    const d = Math.hypot(st.x - x, st.z - z);
+    if (!best || d < best.d) best = { station: st, d };
+  }
+  return best;
 }

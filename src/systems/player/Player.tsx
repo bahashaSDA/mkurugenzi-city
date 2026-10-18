@@ -11,7 +11,7 @@ import { diving, playerPosition, playerView, teleport } from './playerState';
 import { setUnderwater } from '../audio/mixer';
 import { AbelModel, playerAnim } from './AbelModel';
 import { vehicleColliders } from '../vehicles/state';
-import { bike, CAR_DIMS, carKind, drive } from '../driving/state';
+import { bike, CAR_DIMS, carKind, drive, FOOT_Y } from '../driving/state';
 import { playerIK } from './ik';
 import { abort, beginBoarding, occ, sampleFeet, samplePath, type Key } from '../vehicles/occupancy';
 import { playSfx } from '../audio/sfx';
@@ -72,6 +72,8 @@ const _up = new THREE.Vector3(0, 1, 0);
 const _ride = new THREE.Vector3();
 const _zero = { x: 0, y: 0, z: 0 };
 const _w = new THREE.Vector3();
+const _apInv = new THREE.Matrix4();
+const _apLocal = new THREE.Vector3();
 const _fq = new THREE.Quaternion();
 const _fp = new THREE.Vector3();
 const _fs = new THREE.Vector3();
@@ -109,6 +111,9 @@ export function Player() {
     eating: false,
     eatFacing: 0,
     swimming: false,
+    tread: 0, // treading-water cycle (s)
+    apClose: false, // walking to a door: stalled right beside it, close enough to step in
+    stroke: 0, // front-crawl cycle (rad): the body rides up and rolls with each arm
     wasUnder: false,
     camUnder: false,
     surface: 0,
@@ -219,22 +224,43 @@ export function Player() {
         abort(rawMag > 0.3 ? 'input' : wasted ? 'wasted' : 'no-frame');
       } else {
         _w.copy(r.stand).applyMatrix4(occ.frame);
+        // the door is on the far side of the vehicle: walk round its nearer end, not into it
+        _apInv.copy(occ.frame).invert();
+        _apLocal.set(playerPosition.x, playerPosition.y, playerPosition.z).applyMatrix4(_apInv);
+        const hl = r.halfLength ?? 2.6;
+        if (Math.sign(_apLocal.x) !== Math.sign(r.stand.x) && Math.abs(r.stand.x) > 0.3) {
+          const zf = hl + 0.75;
+          const zc = Math.abs(_apLocal.z - zf) + Math.abs(zf - r.stand.z) <= Math.abs(_apLocal.z + zf) + Math.abs(-zf - r.stand.z) ? zf : -zf;
+          const wx = Math.max(Math.abs(r.stand.x), 1.3);
+          // along our side to the corner, then across the end to the door's side
+          const atEnd = Math.abs(_apLocal.z) > hl + 0.35;
+          _w.set(atEnd ? Math.sign(r.stand.x) * wx : Math.sign(_apLocal.x || 1) * wx, r.stand.y, zc).applyMatrix4(occ.frame);
+          if (Math.hypot(_w.x - playerPosition.x, _w.z - playerPosition.z) < 0.35) _w.set(Math.sign(r.stand.x) * wx, r.stand.y, zc).applyMatrix4(occ.frame);
+        }
         const dx = _w.x - playerPosition.x;
         const dz = _w.z - playerPosition.z;
         const d = Math.hypot(dx, dz);
-        if (nowA < s.apStuckAt) s.apStuckAt = 0; // a new approach
+        if (nowA < s.apStuckAt) {
+          s.apStuckAt = 0; // a new approach
+          s.apClose = false;
+        }
         if (nowA - s.apStuckAt > 1200) {
-          // no progress for a while (a wall, a crowd): give up rather than walk on the spot forever
+          // no progress for a while (a wall, a crowd): give up rather than walk on the spot forever.
+          // Pressed against the car right by the door (the spot is just round the body): close
+          // enough, he steps in from where he is
           if (s.apStuckAt && Math.hypot(playerPosition.x - s.apStuckX, playerPosition.z - s.apStuckZ) < 0.15 && d > 0.3) {
-            abort('stuck');
-            useEconomy.getState().toast("Can't reach the door from here", 'info');
+            if (d < 0.8) s.apClose = true;
+            else {
+              abort('stuck');
+              useEconomy.getState().toast("Can't reach the door from here", 'info');
+            }
           }
           s.apStuckAt = nowA;
           s.apStuckX = playerPosition.x;
           s.apStuckZ = playerPosition.z;
         }
         if (occ.phase === 'approaching') {
-          if (d > 0.16) {
+          if (d > 0.16 && !s.apClose) {
             s.speed = THREE.MathUtils.damp(s.speed, d > 4 ? RUN : WALK, 10, dt);
             _move.set(dx / d, 0, dz / d);
             let df = Math.atan2(dx, dz) - s.facing;
@@ -308,6 +334,9 @@ export function Player() {
       }
     }
     playerAnim.swimming = s.swimming;
+    playerAnim.diving = diving.under;
+    diving.swimming = s.swimming;
+    diving.surface = s.surface;
 
     // --- Gravity / jump ---
     const wasGrounded = s.grounded;
@@ -494,7 +523,8 @@ export function Player() {
       s.airTop = playerPosition.y;
     } else s.airTop = Math.max(s.airTop, playerPosition.y);
     // actual ground speed (not the input): animations follow what the body really does
-    playerAnim.speed = Math.hypot(m.x, m.z) / dt;
+    // (smoothed: a frame-to-frame wobble in the measured speed would flick between walk and jog clips)
+    playerAnim.speed = THREE.MathUtils.damp(playerAnim.speed, Math.hypot(m.x, m.z) / dt, 14, dt);
     playerAnim.grounded = s.grounded;
     playerAnim.vy = s.vy;
     if (s.grounded && s.vy < 0) s.vy = 0;
@@ -514,13 +544,21 @@ export function Player() {
     if (visual.current) {
       // swimming: pitch flat into a front crawl when moving, nearly upright when treading water;
       // keep the hips just under the surface whatever the tilt
-      const wantTilt = s.swimming ? (playerAnim.speed > 0.4 || diving.under ? 1.3 : 0.2) : 0;
+      // (the Swim_Loop clip already leans the body forward: 1.05 more puts the back and the back of
+      // the head at the surface; the old 1.3 pitched him head-down, face half a metre under)
+      const wantTilt = s.swimming ? (playerAnim.speed > 0.4 || diving.under ? 1.05 : 0.15) : 0;
       s.tilt = THREE.MathUtils.damp(s.tilt, wantTilt, 4, dt);
       _q.setFromAxisAngle(_up, s.facing);
       _qTilt.setFromAxisAngle(_xAxis, s.tilt);
       visual.current.quaternion.copy(_q).multiply(_qTilt);
+      // the crawl: the body rolls towards each pulling arm and rides up a little with every stroke
+      const crawl = s.swimming ? THREE.MathUtils.clamp((s.tilt - 0.25) / 0.8, 0, 1) : 0;
+      s.stroke += dt * (1.6 + playerAnim.speed * 1.4);
+      if (crawl > 0) visual.current.quaternion.multiply(_qTilt.setFromAxisAngle(_up, Math.sin(s.stroke) * 0.38 * crawl));
       if (s.swimming || s.tilt > 0.01) {
-        const hipsY = (s.swimming ? s.surface - 0.12 - diving.depth : ny - 0.85 + 1.0) - ny;
+        // treading water (upright): shoulders in the water, head out; crawling: hips at the surface
+        const sink = THREE.MathUtils.lerp(0.5, 0.03, crawl) - 0.035 * Math.sin(2 * s.stroke) * crawl;
+        const hipsY = (s.swimming ? s.surface - sink - diving.depth : ny - 0.85 + 1.0) - ny;
         const k = Math.min(1, s.tilt / 1.3);
         visual.current.position.set(
           -Math.sin(s.facing) * Math.sin(s.tilt),
@@ -529,6 +567,14 @@ export function Player() {
         );
       } else {
         visual.current.position.set(0, -(CAPSULE_HALF + CAPSULE_R), 0);
+      }
+      if (!riding) {
+        // the body is drawn where physics last put it; this frame's move lands at the next step.
+        // Draw Abel where he is NOW (the camera follows that), so he never shudders against it.
+        const bp = rb.translation();
+        visual.current.position.x += nx - bp.x;
+        visual.current.position.y += ny - bp.y;
+        visual.current.position.z += nz - bp.z;
       }
       if (occupied && occ.phase !== 'walking') {
         // Attach to the vehicle as it will be RENDERED this frame: its full rotation (slopes,
@@ -568,7 +614,21 @@ export function Player() {
         const toAbel = (v: THREE.Vector3) => v.sub(seatK.p).applyAxisAngle(_up, -seatK.yaw);
         const hands = (playerIK.hands ??= [new THREE.Vector3(), new THREE.Vector3()]);
         if (r.kind === 'car') {
-          const c = CAR_DIMS[carKind(drive.piece)]?.wheel;
+          const dims = CAR_DIMS[carKind(drive.piece)];
+          const c = dims?.wheel;
+          // feet on the pedals, knees up, inside the footwell: the seated clip alone hangs the legs
+          // straight down through the floor (seen under the car from outside)
+          if (dims) {
+            const [sx, sy, sz] = dims.seat;
+            const fy = FOOT_Y.get(drive.piece) ?? sy + 0.22;
+            const feet = (playerIK.feet ??= [new THREE.Vector3(), new THREE.Vector3()]);
+            feet[0]!.set(sx + 0.15, fy, sz + 0.64);
+            feet[1]!.set(sx - 0.13, fy, sz + 0.68);
+            toAbel(feet[0]!);
+            toAbel(feet[1]!);
+            if (!c) playerIK.hands = null;
+            want = 1;
+          }
           if (c) {
             // 9 and 3 on the rim (r 0.18), the wheel leaning back 25 degrees, turned with the steering
             const turn = -drive.steer * 7;
@@ -577,7 +637,6 @@ export function Player() {
               hands[i]!.set(c[0] + _ikv.x, c[1] + _ikv.y - 0.03, c[2] + _ikv.z - 0.07);
               toAbel(hands[i]!);
             }
-            playerIK.feet = null;
             want = 1;
           }
         } else {
@@ -594,6 +653,20 @@ export function Player() {
           toAbel(feet[1]!);
           want = 1;
         }
+      }
+      if (!want && s.swimming && !diving.under && playerAnim.speed < 0.45 && occ.phase === 'walking') {
+        // treading water: hands scull in flat figure-eights just under the surface, out in front of
+        // the chest; the legs turn an eggbeater kick under him (Abel's own frame: feet at the origin)
+        s.tread += dt;
+        const t = s.tread * 2.4;
+        const hands = (playerIK.hands ??= [new THREE.Vector3(), new THREE.Vector3()]);
+        const feet = (playerIK.feet ??= [new THREE.Vector3(), new THREE.Vector3()]);
+        for (const [i, side] of [[0, 1], [1, -1]] as const) {
+          hands[i]!.set(side * (0.42 + 0.14 * Math.sin(t)), 1.32 + 0.03 * Math.sin(2 * t), 0.32 + 0.1 * Math.sin(2 * t) * side);
+          const ph = t * 0.85 + (i ? Math.PI : 0);
+          feet[i]!.set(side * (0.2 + 0.08 * Math.cos(ph)), 0.32 + 0.14 * Math.sin(ph), 0.12 + 0.12 * Math.cos(ph));
+        }
+        want = 1;
       }
       playerIK.w = THREE.MathUtils.damp(playerIK.w, want, want ? 5 : 12, dt);
     }

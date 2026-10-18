@@ -41,6 +41,8 @@ export interface Ride {
   /** Standing spot beside the door (vehicle-local, feet) and the facing to take there. */
   stand: THREE.Vector3;
   standYaw: number;
+  /** half the vehicle's length (m): walking round it to a door on the far side */
+  halfLength?: number;
   /** stand -> seat. The last key is the seat. */
   board: Key[];
   /** Seated clip (Driving_Loop, Sitting_Idle_Loop, Idle_Rail_Loop, Riding_Loop). */

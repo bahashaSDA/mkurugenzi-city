@@ -35,11 +35,25 @@ async function fetchJson<T>(url: string, timeoutMs: number): Promise<T | null> {
 
 let contentPromise: Promise<Content> | null = null;
 
-/** content.json merged with any brand-new uploads (newest first). Never throws. */
+/** The catalogue baked into the bundle (vite.config.ts): used whenever the network copy can't be had. */
+async function bundled(): Promise<Content> {
+  try {
+    const m = await import('virtual:mk-content');
+    return structuredClone(m.default);
+  } catch {
+    return { links: {}, episodes: [] };
+  }
+}
+
+/** content.json merged with any brand-new uploads (newest first). Never throws, never empty if the build has episodes. */
 export function loadContent(): Promise<Content> {
   contentPromise ??= (async () => {
-    const base = (await fetchJson<Content>('/content/content.json', 10000)) ?? { links: {}, episodes: [] };
-    const latest = await fetchJson<{ videos: { id: string; title: string; published: string }[] }>(LATEST_URL, 4000);
+    // the network copy is fresher (refreshed daily); two tries, generous timeouts (the first
+    // seconds of a hosted game share the connection with large model downloads)
+    let base = await fetchJson<Content>('/content/content.json', 20000);
+    if (!base?.episodes?.length) base = await fetchJson<Content>(`/content/content.json?r=${Date.now()}`, 20000);
+    if (!base?.episodes?.length) base = await bundled();
+    const latest = await fetchJson<{ videos: { id: string; title: string; published: string }[] }>(LATEST_URL, 6000);
     if (latest?.videos?.length) {
       const known = new Set(base.episodes.map((e) => e.youtubeId));
       const fresh = latest.videos
@@ -48,6 +62,8 @@ export function loadContent(): Promise<Content> {
         .filter((e): e is Episode => !!e);
       base.episodes = [...fresh, ...base.episodes];
     }
+    // nothing at all: let the next caller try again rather than caching an empty list forever
+    if (!base.episodes.length) contentPromise = null;
     return base;
   })();
   return contentPromise;

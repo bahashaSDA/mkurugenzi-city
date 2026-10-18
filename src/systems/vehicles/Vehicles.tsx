@@ -53,8 +53,8 @@ const SAFE_GAP = 9;
 // Render LODs by distance, with hysteresis so a vehicle on the boundary doesn't flicker between
 // two models. Near: full model with spinning wheels; mid: textured simplified model (wheels still
 // spin where the model has them); far: one merged untextured mesh; beyond: not drawn.
-const LOD_IN = [38, 150, 480];
-const LOD_OUT = [44, 165, 500];
+const LOD_IN = [55, 230, 900];
+const LOD_OUT = [62, 250, 940];
 // audio
 const ENGINE_VOICES = 5;
 const ENGINE_RANGE = 75;
@@ -164,10 +164,14 @@ export function Vehicles() {
         });
       }
     }
-    vehicles.length = 0;
-    vehicles.push(...list);
     return list;
   }, [tier, routes]);
+  // the shared list (hailing, the map, tests) is the fleet this component actually drives
+  // (set in an effect: a render-time side effect could publish a different copy of the fleet)
+  useEffect(() => {
+    vehicles.length = 0;
+    vehicles.push(...fleet);
+  }, [fleet]);
 
   // --- wheelbase of each piece (from its real wheels) for slope pitch and steering ---
   const geom = useMemo(() => {
@@ -502,9 +506,15 @@ export function Vehicles() {
           if (aboard && occ.phase === 'seated') conductorSays(v, 'depart', true);
         }
       }
-      const v0 = v.v;
-      v.v += THREE.MathUtils.clamp(target - v.v, -6 * dt, 2.5 * dt);
-      v.accel = THREE.MathUtils.damp(v.accel, (v.v - v0) / Math.max(dt, 1e-3), 4, dt);
+      // speed like a driver's foot: the wanted acceleration eases in and out (no instant flips
+      // between full throttle and full brake: that read as a jerky, "lagging" stop-start)
+      const want = THREE.MathUtils.clamp((target - v.v) * 1.1, -6.5, spec.kind === 'car' ? 2.6 : 1.8);
+      v.accel = THREE.MathUtils.damp(v.accel, want, want < v.accel ? 7 : 2.5, dt);
+      v.v = Math.max(0, v.v + v.accel * dt);
+      if (target < 0.05 && v.v < 0.15) {
+        v.v = 0;
+        v.accel = Math.min(v.accel, 0);
+      }
       v.s = (v.s + v.v * dt) % rs.length;
       v.stopped = v.v < 0.3;
       // the sliding door: rolled open at a stage (the conductor works the door), shut before moving

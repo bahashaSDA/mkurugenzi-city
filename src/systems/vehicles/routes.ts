@@ -1,4 +1,4 @@
-import { surfaceAt } from '../../world/roadSurface';
+import { nearestRoad, surfaceAt } from '../../world/roadSurface';
 import { TURNAROUNDS, type Turnaround } from '../../config/roads';
 
 // Vehicle routes as closed loops along road centre lines. Each point carries the lane offset to the
@@ -38,7 +38,9 @@ export const ROUTES: RouteDef[] = [
   {
     id: 'B',
     name: 'Route 111: Stage - Rocky Ridge - East Road',
-    pts: [[14, 132, T], [14, 330, T], [300, 330, T], [300, 200, T], [220, 60, T], [140, -40, T], [18, -40, T]],
+    // (it closed the loop at (18, -40), the avenue's east KERB: the last 136 m ran down the east
+    // pavement where people walk. The junction is on the avenue's centre line.)
+    pts: [[14, 132, T], [14, 330, T], [300, 330, T], [300, 200, T], [220, 60, T], [140, -40, T], [14, -40, T]],
     stops: [
       { name: 'Matatu Stage', x: 14, z: 138, dwell: 9 },
       { name: 'South Road', x: 14, z: 300, dwell: 6 },
@@ -133,6 +135,55 @@ export interface RouteSample {
 }
 
 const STEP = 1.0;
+/** half the widest vehicle (bus / nganya) plus a margin: what must stay on the carriageway */
+const BODY_HALF = 1.45;
+
+/**
+ * Corner smoothing and the swing into a turning circle can carry a path's edge off the tarmac (onto
+ * a kerb, a pavement, the verge). Nudge every sample back until a full bus width either side of it
+ * is on the road, then smooth lightly so the nudges don't become kinks. In place.
+ */
+function keepOnRoad(sx: Float32Array, sz: Float32Array) {
+  const m = sx.length;
+  const nudge = () => {
+    for (let i = 0; i < m; i++) {
+      const j = (i + 1) % m;
+      const k0 = (i - 1 + m) % m;
+      const dx = sx[j]! - sx[k0]!;
+      const dz = sz[j]! - sz[k0]!;
+      const len = Math.hypot(dx, dz) || 1;
+      const lx = dz / len; // left of travel
+      const lz = -dx / len;
+      for (let it = 0; it < 4; it++) {
+        const l = nearestRoad(sx[i]! + lx * BODY_HALF, sz[i]! + lz * BODY_HALF, 6);
+        const r = nearestRoad(sx[i]! - lx * BODY_HALF, sz[i]! - lz * BODY_HALF, 6);
+        const ol = l ? l.out : 0; // no road at all within reach: leave it (not a road stretch)
+        const or = r ? r.out : 0;
+        if (ol < 0.02 && or < 0.02) break;
+        const shift = (or - ol) * 0.6 + Math.sign(or - ol) * 0.02;
+        sx[i] = sx[i]! + lx * shift;
+        sz[i] = sz[i]! + lz * shift;
+      }
+    }
+  };
+  const smooth = (W: number) => {
+    const ax = Float32Array.from(sx);
+    const az = Float32Array.from(sz);
+    for (let i = 0; i < m; i++) {
+      let x = 0;
+      let z = 0;
+      for (let k = -W; k <= W; k++) {
+        x += ax[(i + k + m) % m]!;
+        z += az[(i + k + m) % m]!;
+      }
+      sx[i] = x / (2 * W + 1);
+      sz[i] = z / (2 * W + 1);
+    }
+  };
+  nudge();
+  smooth(2);
+  nudge();
+}
 
 /** Resample a closed route every metre (lane-offset, draped on the terrain), with headings and the
  *  route-distance of each stop. */
@@ -208,6 +259,7 @@ export function sampleRoute(r: RouteDef): RouteSample {
     sx[i] = ax / (2 * W + 1);
     sz[i] = az / (2 * W + 1);
   }
+  keepOnRoad(sx, sz);
   const heading = new Float32Array(m);
   const y = new Float32Array(m);
   for (let i = 0; i < m; i++) {

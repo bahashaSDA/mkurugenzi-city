@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { create } from 'zustand';
 import { type Kit } from '../../world/kit/useKit';
 import { KitInstances, type Placement } from '../../world/kit/KitInstances';
-import { surfaceAt, surfaceKind } from '../../world/roadSurface';
+import { nearestRoad, surfaceAt, surfaceKind } from '../../world/roadSurface';
 import { tyreContact } from './tyreMarks';
 import { register } from '../../game/interactables';
 import { useEconomy } from '../../game/economy';
@@ -61,19 +61,39 @@ interface Boda extends Placement {
   id: number;
 }
 
-/** Bodas wait at every stage: two or three angled to the kerb. */
+/** Bodas wait at every stage: two or three side by side at the roadside, OFF the carriageway
+ *  (a fixed offset from the stop used to leave some standing in the traffic lane). */
 function planBodas(): Boda[] {
   const out: Boda[] = [];
   const seen = new Set<string>();
+  // kerbside: clear of every road by 1.4 m, but no more than 4 m out (where riders wait)
+  const kerbside = (x: number, z: number) => !nearestRoad(x, z, 1.4) && !!nearestRoad(x, z, 4);
   for (const rt of ROUTES)
     for (const st of rt.stops) {
       const key = `${Math.round(st.x / 20)},${Math.round(st.z / 20)}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      for (let i = 0; i < 2 + (st.x % 2 === 0 ? 1 : 0); i++) {
-        const x = st.x - 9 - i * 1.3;
-        const z = st.z + 7 + i * 0.4;
-        out.push({ id: out.length, piece: 'rv_boda', x, z, rotY: 0.6 + i * 0.15, y: surfaceAt(x, z) });
+      const n = 2 + (st.x % 2 === 0 ? 1 : 0);
+      // the first spot round the stage (nearest first) with room for the whole row
+      let found: { x: number; z: number; ax: number; az: number } | null = null;
+      for (let d = 6; d <= 16 && !found; d += 1.5)
+        for (let k = 0; k < 24 && !found; k++) {
+          const a = (k / 24) * Math.PI * 2;
+          const x = st.x + Math.cos(a) * d;
+          const z = st.z + Math.sin(a) * d;
+          // the row runs along the road: tangent to the ring round the stage
+          const ax = -Math.sin(a) * 1.3;
+          const az = Math.cos(a) * 1.3;
+          let ok = true;
+          for (let i = 0; i < n && ok; i++) ok = kerbside(x + ax * i, z + az * i);
+          if (ok) found = { x, z, ax, az };
+        }
+      if (!found) continue;
+      const face = Math.atan2(found.ax, found.az) + Math.PI / 2 + 0.5; // angled to the kerb
+      for (let i = 0; i < n; i++) {
+        const x = found.x + found.ax * i;
+        const z = found.z + found.az * i;
+        out.push({ id: out.length, piece: 'rv_boda', x, z, rotY: face + i * 0.12, y: surfaceAt(x, z) });
       }
     }
   return out;

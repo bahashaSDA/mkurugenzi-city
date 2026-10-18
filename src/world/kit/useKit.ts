@@ -95,6 +95,9 @@ uniform float uNight; varying vec3 vWP;`)
 
 function prepareMaterial(m: THREE.Material) {
   const std = m as THREE.MeshStandardMaterial;
+  // sharp at a distance and at grazing angles (walls along a street, roofs seen from the road):
+  // without anisotropic filtering the mipmaps smear every texture into a blur past ~30 m
+  for (const t of [std.map, std.normalMap, std.roughnessMap, std.metalnessMap, std.aoMap]) if (t) t.anisotropy = 8;
   if (m.name.includes('glass')) {
     // tinted vehicle/window glass: see-through so passengers and the street are visible
     m.transparent = true;

@@ -25,6 +25,7 @@ export const playerAnim = {
   speed: 0, grounded: true, vy: 0, idleTime: 0, action: '', actionUntil: 0, riding: false, rideClip: '',
   prop: '' as Prop, // held while eating/drinking
   swimming: false,
+  diving: false, // under the surface (the crawl, never treading)
   /** fights (systems/combat): current one-shot attack/reaction clip and its end time */
   combat: '' as string,
   combatUntil: 0,
@@ -37,6 +38,9 @@ export const playerAnim = {
 };
 
 const FADE = 0.25;
+/** Bones other systems follow (swim splashes at the hands). */
+export const abelBones: { handL: THREE.Object3D | null; handR: THREE.Object3D | null; head: THREE.Object3D | null } = { handL: null, handR: null, head: null };
+const LOCO = new Set(['Walk_Loop', 'Jog_Fwd_Loop', 'Sprint_Loop', 'Limp_Loop']);
 const IDLE_VARIANTS = ['Idle_FoldArms_Loop', 'Idle_TalkingPhone_Loop', 'Idle_Talking_Loop', 'Idle_Loop'];
 
 export function AbelModel() {
@@ -63,6 +67,11 @@ export function AbelModel() {
   // food and drink props in Abel's hands (GTA-style: you see what he is eating)
   const props = useMemo(() => makeProps(gltf.scene), [gltf]);
   const spine = useMemo(() => gltf.scene.getObjectByName('spine_03') ?? gltf.scene.getObjectByName('spine_02'), [gltf]);
+  useEffect(() => {
+    abelBones.handL = gltf.scene.getObjectByName('hand_l') ?? null;
+    abelBones.handR = gltf.scene.getObjectByName('hand_r') ?? null;
+    abelBones.head = gltf.scene.getObjectByName('head') ?? null;
+  }, [gltf]);
   // hands and feet on the controls (systems/player/ik)
   const limbs = useMemo<Limbs | null>(() => {
     const g = (n: string) => gltf.scene.getObjectByName(n);
@@ -77,7 +86,7 @@ export function AbelModel() {
     };
   }, [gltf]);
 
-  const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10, combatUntil: 0 });
+  const st = useRef({ current: '', idleVariant: 0, idleSwitchAt: 10, combatUntil: 0, air: 0 });
   // outfit, haircut and cap from the wardrobe (shop previews included)
   const wardrobe = useMemo(() => new AbelWardrobe(gltf.scene, gl), [gltf, gl]);
   useEffect(() => {
@@ -97,11 +106,16 @@ export function AbelModel() {
     const s = st.current;
     const look = lookNow(useWardrobe.getState());
     wardrobe.set(look.outfit, look.hair, look.cap);
-    const { speed, grounded, vy } = playerAnim;
+    const { speed, vy } = playerAnim;
+    // a bump, kerb or stair edge drops ground contact for a frame or two: not a fall (no jump flash)
+    s.air = playerAnim.grounded ? 0 : s.air + dt;
+    const grounded = playerAnim.grounded || (s.air < 0.18 && vy > -4 && vy < 1.5);
     let want: string;
     if (playerAnim.down) want = performance.now() < playerAnim.combatUntil ? playerAnim.combat || 'Knockdown' : 'Down_Loop';
     else if (playerAnim.combat && performance.now() < playerAnim.combatUntil) want = playerAnim.combat;
-    else if (playerAnim.swimming) want = 'Swim_Loop';
+    // swimming: the front crawl when moving or diving; treading water (upright, IK sculling hands
+    // and an eggbeater kick, systems/player/Player) when he stops
+    else if (playerAnim.swimming) want = speed > 0.45 || playerAnim.diving ? 'Swim_Loop' : 'Idle_Loop';
     else if (playerAnim.riding) {
       // on a seat (not a vehicle): eating plays the seated bites, food in hand
       const eatingSeated = seat.active && playerAnim.action === 'Consume' && performance.now() < playerAnim.actionUntil;
@@ -134,6 +148,11 @@ export function AbelModel() {
       const prev = actions.get(s.current);
       const fast = want.startsWith('Jump') || want.startsWith('Punch') || want === 'Kick';
       next.reset().setEffectiveWeight(1).fadeIn(fast ? 0.08 : FADE).play();
+      // walk <-> jog <-> sprint: carry the stride over (same foot forward), no restart of the cycle
+      if (prev && prev !== next && LOCO.has(want) && LOCO.has(s.current)) {
+        const pd = prev.getClip().duration;
+        next.time = ((prev.time % pd) / pd) * next.getClip().duration;
+      }
       if (prev !== next) prev?.fadeOut(fast ? 0.08 : FADE);
       s.current = want;
       s.combatUntil = playerAnim.combatUntil;

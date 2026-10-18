@@ -404,6 +404,7 @@ function TheatreBuilding() {
             src={`https://www.youtube-nocookie.com/embed/${video.id}?autoplay=1&rel=0&modestbranding=1`}
             title={video.title}
             allow="autoplay; encrypted-media; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
             style={{ border: 0, display: 'block', background: '#000' }}
           />
         </Html>

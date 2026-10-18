@@ -19,8 +19,9 @@ import { bus } from '../audio/mixer';
 import { EngineVoice } from '../audio/engine';
 import { horn, impact } from '../audio/sfx';
 import { radio } from '../audio/radio';
-import { CAR_DIMS, SURFACE_GRIP, carKind, drive, enterRequest, handlingOf, useParking, useService } from './state';
-import { FUEL_PRICE, TANK, serviceAt } from '../../game/stations';
+import { FOOT_Y, CAR_DIMS, SURFACE_GRIP, carKind, drive, enterRequest, handlingOf, useParking, useService } from './state';
+import { FUEL_PRICE, TANK, nearestStation, serviceAt } from '../../game/stations';
+import { useNav } from '../../game/navigation';
 import { playSfx } from '../audio/sfx';
 import { surfaceKind, type Surface } from '../../world/roadSurface';
 import { tyreContact } from './tyreMarks';
@@ -138,6 +139,7 @@ function carRide(piece: string, half: number, side: 'driver' | 'passenger', hook
     kind: 'car',
     stand: board[0]!.p.clone(),
     standYaw: doorYaw,
+    halfLength: d.L / 2,
     board,
     seatClip: 'Driving_Loop',
     exit,
@@ -203,6 +205,8 @@ export function Driving() {
     // which door? the driver's if there is room to stand and swing it open, else the passenger's
     const d = CAR_DIMS[carKind(c.piece)]!;
     const parts = kit.get(c.piece)?.lods[0] ?? [];
+    // the floor of the footwell: just above the body's underside, never above the seat
+    FOOT_Y.set(c.piece, THREE.MathUtils.clamp(bb.min.y + 0.16, d.seat[1] + 0.18, d.seat[1] + 0.36));
     const clear = (sgn: number) => {
       const door = frontDoor(parts, sgn);
       const standZ = door ? door.hinge.z - door.size.z - 0.12 : d.seat[2] + 0.25;
@@ -424,7 +428,19 @@ function DrivenCar({ car, kit, onExit, onLive }: { car: Car; kit: Kit; onExit: (
     const controls = live && !inputLock.ui;
     const throttle = controls ? input.moveY : 0;
     let engineF = 0;
-    let brake = live ? 0.6 : 25; // engine braking / parked
+    let brake = live ? 0.6 : 90; // engine braking / parked (handbrake on)
+    if (!live) {
+      // getting in or out: the car stays put. It still settles onto its springs (vertical), but it
+      // must not roll off or rock while Abel climbs in (it used to roll back and lift its nose)
+      const b = body.current;
+      if (b) {
+        const v = b.linvel();
+        const a = b.angvel();
+        const k = 0.35;
+        b.setLinvel({ x: v.x * k, y: v.y, z: v.z * k }, true);
+        b.setAngvel({ x: a.x * k, y: a.y * k, z: a.z * k }, true);
+      }
+    }
     const BR = h.brake;
     if (throttle > 0.1) {
       brake = 0;
@@ -618,7 +634,10 @@ function DrivenCar({ car, kit, onExit, onLive }: { car: Car; kit: Kit; onExit: (
       drive.fuel = Math.max(0, drive.fuel - (Math.abs(drive.speed) * dt / 1000) * (0.35 + 1.1 * st.current.throttle));
       if (drive.fuel < 5 && !fuelTold.current.low) {
         fuelTold.current.low = true;
-        useEconomy.getState().toast('Low fuel: find a petrol station (the green pump on the map)', 'info');
+        // GPS to the nearest pump (unless a mission's route is already set)
+        const ns = nearestStation(drive.x, drive.z);
+        if (ns && !useNav.getState().target) useNav.setState({ target: { x: ns.station.x, z: ns.station.z, label: ns.station.name, kind: 'waypoint' } });
+        useEconomy.getState().toast(ns ? `Low fuel: ${ns.station.name} is ${ns.d < 1000 ? `${Math.round(ns.d / 10) * 10} m` : `${(ns.d / 1000).toFixed(1)} km`} away (GPS set). Stop under the canopy and press E` : 'Low fuel: find a petrol station', 'info');
       }
       if (drive.fuel <= 0 && !fuelTold.current.empty) {
         fuelTold.current.empty = true;

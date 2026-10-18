@@ -11,16 +11,17 @@ import { thump, whoosh } from '../audio/stingers';
 import { useEconomy } from '../../game/economy';
 import { create } from 'zustand';
 
+export type StreetMood = 'flee' | 'fight' | 'mug';
 interface StreetSpawn {
   id: number;
   x: number;
   z: number;
-  mood: 'flee' | 'fight';
+  mood: StreetMood;
   until: number;
 }
 
 /** People thrown into the street by events (a carjacked driver): they run or fight. */
-export const useStreetSpawns = create<{ list: StreetSpawn[]; add: (x: number, z: number, mood: 'flee' | 'fight') => void; prune: () => void }>((set, get) => ({
+export const useStreetSpawns = create<{ list: StreetSpawn[]; add: (x: number, z: number, mood: StreetMood) => void; prune: () => void }>((set, get) => ({
   list: [],
   add: (x, z, mood) => set({ list: [...get().list.slice(-3), { id: Math.random(), x, z, mood, until: performance.now() + 45000 }] }),
   prune: () => {
@@ -57,6 +58,10 @@ export interface Combatant {
   pendingHit: number; // when its punch lands on Abel (0: none)
   knockedOut: boolean;
   name: string;
+  /** a Kibera mugger: he goes for Abel's wallet, then runs with it */
+  mugger?: boolean;
+  /** what he took (KSh): Abel gets it back if he puts him down */
+  loot?: number;
 }
 
 export const combatants = new Map<number, Combatant>();
@@ -169,6 +174,11 @@ function knockDown(c: Combatant) {
   c.clipUntil = performance.now() + 800;
   c.stateUntil = performance.now() + (c.tag === 'mission' ? 1e9 : 7000 + Math.random() * 4000);
   c.pendingHit = 0;
+  if (c.loot) {
+    // the wallet comes back off the man who ran with it
+    useEconomy.getState().earn(c.loot, 'Got your money back');
+    c.loot = 0;
+  }
   if (!c.knockedOut) {
     c.knockedOut = true;
     emit({ type: 'knockout', npc: c.id, tag: c.tag });
@@ -196,6 +206,25 @@ function scatterBystanders(victim: Combatant) {
 const KO_LINES = ['Sawa sawa! Nimekubali!', 'Aki, wacha! Mimi ni fan yako!', 'Mkurugenzi... hii story utaiambia aje?', 'Nitakuripoti kwa podcast!'];
 const pickLine = (l: string[]) => l[Math.floor(Math.random() * l.length)]!;
 
+// ------------------------------------------------------------------ Kibera muggings
+const RUN_LINES = ['Tumekula! Kimbia!', 'Pesa ni yetu, boss!', 'Asante kwa mchango, Mkurugenzi!'];
+/** force: ?debug tests start one now */
+export const mugging = { active: false, robbed: false, startedAt: 0, force: false };
+
+/** A mugger's punch landed: he grabs part of Abel's cash and the gang runs with it. */
+function rob(c: Combatant) {
+  if (mugging.robbed) return;
+  const eco = useEconomy.getState();
+  if (eco.money <= 0) return;
+  const take = Math.min(eco.money, Math.max(50, Math.round((eco.money * (0.3 + Math.random() * 0.25)) / 10) * 10));
+  useEconomy.setState({ money: eco.money - take });
+  eco.toast(`Mugged! They took KSh ${take.toLocaleString()} · put him down to get it back`, 'spend');
+  mugging.robbed = true;
+  c.loot = take;
+  for (const o of combatants.values()) if (o.mugger && o.state === 'fight') flee(o, 25000);
+  useEconomy.getState().toast(pickLine(RUN_LINES), 'info');
+}
+
 /** Called once per frame by CombatDirector: Abel's punches land, opponents' punches land. */
 export function updateCombat() {
   const now = performance.now();
@@ -212,9 +241,11 @@ export function updateCombat() {
       if (d < 1.9 && c.state === 'fight' && canFight()) {
         const raw = (5 + Math.random() * 5) * c.toughness;
         const dmg = input.guard ? raw * 0.25 : raw;
-        useHealth.getState().damage(dmg, 'You lost the fight.');
+        useHealth.getState().damage(dmg, c.mugger ? 'Mugged in Kibera.' : 'You lost the fight.');
         playerAnim.hitAt = now;
         thump(dmg / 12);
+        // a mugger's clean hit (not blocked) takes the wallet
+        if (c.mugger && (!input.guard || Math.random() < 0.25)) rob(c);
       }
     }
   }

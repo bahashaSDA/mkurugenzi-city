@@ -56,6 +56,21 @@ const ROOM_OF: Record<string, [RoomType, string, string?]> = {
   rb_flats: ['int_house', 'flat'],
   rb_residential: ['int_house', 'flat'],
   rb_shop: ['int_shop', 'the duka', 'kiosk'],
+  // the CBD and town blocks: flats above the offices (every tall building can be entered)
+  bld_office_8: ['int_house', 'flat'],
+  bld_tower_a: ['int_house', 'flat'],
+  bld_tower_b: ['int_house', 'flat'],
+  mk_tower: ['int_house', 'Mkurugenzi Tower flat'],
+  rb_office_a: ['int_house', 'flat'],
+  rb_office_b: ['int_house', 'flat'],
+  rb_tower: ['int_house', 'flat'],
+  rb_coop: ['int_shop', 'the bank kiosk', 'kiosk'],
+  // the petrol station's shop (its door is behind the canopy, see buildDoors)
+  petrol_station: ['int_shop', 'the station shop', 'kiosk'],
+};
+/** Doors that aren't at the front of the piece's footprint (three.js local z of the door). */
+const DOOR_Z: Record<string, number> = {
+  petrol_station: -7.9, // the shop (Blender y 8.5..15.5) sits behind the pumps, its door facing them
 };
 
 /** How far the front of a piece reaches (+Z, three.js), from its colliders. */
@@ -91,7 +106,7 @@ function buildDoors(kits: Kit[]): Door[] {
       continue;
     }
     const def = ROOM_OF[p.piece];
-    if (def) add(p.x, p.z, p.rotY, 0, frontOf(kits, p.piece) + 0.5, def[0], def[1], def[2]);
+    if (def) add(p.x, p.z, p.rotY, 0, DOOR_Z[p.piece] ?? frontOf(kits, p.piece) + 0.5, def[0], def[1], def[2]);
   }
   return out;
 }
