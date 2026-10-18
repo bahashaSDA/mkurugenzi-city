@@ -714,7 +714,7 @@ function DrivenCar({ car, kit, onExit, onLive }: { car: Car; kit: Kit; onExit: (
         ty.slip += (Math.min(1, Math.max(latR * 1.25, longR)) - ty.slip) * Math.min(1, dt * 12);
         const n = vc.wheelContactNormal(i);
         _n.set(n?.x ?? 0, n?.y ?? 1, n?.z ?? 0);
-        tyreContact(`car${i}`, true, _p, _n, _f.x, _f.z, Math.max(0.18, layout[i]!.r * 0.55), ty.slip, Math.max(sp, roll), ty.surface, dt);
+        tyreContact(`car${i}`, true, _p, _n, _f.x, _f.z, Math.max(0.18, layout[i]!.r * 0.55), occ.phase === 'seated' ? ty.slip : 0, Math.max(sp, roll), ty.surface, dt); // no skid dust while the car is held for getting in/out
         if (ty.surface === 'tarmac') squeal = Math.max(squeal, ty.slip);
         else gravel = Math.max(gravel, Math.min(1, sp / 16));
       }

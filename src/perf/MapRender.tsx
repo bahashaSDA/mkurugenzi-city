@@ -9,8 +9,11 @@ import * as THREE from 'three';
 
 export const MAPRENDER = typeof location !== 'undefined' && new URLSearchParams(location.search).has('maprender');
 
-/** Kit LOD/cull distance multiplier (1 in the game; large while photographing the map). */
-export const kitLodScale = { value: MAPRENDER ? 6 : 1 };
+/** ?film: offline-rendered marketing footage (tools/film): full detail out to the horizon. */
+export const FILM = typeof location !== 'undefined' && new URLSearchParams(location.search).has('film');
+
+/** Kit LOD/cull distance multiplier (1 in the game; large while photographing the map or filming). */
+export const kitLodScale = { value: MAPRENDER ? 6 : FILM ? 2.2 : 1 };
 
 declare global {
   interface Window {

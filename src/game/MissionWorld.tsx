@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { FILM } from '../perf/MapRender';
 import { heightAt } from '../world/heights';
 import { register } from './interactables';
 import { availableMissions, currentStep, useMissionAction, useMissions } from './missions';
@@ -94,6 +95,9 @@ function labelTexture(text: string): { tex: THREE.CanvasTexture; aspect: number 
   return { tex, aspect: w / 72 };
 }
 
+/** ?film cinematics: no mission beacons in the shot (the gameplay reel adds &markers) */
+const HIDE_BEACONS = FILM && !new URLSearchParams(location.search).has('markers');
+
 export function MissionWorld() {
   const active = useMissions((s) => s.active);
   const step = useMissions((s) => s.step);
@@ -130,7 +134,7 @@ export function MissionWorld() {
 
   return (
     <>
-      {markers.map((m) => (
+      {!HIDE_BEACONS && markers.map((m) => (
         <Beacon key={m.key} marker={m} />
       ))}
       <MissionSpawns />

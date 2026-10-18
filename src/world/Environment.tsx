@@ -5,6 +5,7 @@ const liteFrame = { n: 0 };
 import { useFrame, useThree } from '@react-three/fiber';
 import { Environment as EnvMap, Sky } from '@react-three/drei';
 import * as THREE from 'three';
+import { FILM } from '../perf/MapRender';
 import { useGame } from '../app/store';
 import { BUDGETS } from '../perf/budgets';
 import { playerPosition } from '../systems/player/playerState';
@@ -77,7 +78,8 @@ export function Environment() {
   const envDay = daylight(envH);
 
   useEffect(() => {
-    scene.fog = new THREE.Fog('#cfc7b8', 140, tier === 'low' ? 600 : tier === 'mid' ? 1000 : 1400);
+    // ?film (marketing footage): clearer air, the skyline reads from across the city
+    scene.fog = FILM ? new THREE.Fog('#cfc7b8', 420, 3200) : new THREE.Fog('#cfc7b8', 140, tier === 'low' ? 600 : tier === 'mid' ? 1000 : 1400);
     return () => {
       scene.fog = null;
     };

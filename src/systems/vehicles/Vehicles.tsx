@@ -1,6 +1,7 @@
 import { junctions, lightAt } from '../../world/junctions';
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { kitLodScale } from '../../perf/MapRender';
 import { CuboidCollider, RigidBody, useRapier, type RapierRigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
@@ -574,8 +575,9 @@ export function Vehicles() {
       if (v.jackedUntil) continue;
       const d = Math.hypot(v.x - camera.position.x, v.z - camera.position.z);
       let lod = v.lod;
-      while (lod > 0 && d < LOD_IN[lod - 1]!) lod--;
-      while (lod < 3 && d > LOD_OUT[lod]!) lod++;
+      const ls = kitLodScale.value;
+      while (lod > 0 && d < LOD_IN[lod - 1]! * ls) lod--;
+      while (lod < 3 && d > LOD_OUT[lod]! * ls) lod++;
       if (ride.vehicle === v.id) lod = 0;
       v.lod = lod;
       if (lod > 2) continue;
