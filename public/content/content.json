@@ -7,6 +7,14 @@
  },
  "episodes": [
   {
+   "youtubeId": "Rvcpsc-CErc",
+   "title": "Specialist Vanessa Guillen || Headline Hitters 12 Ep 11",
+   "show": "Headline Hitters",
+   "season": 12,
+   "episode": 11,
+   "durationSec": 2200
+  },
+  {
    "youtubeId": "rC3yic06nxE",
    "title": "Love and Poison || Mkurugenzi Minisodes 17 EP 12",
    "show": "Mkurugenzi Minisodes",
@@ -5268,7 +5276,7 @@
  "featuredVideo": "lAI0QRtxqVE",
  "announcements": [],
  "stats": {
-  "youtubeSubscribers": 1100000,
+  "youtubeSubscribers": 1110000,
   "milestoneDate": "2026-06-24"
  },
  "shows": [
